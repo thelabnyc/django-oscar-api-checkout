@@ -74,6 +74,10 @@ class CheckoutView(generics.GenericAPIView):
     serializer_class = CheckoutSerializer
 
     def post(self, request, format=None):
+        # Wipe out any previous state data
+        utils.clear_payment_method_states(request.session)
+
+        # Validate the input
         c_ser = self.get_serializer(data=request.data)
         if not c_ser.is_valid():
             return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
@@ -102,35 +106,37 @@ class CheckoutView(generics.GenericAPIView):
         order_balance = order.total_incl_tax
         states = {}
 
+        # Loop through each method with a specified amount to charge
         data_amount_specified = { k: v for k, v in data.items() if not v['pay_balance'] }
-        data_pay_balance = { k: v for k, v in data.items() if v['pay_balance'] }
-
         for code, method_data in data_amount_specified.items():
             method = methods[code]
             state = method.record_payment(order, **method_data)
             states[method.code] = state
             order_balance -= state.amount
 
+        # Change the remainder, not covered by the above methods, to the method marked with `pay_balance`
+        data_pay_balance = { k: v for k, v in data.items() if v['pay_balance'] }
         for code, method_data in data_pay_balance.items():
             method = methods[code]
             state = method.record_payment(order, amount=order_balance, **method_data)
             states[method.code] = state
+            order_balance -= state.amount
 
         return states
 
 
 class PaymentStatesView(generics.GenericAPIView):
     def get(self, request, pk=None):
+        # We don't really use the provided pk. It's just there to be compatible with oscarapi
         if pk and int(pk) != request.session.get(CHECKOUT_ORDER_ID):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
+        # Fetch the order object from the session, but only if it's pending
         pk = request.session.get(CHECKOUT_ORDER_ID)
         order = get_object_or_404(Order, pk=pk)
 
-        states = utils.list_payment_method_states(order, request.session)
-        if not any(states):
-            return Response(status=status.HTTP_201_NO_CONTENT)
-
+        # Return order status and payment states
+        states = utils.list_payment_method_states(request.session)
         state_data = {}
         for code, state in states.items():
             ser = PaymentStateSerializer(instance=state)
@@ -138,5 +144,5 @@ class PaymentStatesView(generics.GenericAPIView):
 
         return Response({
             'order_status': order.status,
-            'payment_method_states': state_data
+            'payment_method_states': state_data if any(state_data) else None
         })
