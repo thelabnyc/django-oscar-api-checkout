@@ -1,0 +1,11 @@
+---
+
+- fields:
+    display_order: 0
+    is_shipping_country: true
+    iso_3166_1_a3: USA
+    iso_3166_1_numeric: '840'
+    name: "United States of America"
+    printable_name: "United States"
+  model: address.country
+  pk: US

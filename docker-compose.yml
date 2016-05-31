@@ -1,0 +1,12 @@
+postgres:
+  image: postgres:9.4
+
+test:
+  build: .
+  command: python sandbox/manage.py runserver 0.0.0.0:8000
+  ports:
+    - "8000:8000"
+  links:
+    - postgres
+  volumes:
+    - .:/code
