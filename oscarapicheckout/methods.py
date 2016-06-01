@@ -6,8 +6,12 @@ from rest_framework import serializers
 from oscar.core.loading import get_model
 from . import states
 
+PaymentEventType = get_model('order', 'PaymentEventType')
+PaymentEvent = get_model('order', 'PaymentEvent')
+PaymentEventQuantity = get_model('order', 'PaymentEventQuantity')
 SourceType = get_model('payment', 'SourceType')
 Source = get_model('payment', 'Source')
+Transaction = get_model('payment', 'Transaction')
 
 
 class PaymentMethodSerializer(serializers.Serializer):
@@ -38,6 +42,28 @@ class PaymentMethod(object):
     code = 'abstract-payment-method'
     serializer_class = PaymentMethodSerializer
 
+    def _make_payment_event(self, type_name, order, amount, reference=''):
+        etype, created = PaymentEventType.objects.get_or_create(name=type_name)
+        event = PaymentEvent()
+        event.order = order
+        event.amount = amount
+        event.reference = reference
+        event.event_type = etype
+        event.save()
+        return event
+
+    def make_authorize_event(self, *args, **kwargs):
+        return self._make_payment_event(Transaction.AUTHORISE, *args, **kwargs)
+
+    def make_debit_event(self, *args, **kwargs):
+        return self._make_payment_event(Transaction.DEBIT, *args, **kwargs)
+
+    def make_refund_event(self, *args, **kwargs):
+        return self._make_payment_event(Transaction.REFUND, *args, **kwargs)
+
+    def make_event_quantity(self, event, line, quantity):
+        return PaymentEventQuantity.objects.create(event=event, line=line, quantity=quantity)
+
     def get_source(self, order, reference=''):
         stype, created = SourceType.objects.get_or_create(name=self.name)
         source, created = Source.objects.get_or_create(order=order, source_type=stype)
@@ -66,5 +92,15 @@ class Cash(PaymentMethod):
 
     def _record_payment(self, order, amount, reference, **kwargs):
         source = self.get_source(order, reference)
-        source.debit(amount, reference)
-        return states.Complete(amount)
+
+        amount_to_allocate = amount - source.amount_allocated
+        source.allocate(amount_to_allocate, reference)
+
+        amount_to_debit = amount - source.amount_debited
+        source.debit(amount_to_debit, reference)
+
+        event = self.make_debit_event(order, amount_to_debit, reference)
+        for line in order.lines.all():
+            self.make_event_quantity(event, line, line.quantity)
+
+        return states.Complete(source.amount_debited)

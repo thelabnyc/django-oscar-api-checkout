@@ -86,11 +86,13 @@ class CashTest(BaseTest):
 
         source = order.sources.first()
         self.assertEqual(source.currency, order.currency)
-        self.assertEqual(source.amount_allocated, Decimal('0.00'))
+        self.assertEqual(source.amount_allocated, Decimal('1.00'))
         self.assertEqual(source.amount_debited, Decimal('1.00'))
         self.assertEqual(source.amount_refunded, Decimal('0.00'))
-        self.assertEqual(source.transactions.count(), 1)
+        self.assertEqual(source.transactions.count(), 2)
 
-        transaction = source.transactions.first()
-        self.assertEqual(transaction.txn_type, 'Debit')
+        transaction = source.transactions.get(txn_type='Authorise')
+        self.assertEqual(transaction.amount, Decimal('1.00'))
+
+        transaction = source.transactions.get(txn_type='Debit')
         self.assertEqual(transaction.amount, Decimal('1.00'))

@@ -10,16 +10,14 @@ from oscarapi.serializers.checkout import (
 )
 from oscarapi.basket.operations import get_basket
 from oscarapi.utils import overridable
-from .settings import API_ENABLED_PAYMENT_METHODS
-from .states import COMPLETE
+from .settings import API_ENABLED_PAYMENT_METHODS, ORDER_STATUS_PAYMENT_DECLINED
+from .states import PENDING
 from . import utils
 
 Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
 BillingAddress = get_model('order', 'BillingAddress')
 ShippingAddress = get_model('order', 'ShippingAddress')
-
-OrderCreator = get_class('order.utils', 'OrderCreator')
 
 
 class PaymentMethodsSerializer(serializers.Serializer):
@@ -69,7 +67,7 @@ class PaymentStateSerializer(serializers.Serializer):
     required_action = serializers.SerializerMethodField()
 
     def get_required_action(self, state):
-        return state.get_required_action() if state.status != COMPLETE else None
+        return state.get_required_action() if state.status == PENDING else None
 
 
 class OrderSerializer(OscarOrderSerializer):
@@ -130,10 +128,10 @@ class CheckoutSerializer(OscarCheckoutSerializer):
 
         # Place the order
         try:
-            order = self.place_order(
-                order_number=order_number,
-                user=request.user,
+            order = self._insupd_order(
                 basket=basket,
+                user=request.user,
+                order_number=order_number,
                 billing_address=billing_address,
                 shipping_address=shipping_address,
                 order_total=validated_data.get('total'),
@@ -141,7 +139,41 @@ class CheckoutSerializer(OscarCheckoutSerializer):
                 shipping_charge=validated_data.get('shipping_charge'),
                 guest_email=validated_data.get('guest_email') or '')
         except ValueError as e:
+            print(e)
             raise exceptions.NotAcceptable(e.message)
 
         # Return the order
         return order
+
+
+    def _insupd_order(self, basket, user=None, shipping_address=None, billing_address=None, **kwargs):
+        existing_orders = basket.order_set.all()
+        if existing_orders.exclude(status=ORDER_STATUS_PAYMENT_DECLINED).exists():
+            raise exceptions.NotAcceptable(_("An non-declined order already exists for this basket."))
+
+        existing_count = existing_orders.count()
+        if existing_count > 1:
+            raise exceptions.NotAcceptable(_("Multiple order exist for this basket! This should never happen and we don't know what to do."))
+
+        # If no orders were pre-existing, make a new one.
+        if existing_count == 0:
+            return self.place_order(
+                basket=basket,
+                user=user,
+                shipping_address=shipping_address,
+                billing_address=billing_address,
+                **kwargs)
+
+        # Update this order instead of making a new one.
+        order = existing_orders.first()
+        status = self.get_initial_order_status(basket)
+        shipping_address = self.create_shipping_address(user, shipping_address)
+        billing_address = self.create_billing_address(billing_address, shipping_address, **kwargs)
+        return utils.OrderUpdater().update_order(
+            order=order,
+            basket=basket,
+            user=user,
+            shipping_address=shipping_address,
+            billing_address=billing_address,
+            status=status,
+            **kwargs)
