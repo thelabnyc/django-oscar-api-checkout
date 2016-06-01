@@ -74,7 +74,7 @@ class PaymentMethod(object):
 
     @transaction.atomic()
     def record_payment(self, request, order, amount=None, reference='', **kwargs):
-        if not amount or amount <= Decimal('0.00'):
+        if not amount and amount != Decimal('0.00'):
             raise RuntimeError('Amount must be specified')
         return self._record_payment(request, order, amount, reference, **kwargs)
 

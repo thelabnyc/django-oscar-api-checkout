@@ -100,6 +100,35 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(resp.data['payment']['non_field_errors'][0], 'At least one payment method must be enabled.')
 
 
+    def test_free_product(self):
+        self.login(is_staff=True)
+
+        # Make a basket that will cost nothing
+        basket_id = self._get_basket_id()
+        product = self._create_product(price=D('0.00'))
+        resp = self._add_to_basket(product.id)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        # Checkout
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'cash': {
+                'enabled': True,
+            }
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Fetch payment states
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Complete')
+        self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '0.00')
+        self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
+        self.assertPaymentSource(order_resp.data['number'], 'Cash')
+
+
     def test_payment_method_requiring_form_post(self):
         basket_id = self._prepare_basket()
 
