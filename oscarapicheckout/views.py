@@ -103,24 +103,25 @@ class CheckoutView(generics.GenericAPIView):
 
 
     def _record_payments(self, order, methods, data):
-        order_balance = order.total_incl_tax
+        order_balance = [order.total_incl_tax]
         states = {}
+
+        def record(code, method_data):
+            method = methods[code]
+            state = method.record_payment(order, **method_data)
+            order_balance[0] = order_balance[0] - state.amount
+            return state
 
         # Loop through each method with a specified amount to charge
         data_amount_specified = { k: v for k, v in data.items() if not v['pay_balance'] }
         for code, method_data in data_amount_specified.items():
-            method = methods[code]
-            state = method.record_payment(order, **method_data)
-            states[method.code] = state
-            order_balance -= state.amount
+            states[code] = record(code, method_data)
 
         # Change the remainder, not covered by the above methods, to the method marked with `pay_balance`
         data_pay_balance = { k: v for k, v in data.items() if v['pay_balance'] }
         for code, method_data in data_pay_balance.items():
-            method = methods[code]
-            state = method.record_payment(order, amount=order_balance, **method_data)
-            states[method.code] = state
-            order_balance -= state.amount
+            method_data['amount'] = order_balance[0]
+            states[code] = record(code, method_data)
 
         return states
 
