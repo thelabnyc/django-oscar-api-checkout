@@ -73,13 +73,13 @@ class PaymentMethod(object):
         return source
 
     @transaction.atomic()
-    def record_payment(self, order, amount=None, reference='', **kwargs):
+    def record_payment(self, request, order, amount=None, reference='', **kwargs):
         if not amount or amount <= Decimal('0.00'):
             raise RuntimeError('Amount must be specified')
-        return self._record_payment(order, amount, reference, **kwargs)
+        return self._record_payment(request, order, amount, reference, **kwargs)
 
-    def _record_payment(self, order, amount, reference, **kwargs):
-        raise NotImplementedError('Subclass must implement _record_payment(order, amount, reference, **kwargs) method.')
+    def _record_payment(self, request, order, amount, reference, **kwargs):
+        raise NotImplementedError('Subclass must implement _record_payment(request, order, amount, reference, **kwargs) method.')
 
 
 class Cash(PaymentMethod):
@@ -90,7 +90,7 @@ class Cash(PaymentMethod):
     name = _('Cash')
     code = 'cash'
 
-    def _record_payment(self, order, amount, reference, **kwargs):
+    def _record_payment(self, request, order, amount, reference, **kwargs):
         source = self.get_source(order, reference)
 
         amount_to_allocate = amount - source.amount_allocated

@@ -20,14 +20,14 @@ class GetCardTokenView(generics.GenericAPIView):
 
         # Decline the payment
         if request.data.get('deny'):
-            utils.mark_payment_method_declined(order, request.session, CreditCard.code, request.data['amount'])
+            utils.mark_payment_method_declined(order, request, CreditCard.code, request.data['amount'])
             return Response({
                 'status': 'Declined',
             })
 
         # Require the client to do another form post
         new_state = CreditCard().require_authorization_post(order, amount)
-        utils.update_payment_method_state(order, request.session, CreditCard.code, new_state)
+        utils.update_payment_method_state(order, request, CreditCard.code, new_state)
         return Response({
             'status': 'Success',
         })
@@ -42,7 +42,7 @@ class AuthorizeCardView(generics.GenericAPIView):
 
         # Record the funds allocation
         new_state = CreditCard().record_successful_authorization(order, amount, uuid.uuid1())
-        utils.update_payment_method_state(order, request.session, CreditCard.code, new_state)
+        utils.update_payment_method_state(order, request, CreditCard.code, new_state)
         return Response({
             'status': 'Success',
         })

@@ -27,57 +27,57 @@ def _session_unpickle(utfed):
     return obj
 
 
-def _update_payment_method_state(session, code, state):
-    states = session.get(CHECKOUT_PAYMENT_STEPS, {})
+def _update_payment_method_state(request, code, state):
+    states = request.session.get(CHECKOUT_PAYMENT_STEPS, {})
     states[code] = _session_pickle(state)
-    session[CHECKOUT_PAYMENT_STEPS] = states
-    session.modified = True
+    request.session[CHECKOUT_PAYMENT_STEPS] = states
+    request.session.modified = True
 
 
-def _update_order_status(order, session):
-    states = list_payment_method_states(session)
+def _update_order_status(order, request):
+    states = list_payment_method_states(request)
 
     declined = [s for k, s in states.items() if s.status == DECLINED]
     if len(declined) > 0:
         order.set_status(ORDER_STATUS_PAYMENT_DECLINED)
-        order.basket.thaw()  # Thaw the basket and put it back into the session so that it can be retried
-        operations.store_basket_in_session(order.basket, session)
-        order_payment_declined.send(sender=order, order=order)
+        order.basket.thaw()  # Thaw the basket and put it back into the request.session so that it can be retried
+        operations.store_basket_in_session(order.basket, request.session)
+        order_payment_declined.send(sender=order, order=order, request=request)
 
     not_complete = [s for k, s in states.items() if s.status != COMPLETE]
     if len(not_complete) <= 0:
         order.set_status(ORDER_STATUS_AUTHORIZED)
         order.basket.submit()  # Mark the basket as submitted
-        order_payment_authorized.send(sender=order, order=order)
+        order_payment_authorized.send(sender=order, order=order, request=request)
 
 
-def list_payment_method_states(session):
-    states = session.get(CHECKOUT_PAYMENT_STEPS, {})
+def list_payment_method_states(request):
+    states = request.session.get(CHECKOUT_PAYMENT_STEPS, {})
     return { code: _session_unpickle(state) for code, state in states.items() }
 
 
-def clear_payment_method_states(session):
-    session[CHECKOUT_PAYMENT_STEPS] = {}
-    session.modified = True
+def clear_payment_method_states(request):
+    request.session[CHECKOUT_PAYMENT_STEPS] = {}
+    request.session.modified = True
 
 
-def update_payment_method_state(order, session, code, state):
-    _update_payment_method_state(session, code, state)
-    _update_order_status(order, session)
+def update_payment_method_state(order, request, code, state):
+    _update_payment_method_state(request, code, state)
+    _update_order_status(order, request)
 
 
-def set_payment_method_states(order, session, states):
+def set_payment_method_states(order, request, states):
     for code, state in states.items():
-        _update_payment_method_state(session, code, state)
-    _update_order_status(order, session)
+        _update_payment_method_state(request, code, state)
+    _update_order_status(order, request)
 
 
-def mark_payment_method_completed(order, session, code, amount):
-    update_payment_method_state(order, session, code, Complete(amount))
+def mark_payment_method_completed(order, request, code, amount):
+    update_payment_method_state(order, request, code, Complete(amount))
 
 
-def mark_payment_method_declined(order, session, code, amount):
-    update_payment_method_state(order, session, code, Declined(amount))
+def mark_payment_method_declined(order, request, code, amount):
+    update_payment_method_state(order, request, code, Declined(amount))
 
 
 

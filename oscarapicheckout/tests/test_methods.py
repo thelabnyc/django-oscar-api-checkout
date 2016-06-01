@@ -77,7 +77,7 @@ class PaymentMethodTest(BaseTest):
 class CashTest(BaseTest):
     def test_record_payment(self):
         order = create_order()
-        state = Cash().record_payment(order, amount=Decimal('1.00'))
+        state = Cash().record_payment(None, order, amount=Decimal('1.00'))
 
         self.assertEqual(state.status, 'Complete')
         self.assertEqual(state.amount, Decimal('1.00'))

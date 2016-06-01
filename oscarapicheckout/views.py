@@ -75,7 +75,7 @@ class CheckoutView(generics.GenericAPIView):
 
     def post(self, request, format=None):
         # Wipe out any previous state data
-        utils.clear_payment_method_states(request.session)
+        utils.clear_payment_method_states(request)
 
         # Validate the input
         c_ser = self.get_serializer(data=request.data)
@@ -92,10 +92,11 @@ class CheckoutView(generics.GenericAPIView):
 
         # Save payment steps into session for processing
         states = self._record_payments(
+            request=request,
             order=order,
             methods=c_ser.fields['payment'].methods,
             data=c_ser.validated_data['payment'])
-        utils.set_payment_method_states(order, request.session, states)
+        utils.set_payment_method_states(order, request, states)
 
         # Return order data
         order_placed.send(sender=self, order=order, user=request.user, request=request)
@@ -103,13 +104,13 @@ class CheckoutView(generics.GenericAPIView):
         return Response(o_ser.data)
 
 
-    def _record_payments(self, order, methods, data):
+    def _record_payments(self, request, order, methods, data):
         order_balance = [order.total_incl_tax]
         states = {}
 
         def record(code, method_data):
             method = methods[code]
-            state = method.record_payment(order, **method_data)
+            state = method.record_payment(request, order, **method_data)
             order_balance[0] = order_balance[0] - state.amount
             return state
 
@@ -138,7 +139,7 @@ class PaymentStatesView(generics.GenericAPIView):
         order = get_object_or_404(Order, pk=pk)
 
         # Return order status and payment states
-        states = utils.list_payment_method_states(request.session)
+        states = utils.list_payment_method_states(request)
         state_data = {}
         for code, state in states.items():
             ser = PaymentStateSerializer(instance=state)

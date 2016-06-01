@@ -16,7 +16,7 @@ class CreditCard(PaymentMethod):
 
 
     # Payment Step 1
-    def _record_payment(self, order, amount, reference, **kwargs):
+    def _record_payment(self, request, order, amount, reference, **kwargs):
         source = self.get_source(order, reference)
         amount_to_allocate = amount - source.amount_allocated
 

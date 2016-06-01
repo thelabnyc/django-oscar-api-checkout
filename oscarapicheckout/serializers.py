@@ -11,6 +11,7 @@ from oscarapi.serializers.checkout import (
 from oscarapi.basket.operations import get_basket
 from oscarapi.utils import overridable
 from .settings import API_ENABLED_PAYMENT_METHODS, ORDER_STATUS_PAYMENT_DECLINED
+from .signals import pre_calculate_total
 from .states import PENDING
 from . import utils
 
@@ -18,6 +19,8 @@ Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
 BillingAddress = get_model('order', 'BillingAddress')
 ShippingAddress = get_model('order', 'ShippingAddress')
+
+OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 
 
 class PaymentMethodsSerializer(serializers.Serializer):
@@ -98,6 +101,15 @@ class CheckoutSerializer(OscarCheckoutSerializer):
 
     def validate(self, data):
         data = super().validate(data)
+
+        # Allow application to calculate taxes before the total is calculated
+        pre_calculate_total.send(
+            sender=self.__class__,
+            basket=data['basket'],
+            shipping_address=data['shipping_address'])
+
+        # Figure out the final total order price
+        data['total'] = OrderTotalCalculator().calculate(data['basket'], data['shipping_charge'])
 
         # Payment amounts specified must not be more than the order total
         posted_total = Decimal('0.00')
