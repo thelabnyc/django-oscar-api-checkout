@@ -40,14 +40,14 @@ def _update_order_status(order, session):
     declined = [s for k, s in states.items() if s.status == DECLINED]
     if len(declined) > 0:
         order.set_status(ORDER_STATUS_PAYMENT_DECLINED)
-        order.basket.thaw() # Thaw the basket and put it back into the session so that it can be retried
+        order.basket.thaw()  # Thaw the basket and put it back into the session so that it can be retried
         operations.store_basket_in_session(order.basket, session)
         order_payment_declined.send(sender=order, order=order)
 
     not_complete = [s for k, s in states.items() if s.status != COMPLETE]
     if len(not_complete) <= 0:
         order.set_status(ORDER_STATUS_AUTHORIZED)
-        order.basket.submit() # Mark the basket as submitted
+        order.basket.submit()  # Mark the basket as submitted
         order_payment_authorized.send(sender=order, order=order)
 
 
@@ -83,9 +83,9 @@ def mark_payment_method_declined(order, session, code, amount):
 
 class OrderUpdater(object):
     def update_order(self, order, basket, order_total,
-                    shipping_method, shipping_charge, user=None,
-                    shipping_address=None, billing_address=None,
-                    order_number=None, status=None, **kwargs):
+                     shipping_method, shipping_charge, user=None,
+                     shipping_address=None, billing_address=None,
+                     order_number=None, status=None, **kwargs):
 
         if basket.is_empty:
             raise ValueError(_("Empty baskets cannot be submitted"))

@@ -6,6 +6,7 @@ from oscarapi.app import application as oscar_api
 from oscarapicheckout.app import application as oscar_api_checkout
 import creditcards.urls
 
+
 urlpatterns = patterns('',
     url(r'^i18n/', include('django.conf.urls.i18n')),
     url(r'^admin/', include(admin.site.urls)),

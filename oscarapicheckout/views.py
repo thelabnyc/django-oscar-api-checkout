@@ -91,7 +91,8 @@ class CheckoutView(generics.GenericAPIView):
         request.session[CHECKOUT_ORDER_ID] = order.id
 
         # Save payment steps into session for processing
-        states = self._record_payments(order,
+        states = self._record_payments(
+            order=order,
             methods=c_ser.fields['payment'].methods,
             data=c_ser.validated_data['payment'])
         utils.set_payment_method_states(order, request.session, states)
