@@ -5,6 +5,13 @@ django-oscar-api-checkout
 An extension on top of django-oscar-api providing a more flexible checkout API with a pluggable payment methods interface.
 
 
+Compatible Payment Plugins
+==========================
+
+- `django-oscar-cybersource <https://gitlab.com/thelabnyc/django-oscar-cybersource>`_: Provides order payment using Cybersource Secure Acceptance Silent Order POST for PCI SAQ A-EP compliant credit card processing.
+
+
+
 Installation
 ============
 

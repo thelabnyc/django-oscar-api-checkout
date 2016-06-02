@@ -1,11 +1,12 @@
 # Packages maintained by thelab
 versiontag==1.0.3
 
-# Everything else
-Django==1.9.6
-djangorestframework==3.3.2
-django-oscar==1.2.1
-django-oscar-api==1.0.4
+# Test Reqs
 psycopg2==2.6.1
 flake8===2.5.4
 PyYAML==3.11
+
+# Everything else
+Django==1.9.6
+django-oscar==1.2.1
+django-oscar-api==1.0.4
