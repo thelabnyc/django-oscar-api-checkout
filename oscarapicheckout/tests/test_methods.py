@@ -1,7 +1,5 @@
 from decimal import Decimal
 from oscar.test.factories import create_order
-from rest_framework import status
-from rest_framework.reverse import reverse
 from .base import BaseTest
 
 from ..methods import PaymentMethodSerializer, PaymentMethod, Cash

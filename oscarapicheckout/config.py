@@ -7,4 +7,4 @@ class Config(AppConfig):
 
     def ready(self):
         # Register signal handlers
-        from . import handlers
+        from . import handlers  # NOQA

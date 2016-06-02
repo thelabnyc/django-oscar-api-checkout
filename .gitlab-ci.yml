@@ -17,7 +17,7 @@ lint:
   stage: test
   image: python:3.5
   script:
-    - pycodestyle --show-pep8 oscarapicheckout/ sandbox/
+    - flake8 oscarapicheckout/ sandbox/
 
 test_python:3.4:
   stage: test

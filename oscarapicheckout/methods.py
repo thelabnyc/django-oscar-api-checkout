@@ -1,5 +1,4 @@
 from decimal import Decimal
-from django.conf import settings
 from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers

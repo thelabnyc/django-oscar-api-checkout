@@ -2,10 +2,8 @@ from decimal import Decimal
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.response import Response
-from rest_framework.reverse import reverse
 from oscar.core.loading import get_model
 from oscarapicheckout import utils
-from oscarapicheckout.states import FormPostRequired
 from .methods import CreditCard
 import uuid
 

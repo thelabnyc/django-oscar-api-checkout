@@ -2,12 +2,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.response import Response
 from oscar.core.loading import get_model
-from oscarapi.views.checkout import CheckoutView as OscarCheckoutView
-from .settings import (
-    API_ENABLED_PAYMENT_METHODS,
-    ORDER_STATUS_PAYMENT_DECLINED,
-    ORDER_STATUS_AUTHORIZED,
-)
 from .serializers import (
     CheckoutSerializer,
     OrderSerializer,
@@ -15,7 +9,6 @@ from .serializers import (
     PaymentStateSerializer
 )
 from .signals import order_placed
-from .states import COMPLETE, DECLINED
 from . import utils
 
 Order = get_model('order', 'Order')

@@ -9,7 +9,6 @@ from oscarapi.serializers.checkout import (
     OrderSerializer as OscarOrderSerializer,
 )
 from oscarapi.basket.operations import get_basket
-from oscarapi.utils import overridable
 from .settings import API_ENABLED_PAYMENT_METHODS, ORDER_STATUS_PAYMENT_DECLINED
 from .signals import pre_calculate_total
 from .states import PENDING
