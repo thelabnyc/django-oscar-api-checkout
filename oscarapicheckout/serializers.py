@@ -40,7 +40,7 @@ class PaymentMethodsSerializer(serializers.Serializer):
             if permission.is_permitted(request=request, user=request.user):
                 MethodClass = import_string(m['method'])
                 method = MethodClass()
-                self.fields[method.code] = method.serializer_class(required=False)
+                self.fields[method.code] = method.serializer_class(required=False, context=self.context)
                 self.methods[method.code] = method
 
         if not any(self.fields):
