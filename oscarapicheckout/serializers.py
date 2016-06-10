@@ -177,6 +177,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
 
         # Update this order instead of making a new one.
         order = existing_orders.first()
+        kwargs['order_number'] = order.number
         status = self.get_initial_order_status(basket)
         shipping_address = self.create_shipping_address(user, shipping_address)
         billing_address = self.create_billing_address(billing_address, shipping_address, **kwargs)

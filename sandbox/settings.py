@@ -24,7 +24,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'oscarapi',
     'oscarapicheckout',
-] + get_core_apps([])
+] + get_core_apps([
+    'order',
+])
 
 
 LOGGING = {
