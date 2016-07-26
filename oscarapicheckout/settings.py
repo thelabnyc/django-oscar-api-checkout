@@ -18,6 +18,7 @@ API_ENABLED_PAYMENT_METHODS = overridable('API_ENABLED_PAYMENT_METHODS', [
         'permission': 'oscarapicheckout.permissions.StaffOnly',
     }
 ])
+API_MAX_PAYMENT_METHODS = overridable('API_MAX_PAYMENT_METHODS', 0)
 
 ORDER_STATUS_PENDING = overridable('ORDER_STATUS_PENDING', 'Pending')
 ORDER_STATUS_PAYMENT_DECLINED = overridable('ORDER_STATUS_PAYMENT_DECLINED', 'Payment Declined')

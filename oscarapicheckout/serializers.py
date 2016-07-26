@@ -13,6 +13,7 @@ from oscarapi.serializers.checkout import (
 from oscarapi.basket.operations import get_basket
 from .settings import (
     API_ENABLED_PAYMENT_METHODS,
+    API_MAX_PAYMENT_METHODS,
     ORDER_STATUS_PAYMENT_DECLINED,
     ORDER_OWNERSHIP_CALCULATOR,
 )
@@ -58,6 +59,10 @@ class PaymentMethodsSerializer(serializers.Serializer):
         enabled_methods = { k: v for k, v in data.items() if v['enabled'] }
         if len(enabled_methods) <= 0:
             raise serializers.ValidationError("At least one payment method must be enabled.")
+
+        # Respect payment method limit
+        if API_MAX_PAYMENT_METHODS > 0 and len(enabled_methods) > API_MAX_PAYMENT_METHODS:
+            raise serializers.ValidationError("No more than %s payment method can be enabled." % API_MAX_PAYMENT_METHODS)
 
         # Must set pay_balance flag on exactly one payment method
         balance_methods = { k: v for k, v in enabled_methods.items() if v['pay_balance'] }
