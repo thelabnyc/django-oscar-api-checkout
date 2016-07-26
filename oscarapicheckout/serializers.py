@@ -1,4 +1,6 @@
 from decimal import Decimal
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django.db import transaction
 from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
@@ -9,7 +11,11 @@ from oscarapi.serializers.checkout import (
     OrderSerializer as OscarOrderSerializer,
 )
 from oscarapi.basket.operations import get_basket
-from .settings import API_ENABLED_PAYMENT_METHODS, ORDER_STATUS_PAYMENT_DECLINED
+from .settings import (
+    API_ENABLED_PAYMENT_METHODS,
+    ORDER_STATUS_PAYMENT_DECLINED,
+    ORDER_OWNERSHIP_CALCULATOR,
+)
 from .signals import pre_calculate_total
 from .states import PENDING
 from . import utils
@@ -77,6 +83,11 @@ class OrderSerializer(OscarOrderSerializer):
 
 
 class CheckoutSerializer(OscarCheckoutSerializer):
+    user = serializers.HyperlinkedRelatedField(
+        view_name='user-detail',
+        required=False,
+        queryset=get_user_model().objects.get_queryset())
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -99,7 +110,19 @@ class CheckoutSerializer(OscarCheckoutSerializer):
 
 
     def validate(self, data):
+        # Cache guest email since it might get removed during super validation
+        given_user = data.get('user')
+        guest_email = data.get('guest_email')
+
+        # Calculate totals and whatnot
         data = super().validate(data)
+
+        # Figure out who should own the order
+        request = self.context['request']
+        ownership_calc = import_string(ORDER_OWNERSHIP_CALCULATOR)
+        user, guest_email = ownership_calc(request, given_user, guest_email)
+        data['user'] = user
+        data['guest_email'] = guest_email
 
         # Allow application to calculate taxes before the total is calculated
         pre_calculate_total.send(
@@ -124,8 +147,6 @@ class CheckoutSerializer(OscarCheckoutSerializer):
 
     @transaction.atomic()
     def create(self, validated_data):
-        request = self.context['request']
-
         basket = validated_data.get('basket')
         order_number = self.generate_order_number(basket)
 
@@ -141,7 +162,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         try:
             order = self._insupd_order(
                 basket=basket,
-                user=request.user,
+                user=validated_data.get('user') or AnonymousUser(),
                 order_number=order_number,
                 billing_address=billing_address,
                 shipping_address=shipping_address,
@@ -150,7 +171,6 @@ class CheckoutSerializer(OscarCheckoutSerializer):
                 shipping_charge=validated_data.get('shipping_charge'),
                 guest_email=validated_data.get('guest_email') or '')
         except ValueError as e:
-            print(e)
             raise exceptions.NotAcceptable(e.message)
 
         # Return the order

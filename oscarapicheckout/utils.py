@@ -82,6 +82,12 @@ def mark_payment_method_declined(order, request, code, amount):
     update_payment_method_state(order, request, code, Declined(amount))
 
 
+def get_order_ownership(request, given_user, guest_email):
+    current_user = request.user
+    if current_user and current_user.is_authenticated():
+        return current_user, None
+    return None, guest_email
+
 
 class OrderUpdater(object):
     def update_order(self, order, basket, order_total,
