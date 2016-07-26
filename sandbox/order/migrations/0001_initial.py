@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
             name='BillingAddress',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(verbose_name='Title', max_length=64, blank=True, choices=[('Mr', 'Mr'), ('Miss', 'Miss'), ('Mrs', 'Mrs'), ('Ms', 'Ms'), ('Dr', 'Dr')])),
+                ('title', models.CharField(verbose_name='Title', max_length=64, blank=True, choices=[('Mr', 'Mr'), ('Miss', 'Miss'), ('Mrs', 'Mrs'), ('Ms', 'Ms'), ('Dr', 'Dr')])),  # NOQA
                 ('first_name', models.CharField(max_length=255, verbose_name='First name', blank=True)),
                 ('last_name', models.CharField(max_length=255, verbose_name='Last name', blank=True)),
                 ('line1', models.CharField(max_length=255, verbose_name='First line of address')),
@@ -65,15 +65,15 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('partner_name', models.CharField(max_length=128, verbose_name='Partner name', blank=True)),
                 ('partner_sku', models.CharField(max_length=128, verbose_name='Partner SKU')),
-                ('partner_line_reference', models.CharField(verbose_name='Partner reference', max_length=128, help_text='This is the item number that the partner uses within their system', blank=True)),
+                ('partner_line_reference', models.CharField(verbose_name='Partner reference', max_length=128, help_text='This is the item number that the partner uses within their system', blank=True)),  # NOQA
                 ('partner_line_notes', models.TextField(verbose_name='Partner Notes', blank=True)),
                 ('title', models.CharField(max_length=255, verbose_name='Title')),
                 ('upc', models.CharField(verbose_name='UPC', max_length=128, blank=True, null=True)),
                 ('quantity', models.PositiveIntegerField(default=1, verbose_name='Quantity')),
                 ('line_price_incl_tax', models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Price (inc. tax)')),
                 ('line_price_excl_tax', models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Price (excl. tax)')),
-                ('line_price_before_discounts_incl_tax', models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Price before discounts (inc. tax)')),
-                ('line_price_before_discounts_excl_tax', models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Price before discounts (excl. tax)')),
+                ('line_price_before_discounts_incl_tax', models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Price before discounts (inc. tax)')),  # NOQA
+                ('line_price_before_discounts_excl_tax', models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Price before discounts (excl. tax)')),  # NOQA
                 ('unit_cost_price', models.DecimalField(max_digits=12, decimal_places=2, blank=True, verbose_name='Unit Cost Price', null=True)),
                 ('unit_price_incl_tax', models.DecimalField(max_digits=12, decimal_places=2, blank=True, verbose_name='Unit Price (inc. tax)', null=True)),
                 ('unit_price_excl_tax', models.DecimalField(max_digits=12, decimal_places=2, blank=True, verbose_name='Unit Price (excl. tax)', null=True)),
@@ -95,7 +95,7 @@ class Migration(migrations.Migration):
                 ('type', models.CharField(max_length=128, verbose_name='Type')),
                 ('value', models.CharField(max_length=255, verbose_name='Value')),
                 ('line', models.ForeignKey(verbose_name='Line', related_name='attributes', to='order.Line')),
-                ('option', models.ForeignKey(verbose_name='Option', on_delete=django.db.models.deletion.SET_NULL, related_name='line_attributes', to='catalogue.Option', null=True)),
+                ('option', models.ForeignKey(verbose_name='Option', on_delete=django.db.models.deletion.SET_NULL, related_name='line_attributes', to='catalogue.Option', null=True)),  # NOQA
             ],
             options={
                 'verbose_name_plural': 'Line Attributes',
@@ -139,7 +139,7 @@ class Migration(migrations.Migration):
                 ('guest_email', models.EmailField(max_length=75, verbose_name='Guest email address', blank=True)),
                 ('date_placed', models.DateTimeField(auto_now_add=True, db_index=True)),
                 ('basket', models.ForeignKey(null=True, verbose_name='Basket', on_delete=django.db.models.deletion.SET_NULL, to='basket.Basket', blank=True)),
-                ('billing_address', models.ForeignKey(null=True, verbose_name='Billing Address', on_delete=django.db.models.deletion.SET_NULL, to='order.BillingAddress', blank=True)),
+                ('billing_address', models.ForeignKey(null=True, verbose_name='Billing Address', on_delete=django.db.models.deletion.SET_NULL, to='order.BillingAddress', blank=True)),  # NOQA
             ],
             options={
                 'ordering': ['-date_placed'],
@@ -153,7 +153,7 @@ class Migration(migrations.Migration):
             name='OrderDiscount',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('category', models.CharField(default='Basket', max_length=64, verbose_name='Discount category', choices=[('Basket', 'Basket'), ('Shipping', 'Shipping'), ('Deferred', 'Deferred')])),
+                ('category', models.CharField(default='Basket', max_length=64, verbose_name='Discount category', choices=[('Basket', 'Basket'), ('Shipping', 'Shipping'), ('Deferred', 'Deferred')])),  # NOQA
                 ('offer_id', models.PositiveIntegerField(blank=True, verbose_name='Offer ID', null=True)),
                 ('offer_name', models.CharField(max_length=128, db_index=True, verbose_name='Offer name', blank=True)),
                 ('voucher_id', models.PositiveIntegerField(blank=True, verbose_name='Voucher ID', null=True)),
@@ -223,7 +223,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(unique=True, max_length=128, verbose_name='Name')),
-                ('code', oscar.models.fields.autoslugfield.AutoSlugField(populate_from='name', unique=True, verbose_name='Code', max_length=128, editable=False, blank=True)),
+                ('code', oscar.models.fields.autoslugfield.AutoSlugField(populate_from='name', unique=True, verbose_name='Code', max_length=128, editable=False, blank=True)),  # NOQA
             ],
             options={
                 'ordering': ('name',),
@@ -237,7 +237,7 @@ class Migration(migrations.Migration):
             name='ShippingAddress',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(verbose_name='Title', max_length=64, blank=True, choices=[('Mr', 'Mr'), ('Miss', 'Miss'), ('Mrs', 'Mrs'), ('Ms', 'Ms'), ('Dr', 'Dr')])),
+                ('title', models.CharField(verbose_name='Title', max_length=64, blank=True, choices=[('Mr', 'Mr'), ('Miss', 'Miss'), ('Mrs', 'Mrs'), ('Ms', 'Ms'), ('Dr', 'Dr')])),  # NOQA
                 ('first_name', models.CharField(max_length=255, verbose_name='First name', blank=True)),
                 ('last_name', models.CharField(max_length=255, verbose_name='Last name', blank=True)),
                 ('line1', models.CharField(max_length=255, verbose_name='First line of address')),
@@ -247,7 +247,7 @@ class Migration(migrations.Migration):
                 ('state', models.CharField(max_length=255, verbose_name='State/County', blank=True)),
                 ('postcode', oscar.models.fields.UppercaseCharField(max_length=64, verbose_name='Post/Zip-code', blank=True)),
                 ('search_text', models.TextField(editable=False, verbose_name='Search text - used only for searching addresses')),
-                ('phone_number', oscar.models.fields.PhoneNumberField(verbose_name='Phone number', help_text='In case we need to call you about your order', blank=True)),
+                ('phone_number', oscar.models.fields.PhoneNumberField(verbose_name='Phone number', help_text='In case we need to call you about your order', blank=True)),  # NOQA
                 ('notes', models.TextField(verbose_name='Instructions', help_text='Tell us anything we should know when delivering your order.', blank=True)),
                 ('country', models.ForeignKey(verbose_name='Country', to='address.Country')),
             ],
@@ -292,7 +292,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(unique=True, max_length=255, verbose_name='Name')),
-                ('code', oscar.models.fields.autoslugfield.AutoSlugField(populate_from='name', unique=True, verbose_name='Code', max_length=128, editable=False, blank=True)),
+                ('code', oscar.models.fields.autoslugfield.AutoSlugField(populate_from='name', unique=True, verbose_name='Code', max_length=128, editable=False, blank=True)),  # NOQA
             ],
             options={
                 'ordering': ('name',),
@@ -355,7 +355,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='order',
             name='shipping_address',
-            field=models.ForeignKey(null=True, verbose_name='Shipping Address', on_delete=django.db.models.deletion.SET_NULL, to='order.ShippingAddress', blank=True),
+            field=models.ForeignKey(null=True, verbose_name='Shipping Address', on_delete=django.db.models.deletion.SET_NULL, to='order.ShippingAddress', blank=True),  # NOQA
             preserve_default=True,
         ),
         migrations.AddField(
@@ -367,8 +367,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='order',
             name='user',
-            field=models.ForeignKey(null=True, verbose_name='User', on_delete=django.db.models.deletion.SET_NULL, related_name='orders', to=settings.AUTH_USER_MODEL, blank=True),
-            preserve_default=True,
+            field=models.ForeignKey(null=True, verbose_name='User', on_delete=django.db.models.deletion.SET_NULL, related_name='orders', to=settings.AUTH_USER_MODEL, blank=True),  # NOQA
         ),
         migrations.AddField(
             model_name='lineprice',
@@ -385,7 +384,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='line',
             name='partner',
-            field=models.ForeignKey(null=True, verbose_name='Partner', on_delete=django.db.models.deletion.SET_NULL, related_name='order_lines', to='partner.Partner', blank=True),
+            field=models.ForeignKey(null=True, verbose_name='Partner', on_delete=django.db.models.deletion.SET_NULL, related_name='order_lines', to='partner.Partner', blank=True),  # NOQA
             preserve_default=True,
         ),
         migrations.AddField(
@@ -397,7 +396,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='line',
             name='stockrecord',
-            field=models.ForeignKey(null=True, verbose_name='Stock record', on_delete=django.db.models.deletion.SET_NULL, to='partner.StockRecord', blank=True),
+            field=models.ForeignKey(null=True, verbose_name='Stock record', on_delete=django.db.models.deletion.SET_NULL, to='partner.StockRecord', blank=True),  # NOQA
             preserve_default=True,
         ),
         migrations.AddField(
