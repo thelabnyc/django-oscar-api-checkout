@@ -161,6 +161,33 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+0.2.0
+------------------
+- Add setting to allow configuring how many payment types may be used on an order
+- Add hook for setting the ownership information on an order during placement
+- Prevent PaymentEvent.reference from ever being None
+
+0.1.5
+------------------
+- Fix bug where order number wouldn't be recycled for a declined order
+
+0.1.4
+------------------
+- Add context to payment method serializers
+
+0.1.3
+------------------
+- Simplify dependencies
+
+0.1.2
+------------------
+- Allow PaymentMethods to handle 0.00-amount transactions
+
+0.1.1
+------------------
+- Send confirmation message upon order authorization
+- Add pep8 linting
+
 0.1.0
 ------------------
 - Initial release.
