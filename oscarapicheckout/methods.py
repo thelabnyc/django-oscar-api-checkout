@@ -46,7 +46,7 @@ class PaymentMethod(object):
         event = PaymentEvent()
         event.order = order
         event.amount = amount
-        event.reference = reference
+        event.reference = reference if reference else ''
         event.event_type = etype
         event.save()
         return event
