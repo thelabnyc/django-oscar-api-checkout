@@ -161,6 +161,10 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+0.2.1
+------------------
+- Explicitly dis-allow cache on API views
+
 0.2.0
 ------------------
 - Add setting to allow configuring how many payment types may be used on an order
