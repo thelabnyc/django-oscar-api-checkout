@@ -126,6 +126,8 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         request = self.context['request']
         ownership_calc = import_string(ORDER_OWNERSHIP_CALCULATOR)
         user, guest_email = ownership_calc(request, given_user, guest_email)
+        if not ((user and user.email) or guest_email):
+            raise serializers.ValidationError(_("Email address is required."))
         data['user'] = user
         data['guest_email'] = guest_email
 

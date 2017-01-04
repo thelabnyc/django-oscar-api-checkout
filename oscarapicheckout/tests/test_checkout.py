@@ -9,6 +9,37 @@ Order = get_model('order', 'Order')
 
 
 class CheckoutAPITest(BaseTest):
+    def test_invalid_email_anon_user(self):
+        basket_id = self._prepare_basket()
+        data = self._get_checkout_data(basket_id)
+        data['guest_email'] = ''
+        data['payment'] = {
+            'credit-card': {
+                'enabled': True,
+                'pay_balance': True,
+            }
+        }
+        resp = self._checkout(data)
+        self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
+        self.assertEqual(resp.data['non_field_errors'][0], 'Guest email is required for anonymous checkouts')
+
+
+    def test_invalid_email_authed_user(self):
+        self.login(is_staff=True, email=None)
+        basket_id = self._prepare_basket()
+        data = self._get_checkout_data(basket_id)
+        data['guest_email'] = ''
+        data['payment'] = {
+            'credit-card': {
+                'enabled': True,
+                'pay_balance': True,
+            }
+        }
+        resp = self._checkout(data)
+        self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
+        self.assertEqual(resp.data['non_field_errors'][0], 'Email address is required.')
+
+
     def test_invalid_basket(self):
         self.login(is_staff=True)
         basket_id = self._prepare_basket()
@@ -607,7 +638,7 @@ class CheckoutAPITest(BaseTest):
 
     def _get_checkout_data(self, basket_id):
         data = {
-            "guest_email": "joe@example.com",
+            "guest_email": "anonymous_joe@example.com",
             "basket": reverse('basket-detail', args=[basket_id]),
             "shipping_address": {
                 "first_name": "Joe",
