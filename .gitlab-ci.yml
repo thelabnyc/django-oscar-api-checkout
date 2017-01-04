@@ -10,6 +10,7 @@ services:
   - postgres:latest
 
 before_script:
+  - pip install versiontag==1.1.1
   - pip install -r requirements.txt
   - export PYTHONPATH=`pwd`
 
