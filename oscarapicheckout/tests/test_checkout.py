@@ -3,12 +3,69 @@ from oscar.core.loading import get_model
 from oscar.test import factories
 from rest_framework import status
 from rest_framework.reverse import reverse
+from ..signals import pre_calculate_total, order_placed, order_payment_authorized
 from .base import BaseTest
 
 Order = get_model('order', 'Order')
 
 
 class CheckoutAPITest(BaseTest):
+    def test_signal_ordering(self):
+        self.login(is_staff=True)
+
+        _test = {'last_signal_called': None}
+
+        def handle_pre_calculate_total(*args, **kwargs):
+            self.assertEqual(_test['last_signal_called'], None)
+            _test['last_signal_called'] = 'pre_calculate_total'
+
+        def handle_order_placed(*args, **kwargs):
+            self.assertEqual(_test['last_signal_called'], 'pre_calculate_total')
+            _test['last_signal_called'] = 'order_placed'
+
+        def handle_order_payment_authorized(*args, **kwargs):
+            self.assertEqual(_test['last_signal_called'], 'order_placed')
+            _test['last_signal_called'] = 'order_payment_authorized'
+
+        pre_calculate_total.connect(handle_pre_calculate_total)
+        order_placed.connect(handle_order_placed)
+        order_payment_authorized.connect(handle_order_payment_authorized)
+
+        # Make a basket
+        basket_id = self._get_basket_id()
+        product = self._create_product(price=D('5.00'))
+        resp = self._add_to_basket(product.id)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        # Checkout
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'cash': {
+                'enabled': True,
+                'pay_balance': True,
+            }
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Make sure order_payment_authorized was the last signal called, thereby asserting the entire chain's order
+        self.assertEqual(_test['last_signal_called'], 'order_payment_authorized')
+
+        # Fetch payment states
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Complete')
+        self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '5.00')
+        self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
+        self.assertPaymentSource(order_resp.data['number'], 'Cash', allocated=D('5.00'), debited=D('5.00'))
+
+        # Cleanup signal handlers
+        pre_calculate_total.disconnect(handle_pre_calculate_total)
+        order_placed.disconnect(handle_order_placed)
+        order_payment_authorized.disconnect(handle_order_payment_authorized)
+
+
     def test_invalid_email_anon_user(self):
         basket_id = self._prepare_basket()
         data = self._get_checkout_data(basket_id)

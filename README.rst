@@ -161,6 +161,11 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+0.2.3
+------------------
+- Make the order in which signals are sent during checkout consistent for synchronous and asynchronous payment methods.
+    - Previously a synchronous payment method resulted in sending ``order_payment_authorized`` before sending ``order_placed``, but an asynchronous payment method would trigger ``order_placed`` first followed by ``order_payment_authorized`` (on a subsequent HTTP request). They are still different in terms of synchronous payment methods firing both signals on the same request and asynchronous payment methods triggering them on different request, but at least now they are always fired in the same order: ``order_placed`` first followed by ``order_payment_authorized``.
+
 0.2.2
 ------------------
 - Require an email address during checkout

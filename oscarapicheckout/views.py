@@ -83,6 +83,9 @@ class CheckoutView(generics.GenericAPIView):
         order = c_ser.save()
         request.session[CHECKOUT_ORDER_ID] = order.id
 
+        # Send order_placed signal
+        order_placed.send(sender=self, order=order, user=request.user, request=request)
+
         # Save payment steps into session for processing
         states = self._record_payments(
             request=request,
@@ -92,7 +95,6 @@ class CheckoutView(generics.GenericAPIView):
         utils.set_payment_method_states(order, request, states)
 
         # Return order data
-        order_placed.send(sender=self, order=order, user=request.user, request=request)
         o_ser = OrderSerializer(order, context={ 'request': request })
         return Response(o_ser.data)
 
