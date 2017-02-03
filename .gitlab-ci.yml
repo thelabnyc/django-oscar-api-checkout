@@ -10,15 +10,14 @@ services:
   - postgres:latest
 
 before_script:
-  - pip install versiontag==1.1.1
   - pip install -r requirements.txt
-  - export PYTHONPATH=`pwd`
+  - pip install -e .[development]
 
 lint:
   stage: test
   image: python:3.5
   script:
-    - flake8 oscarapicheckout/ sandbox/
+    - flake8 --exclude=migrations
 
 test_python:3.4:
   stage: test

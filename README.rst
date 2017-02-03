@@ -161,6 +161,10 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+0.2.4
+------------------
+- Upgrade dependencies.
+
 0.2.3
 ------------------
 - Make the order in which signals are sent during checkout consistent for synchronous and asynchronous payment methods.

@@ -3,10 +3,9 @@ ENV PYTHONUNBUFFERED 0
 
 RUN mkdir /code
 WORKDIR /code
-ENV PYTHONPATH /code
 
 ADD requirements.txt /code/
-RUN pip install versiontag==1.1.1
 RUN pip install -r requirements.txt
 
 ADD . /code/
+RUN pip install -e .[development]

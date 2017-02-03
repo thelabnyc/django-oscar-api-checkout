@@ -1,31 +1,38 @@
 #!/usr/bin/env python
+from setuptools import setup, find_packages, Distribution
 import codecs
 import os.path
-from setuptools import setup
-from versiontag import get_version, cache_git_tag
+
+# Make sure versiontag exists before going any further
+Distribution().fetch_build_eggs('versiontag>=1.2.0')
+
+from versiontag import get_version, cache_git_tag  # NOQA
 
 
-packages = [
-    'oscarapicheckout',
-    'oscarapicheckout.tests',
+packages = find_packages()
+
+install_requires = [
+    'django-oscar>=1.3.0',
+    'django-oscar-api>=1.0.10post1',
+    'djangorestframework>=3.1.0,<3.5.0',
 ]
 
-setup_requires = [
-    'versiontag>=1.0.3',
-]
-
-requires = [
-    'Django>=1.8.12',
-    'django-oscar>=1.2.1',
-    'django-oscar-api>=1.0.4',
-]
+extras_require = {
+    'development': [
+        'psycopg2>=2.6.2',
+        'flake8>=3.2.1',
+        'PyYAML>=3.12',
+    ],
+}
 
 
 def fpath(name):
     return os.path.join(os.path.dirname(__file__), name)
 
+
 def read(fname):
     return codecs.open(fpath(fname), encoding='utf-8').read()
+
 
 cache_git_tag()
 
@@ -35,7 +42,7 @@ setup(
     version=get_version(pypi=True),
     long_description=open('README.rst').read(),
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Framework :: Django :: 1.8',
@@ -55,6 +62,6 @@ setup(
     license='ISC',
     packages=packages,
     include_package_data=True,
-    install_requires=requires,
-    setup_requires=setup_requires
+    install_requires=install_requires,
+    extras_require=extras_require,
 )
