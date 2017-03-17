@@ -4,29 +4,36 @@ variables:
   POSTGRES_PASSWORD: ""
 
 stages:
+  - lint
   - test
 
 services:
   - postgres:latest
 
+cache:
+  key: "$CI_PROJECT_NAME"
+  paths:
+    - $HOME/.cache/pip
+
 before_script:
-  - pip install -r requirements.txt
-  - pip install -e .[development]
+  - pip install tox
 
 lint:
-  stage: test
-  image: python:3.5
-  script:
-    - flake8 --exclude=migrations
+  stage: lint
+  image: python:3.6
+  script: tox -e lint
 
-test_python:3.4:
+test_python34:
   stage: test
   image: python:3.4
-  script:
-    - ./test.sh
+  script: tox -e 'py34-django19-oscar{13,14},py34-django110-oscar14'
 
-test_python:3.5:
+test_python35:
   stage: test
   image: python:3.5
-  script:
-    - ./test.sh
+  script: tox -e 'py35-django19-oscar{13,14},py35-django110-oscar14'
+
+test_python36:
+  stage: test
+  image: python:3.6
+  script: tox -e 'py36-django19-oscar{13,14},py36-django110-oscar14'

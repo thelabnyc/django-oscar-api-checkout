@@ -9,12 +9,12 @@ Distribution().fetch_build_eggs('versiontag>=1.2.0')
 from versiontag import get_version, cache_git_tag  # NOQA
 
 
-packages = find_packages()
+packages = find_packages('src')
 
 install_requires = [
     'django-oscar>=1.3.0',
     'django-oscar-api>=1.0.10post1',
-    'djangorestframework>=3.1.0,<3.5.0',
+    'djangorestframework>=3.1.0',
 ]
 
 extras_require = {
@@ -22,6 +22,9 @@ extras_require = {
         'psycopg2>=2.6.2',
         'flake8>=3.2.1',
         'PyYAML>=3.12',
+        'sphinx>=1.5.2',
+        'tox>=2.6.0',
+        'versiontag>=1.2.0',
     ],
 }
 
@@ -42,7 +45,7 @@ setup(
     version=get_version(pypi=True),
     long_description=open('README.rst').read(),
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Framework :: Django',
         'Framework :: Django :: 1.9',
@@ -50,9 +53,9 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: ISC License (ISCL)',
         'Operating System :: Unix',
-        'Operating System :: MacOS :: MacOS X',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
@@ -60,6 +63,7 @@ setup(
     author_email='crgwbr@gmail.com',
     url='https://gitlab.com/thelabnyc/django-oscar-api-checkout',
     license='ISC',
+    package_dir={'': 'src'},
     packages=packages,
     include_package_data=True,
     install_requires=install_requires,

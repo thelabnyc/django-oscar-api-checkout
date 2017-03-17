@@ -1,4 +1,4 @@
-FROM python:3.5
+FROM python:3.6
 ENV PYTHONUNBUFFERED 0
 
 RUN mkdir /code
@@ -9,3 +9,6 @@ RUN pip install -r requirements.txt
 
 ADD . /code/
 RUN pip install -e .[development]
+
+RUN mkdir /tox
+ENV TOX_WORK_DIR='/tox'
