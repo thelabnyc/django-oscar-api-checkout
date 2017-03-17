@@ -161,6 +161,10 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+0.2.5
+------------------
+- Improve testing by using tox in the CI runner.
+
 0.2.4
 ------------------
 - Upgrade dependencies.
