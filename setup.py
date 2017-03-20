@@ -14,7 +14,6 @@ packages = find_packages('src')
 install_requires = [
     'django-oscar>=1.3.0',
     'django-oscar-api>=1.0.10post1',
-    'djangorestframework>=3.1.0',
 ]
 
 extras_require = {
