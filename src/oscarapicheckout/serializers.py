@@ -11,15 +11,9 @@ from oscarapi.serializers.checkout import (
     OrderSerializer as OscarOrderSerializer,
 )
 from oscarapi.basket.operations import get_basket
-from .settings import (
-    API_ENABLED_PAYMENT_METHODS,
-    API_MAX_PAYMENT_METHODS,
-    ORDER_STATUS_PAYMENT_DECLINED,
-    ORDER_OWNERSHIP_CALCULATOR,
-)
 from .signals import pre_calculate_total
 from .states import PENDING
-from . import utils
+from . import utils, settings
 
 Basket = get_model('basket', 'Basket')
 Order = get_model('order', 'Order')
@@ -41,7 +35,7 @@ class PaymentMethodsSerializer(serializers.Serializer):
         )
 
         self.methods = {}
-        for m in API_ENABLED_PAYMENT_METHODS:
+        for m in settings.API_ENABLED_PAYMENT_METHODS:
             PermissionClass = import_string(m['permission'])
             permission = PermissionClass()
             if permission.is_permitted(request=request, user=request.user):
@@ -61,8 +55,8 @@ class PaymentMethodsSerializer(serializers.Serializer):
             raise serializers.ValidationError("At least one payment method must be enabled.")
 
         # Respect payment method limit
-        if API_MAX_PAYMENT_METHODS > 0 and len(enabled_methods) > API_MAX_PAYMENT_METHODS:
-            raise serializers.ValidationError("No more than %s payment method can be enabled." % API_MAX_PAYMENT_METHODS)
+        if settings.API_MAX_PAYMENT_METHODS > 0 and len(enabled_methods) > settings.API_MAX_PAYMENT_METHODS:
+            raise serializers.ValidationError("No more than %s payment method can be enabled." % settings.API_MAX_PAYMENT_METHODS)
 
         # Must set pay_balance flag on exactly one payment method
         balance_methods = { k: v for k, v in enabled_methods.items() if v['pay_balance'] }
@@ -114,6 +108,12 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         self.fields['basket'].queryset = Basket.objects.filter(pk=basket.pk)
 
 
+    def get_ownership_calc(self):
+        if hasattr(settings.ORDER_OWNERSHIP_CALCULATOR, '__call__'):
+            return settings.ORDER_OWNERSHIP_CALCULATOR
+        return import_string(settings.ORDER_OWNERSHIP_CALCULATOR)
+
+
     def validate(self, data):
         # Cache guest email since it might get removed during super validation
         given_user = data.get('user')
@@ -124,7 +124,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
 
         # Figure out who should own the order
         request = self.context['request']
-        ownership_calc = import_string(ORDER_OWNERSHIP_CALCULATOR)
+        ownership_calc = self.get_ownership_calc()
         user, guest_email = ownership_calc(request, given_user, guest_email)
         if not ((user and user.email) or guest_email):
             raise serializers.ValidationError(_("Email address is required."))
@@ -180,13 +180,18 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         except ValueError as e:
             raise exceptions.NotAcceptable(e.message)
 
+        # Update the owner of the basket to match the order
+        if order.user != order.basket.owner:
+            order.basket.owner = order.user
+            order.basket.save()
+
         # Return the order
         return order
 
 
     def _insupd_order(self, basket, user=None, shipping_address=None, billing_address=None, **kwargs):
         existing_orders = basket.order_set.all()
-        if existing_orders.exclude(status=ORDER_STATUS_PAYMENT_DECLINED).exists():
+        if existing_orders.exclude(status=settings.ORDER_STATUS_PAYMENT_DECLINED).exists():
             raise exceptions.NotAcceptable(_("An non-declined order already exists for this basket."))
 
         existing_count = existing_orders.count()

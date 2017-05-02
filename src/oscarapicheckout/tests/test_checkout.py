@@ -1,10 +1,12 @@
 from decimal import Decimal as D
+from django.contrib.auth.models import User
 from oscar.core.loading import get_model
 from oscar.test import factories
 from rest_framework import status
 from rest_framework.reverse import reverse
 from ..signals import pre_calculate_total, order_placed, order_payment_authorized
 from .base import BaseTest
+import mock
 
 Order = get_model('order', 'Order')
 
@@ -629,6 +631,48 @@ class CheckoutAPITest(BaseTest):
 
         # Make sure different orders were placed
         self.assertNotEqual(order_resp1.data['number'], order_resp2.data['number'])
+
+
+    def test_order_ownership_transfer(self):
+        # Login as one user
+        self.login(is_staff=True)
+
+        # Make a basket
+        basket_id = self._get_basket_id()
+        product = self._create_product(price=D('5.00'))
+        resp = self._add_to_basket(product.id)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        # Configure get_order_ownership so that the order becomes property of a different user. This is
+        # conceivable for situations like a salesperson placing an order for someone else.
+        some_other_user = User.objects.create_user(username='jim', password='doe', email='jim@example.cpom')
+
+        def get_order_ownership(request, given_user, guest_email):
+            return some_other_user, None
+
+        # Checkout
+        with mock.patch('oscarapicheckout.serializers.settings.ORDER_OWNERSHIP_CALCULATOR', get_order_ownership):
+            data = self._get_checkout_data(basket_id)
+            data['payment'] = {
+                'cash': {
+                    'enabled': True,
+                    'pay_balance': True,
+                }
+            }
+            order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Make sure order payment is complete
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Authorized')
+
+        # Get the order form the DB and make sure that the order and the basket both belong to the user returned by
+        # get_order_ownership, even though that wasn't the user who placed the order.
+        order = Order.objects.get(number=order_resp.data['number'])
+        self.assertEqual(order.user_id, some_other_user.id)
+        self.assertEqual(order.basket.status, 'Submitted')
+        self.assertEqual(order.basket.owner_id, some_other_user.id)
 
 
     def assertPaymentSource(self, order_number, source_name, allocated=D('0.00'), debited=D('0.00'), refunded=D('0.00')):
