@@ -5,7 +5,7 @@ from django.views.static import serve
 from oscar.app import application as oscar_application
 from oscarapi.app import application as oscar_api
 from oscarapicheckout.app import application as oscar_api_checkout
-import creditcards.urls
+from sandbox.creditcards import urls as cc_urls
 
 
 urlpatterns = [
@@ -17,7 +17,7 @@ urlpatterns = [
     url(r'^api/', include(oscar_api_checkout.urls)),
     url(r'^api/', include(oscar_api.urls)),
 
-    url(r'^creditcards/', include(creditcards.urls)),
+    url(r'^creditcards/', include(cc_urls)),
 
     # Include stock Oscar
     url(r'', include(oscar_application.urls)),

@@ -8,7 +8,7 @@ DEBUG = True
 SECRET_KEY = 'li0$-gnv)76g$yf7p@(cg-^_q7j6df5cx$o-gsef5hd68phj!4'
 SITE_ID = 1
 
-ROOT_URLCONF = 'urls'
+ROOT_URLCONF = 'sandbox.urls'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     'oscarapi',
     'oscarapicheckout',
 ] + get_core_apps([
-    'order',
+    'sandbox.order',
 ])
 
 
@@ -170,7 +170,7 @@ API_ENABLED_PAYMENT_METHODS = [
         'permission': 'oscarapicheckout.permissions.StaffOnly',
     },
     {
-        'method': 'creditcards.methods.CreditCard',
+        'method': 'sandbox.creditcards.methods.CreditCard',
         'permission': 'oscarapicheckout.permissions.Public',
     },
 ]

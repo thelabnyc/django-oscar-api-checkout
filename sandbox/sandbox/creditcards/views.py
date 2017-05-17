@@ -38,6 +38,13 @@ class AuthorizeCardView(generics.GenericAPIView):
         order_number = request.data['reference_number']
         order = get_object_or_404(Order, number=order_number)
 
+        # Decline the payment
+        if request.data.get('deny'):
+            utils.mark_payment_method_declined(order, request, CreditCard.code, request.data['amount'])
+            return Response({
+                'status': 'Declined',
+            })
+
         # Record the funds allocation
         new_state = CreditCard().record_successful_authorization(order, amount, uuid.uuid1())
         utils.update_payment_method_state(order, request, CreditCard.code, new_state)
