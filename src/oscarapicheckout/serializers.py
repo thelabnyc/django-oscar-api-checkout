@@ -180,11 +180,6 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         except ValueError as e:
             raise exceptions.NotAcceptable(e.message)
 
-        # Update the owner of the basket to match the order
-        if order.user != order.basket.owner:
-            order.basket.owner = order.user
-            order.basket.save()
-
         # Return the order
         return order
 

@@ -9,6 +9,7 @@ from .base import BaseTest
 import mock
 
 Order = get_model('order', 'Order')
+Basket = get_model('basket', 'Basket')
 
 
 class CheckoutAPITest(BaseTest):
@@ -667,12 +668,253 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Authorized')
 
-        # Get the order form the DB and make sure that the order and the basket both belong to the user returned by
+        # Get the order from the DB and make sure that the order and the basket both belong to the user returned by
         # get_order_ownership, even though that wasn't the user who placed the order.
         order = Order.objects.get(number=order_resp.data['number'])
         self.assertEqual(order.user_id, some_other_user.id)
         self.assertEqual(order.basket.status, 'Submitted')
         self.assertEqual(order.basket.owner_id, some_other_user.id)
+
+
+
+    def test_order_ownership_transfer_with_multistep_payment_method(self):
+        # Login as one user
+        request_user = self.login(is_staff=False)
+
+        # Make a basket
+        basket_id = self._get_basket_id()
+        product = self._create_product(price=D('5.00'))
+        resp = self._add_to_basket(product.id)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        # Configure get_order_ownership so that the order becomes property of a different user. This is
+        # conceivable for situations like a salesperson placing an order for someone else.
+        some_other_user = User.objects.create_user(username='jim', password='doe', email='jim@example.cpom')
+
+        def get_order_ownership(request, given_user, guest_email):
+            return some_other_user, None
+
+        # Checkout, using a multi-step payment method (credit card)
+        with mock.patch('oscarapicheckout.serializers.settings.ORDER_OWNERSHIP_CALCULATOR', get_order_ownership):
+            data = self._get_checkout_data(basket_id)
+            data['payment'] = {
+                'credit-card': {
+                    'enabled': True,
+                    'pay_balance': True,
+                }
+            }
+            order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Fetch payment states. Credit Card payment should be pending since we need to fetch a token
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'get-token')
+
+        # Order should belong to the user returned by get_order_ownership, but basket should still belong to the request user
+        self.assertEqual(Order.objects.get(number=order_resp.data['number']).user_id, some_other_user.pk)
+        self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, request_user.pk)
+
+        # Perform the get-token step
+        required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
+        get_token_resp = self._do_payment_step_form_post(required_action)
+        self.assertEqual(get_token_resp.data['status'], 'Success')
+
+        # Fetch payment states again, order and payment should still be pending
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'authorize')
+
+        # Order should belong to the user returned by get_order_ownership, but basket should still belong to the request user
+        self.assertEqual(Order.objects.get(number=order_resp.data['number']).user_id, some_other_user.pk)
+        self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, request_user.pk)
+
+        # Perform the authorize step
+        required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
+        authorize_resp = self._do_payment_step_form_post(required_action)
+        self.assertEqual(authorize_resp.data['status'], 'Success')
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Complete')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
+        self.assertIsNone(states_resp.data['payment_method_states']['credit-card']['required_action'])
+        self.assertPaymentSource(order_resp.data['number'], 'Credit Card', allocated=D('5.00'))
+
+        # Check order integrity
+        order = Order.objects.get(number=order_resp.data['number'])
+        self.assertEqual(order.status, 'Authorized')
+
+        # Order and Basket should now both have been transfered from the request user to the get_order_ownership user
+        self.assertEqual(Order.objects.get(number=order_resp.data['number']).user_id, some_other_user.pk)
+        self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, some_other_user.pk)
+
+        # API should return a new Basket
+        self.assertNotEqual(self._get_basket_id(), basket_id)
+
+
+    def test_order_ownership_transfer_with_multistep_payment_method_with_retry(self):
+        # Login as one user
+        request_user = self.login(is_staff=False)
+
+        # Make a basket
+        basket_id = self._get_basket_id()
+        product = self._create_product(price=D('5.00'))
+        resp = self._add_to_basket(product.id)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        # Configure get_order_ownership so that the order becomes property of a different user. This is
+        # conceivable for situations like a salesperson placing an order for someone else.
+        some_other_user = User.objects.create_user(username='jim', password='doe', email='jim@example.cpom')
+
+        def get_order_ownership(request, given_user, guest_email):
+            return some_other_user, None
+
+        # Checkout, using a multi-step payment method (credit card)
+        with mock.patch('oscarapicheckout.serializers.settings.ORDER_OWNERSHIP_CALCULATOR', get_order_ownership):
+            data = self._get_checkout_data(basket_id)
+            data['payment'] = {
+                'credit-card': {
+                    'enabled': True,
+                    'pay_balance': True,
+                }
+            }
+            order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+        order_number1 = order_resp.data['number']
+
+        # Fetch payment states. Credit Card payment should be pending since we need to fetch a token
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'get-token')
+
+        # Order should belong to the user returned by get_order_ownership, but basket should still belong to the request user
+        self.assertEqual(Order.objects.get(number=order_number1).user_id, some_other_user.pk)
+        self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, request_user.pk)
+
+        # Perform the get-token step
+        required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
+        get_token_resp = self._do_payment_step_form_post(required_action)
+        self.assertEqual(get_token_resp.data['status'], 'Success')
+
+        # Fetch payment states again, order and payment should still be pending
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'authorize')
+
+        # Order should belong to the user returned by get_order_ownership, but basket should still belong to the request user
+        self.assertEqual(Order.objects.get(number=order_number1).user_id, some_other_user.pk)
+        self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, request_user.pk)
+
+        # Perform the authorize step, but make the payment method decline payment
+        required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
+        required_action['fields'].append({ 'key': 'deny', 'value': True })
+        authorize_resp = self._do_payment_step_form_post(required_action)
+        self.assertEqual(authorize_resp.data['status'], 'Declined')
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Payment Declined')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Declined')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
+        self.assertIsNone(states_resp.data['payment_method_states']['credit-card']['required_action'])
+
+        # Check order integrity
+        order = Order.objects.get(number=order_number1)
+        self.assertEqual(order.status, 'Payment Declined')
+
+        # Order should belong to the user returned by get_order_ownership, but basket should still belong to the request user
+        self.assertEqual(Order.objects.get(number=order_number1).user_id, some_other_user.pk)
+        self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, request_user.pk)
+
+        # API should return the same basket we've been working with
+        self.assertEqual(self._get_basket_id(), basket_id)
+
+        # Checkout again, using a multi-step payment method (credit card)
+        with mock.patch('oscarapicheckout.serializers.settings.ORDER_OWNERSHIP_CALCULATOR', get_order_ownership):
+            data = self._get_checkout_data(basket_id)
+            data['payment'] = {
+                'credit-card': {
+                    'enabled': True,
+                    'pay_balance': True,
+                }
+            }
+            order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Order number should get recycled
+        order_number2 = order_resp.data['number']
+        self.assertEqual(order_number2, order_number1)
+
+        # Fetch payment states. Credit Card payment should be pending since we need to fetch a token
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'get-token')
+
+        # Order should belong to the user returned by get_order_ownership, but basket should still belong to the request user
+        self.assertEqual(Order.objects.get(number=order_number2).user_id, some_other_user.pk)
+        self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, request_user.pk)
+
+        # Perform the get-token step
+        required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
+        get_token_resp = self._do_payment_step_form_post(required_action)
+        self.assertEqual(get_token_resp.data['status'], 'Success')
+
+        # Fetch payment states again, order and payment should still be pending
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'authorize')
+
+        # Order should belong to the user returned by get_order_ownership, but basket should still belong to the request user
+        self.assertEqual(Order.objects.get(number=order_number2).user_id, some_other_user.pk)
+        self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, request_user.pk)
+
+        # Perform the authorize step, this time make it accept the transaction
+        required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
+        authorize_resp = self._do_payment_step_form_post(required_action)
+        self.assertEqual(authorize_resp.data['status'], 'Success')
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Complete')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
+        self.assertIsNone(states_resp.data['payment_method_states']['credit-card']['required_action'])
+        self.assertPaymentSource(order_number2, 'Credit Card', allocated=D('5.00'))
+
+        # Check order integrity
+        order = Order.objects.get(number=order_number2)
+        self.assertEqual(order.status, 'Authorized')
+
+        # Order and Basket should now both have been transfered from the request user to the get_order_ownership user
+        self.assertEqual(Order.objects.get(number=order_number2).user_id, some_other_user.pk)
+        self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, some_other_user.pk)
+
+        # API should return a new Basket now
+        self.assertNotEqual(self._get_basket_id(), basket_id)
+
 
 
     def assertPaymentSource(self, order_number, source_name, allocated=D('0.00'), debited=D('0.00'), refunded=D('0.00')):

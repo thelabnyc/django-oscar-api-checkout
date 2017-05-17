@@ -36,21 +36,44 @@ def _update_payment_method_state(request, code, state):
     request.session.modified = True
 
 
+def _set_order_authorized(order, request):
+    # Set the order status
+    order.set_status(ORDER_STATUS_AUTHORIZED)
+
+    # Mark the basket as submitted
+    order.basket.submit()
+
+    # Update the owner of the basket to match the order
+    if order.user != order.basket.owner:
+        order.basket.owner = order.user
+        order.basket.save()
+
+    # Send a signal
+    order_payment_authorized.send(sender=order, order=order, request=request)
+
+
+def _set_order_payment_declined(order, request):
+    # Set the order status
+    order.set_status(ORDER_STATUS_PAYMENT_DECLINED)
+
+    # Thaw the basket and put it back into the request.session so that it can be retried
+    order.basket.thaw()
+    operations.store_basket_in_session(order.basket, request.session)
+
+    # Send a signal
+    order_payment_declined.send(sender=order, order=order, request=request)
+
+
 def _update_order_status(order, request):
     states = list_payment_method_states(request)
 
     declined = [s for k, s in states.items() if s.status == DECLINED]
     if len(declined) > 0:
-        order.set_status(ORDER_STATUS_PAYMENT_DECLINED)
-        order.basket.thaw()  # Thaw the basket and put it back into the request.session so that it can be retried
-        operations.store_basket_in_session(order.basket, request.session)
-        order_payment_declined.send(sender=order, order=order, request=request)
+        _set_order_payment_declined(order, request)
 
     not_complete = [s for k, s in states.items() if s.status != COMPLETE]
     if len(not_complete) <= 0:
-        order.set_status(ORDER_STATUS_AUTHORIZED)
-        order.basket.submit()  # Mark the basket as submitted
-        order_payment_authorized.send(sender=order, order=order, request=request)
+        _set_order_authorized(order, request)
 
 
 def list_payment_method_states(request):
