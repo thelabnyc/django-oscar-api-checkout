@@ -161,6 +161,10 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+0.2.7
+------------------
+- *[Important]* Fix bug introduced in *r0.2.6* with multi-step payment methods when retrying a payment decline.
+
 0.2.6
 ------------------
 - *[Important]* Fix bug causing mismatch between ``Order.user`` and ``Basket.owner`` when, during placement, the order ownership calculator assigns the order to a user other than the basket owner. Now, after creating the order model, the owner of the basket associated with the order is updated to match the order's owner.
