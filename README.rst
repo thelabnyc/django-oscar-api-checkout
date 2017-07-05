@@ -161,6 +161,14 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+0.3.0
+------------------
+- Add helper classes for caching structured data during a multi-step checkout process.
+    - See `oscarapicheckout.cache` module for details.
+    - Doesn't yet include API views for editing or view such data.
+    - Currently includes classes for storing email address, shipping address, billing address, and shipping method.
+    - Required [Django Cache](https://docs.djangoproject.com/en/dev/topics/cache/) framework to be configured.
+
 0.2.7
 ------------------
 - *[Important]* Fix bug introduced in *r0.2.6* with multi-step payment methods when retrying a payment decline.
