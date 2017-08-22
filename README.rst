@@ -161,6 +161,10 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+0.3.1
+------------------
+- Add support for Django 1.11 and Oscar 1.5
+
 0.3.0
 ------------------
 - Add helper classes for caching structured data during a multi-step checkout process.
