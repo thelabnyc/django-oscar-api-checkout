@@ -26,14 +26,14 @@ lint:
 test_python34:
   stage: test
   image: python:3.4
-  script: tox -e 'py34-django19-oscar{13,14},py34-django110-oscar14'
+  script: tox -e 'py34-django110-oscar{14,15},py34-django111-oscar15'
 
 test_python35:
   stage: test
   image: python:3.5
-  script: tox -e 'py35-django19-oscar{13,14},py35-django110-oscar14'
+  script: tox -e 'py35-django110-oscar{14,15},py35-django111-oscar15'
 
 test_python36:
   stage: test
   image: python:3.6
-  script: tox -e 'py36-django19-oscar{13,14},py36-django110-oscar14'
+  script: tox -e 'py36-django110-oscar{14,15},py36-django111-oscar15'
