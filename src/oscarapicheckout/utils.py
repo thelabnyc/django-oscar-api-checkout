@@ -7,6 +7,7 @@ from .signals import order_payment_declined, order_payment_authorized
 from .states import COMPLETE, DECLINED, Complete, Declined
 import pickle
 import base64
+import inspect
 
 Order = get_model('order', 'Order')
 OrderCreator = get_class('order.utils', 'OrderCreator')
@@ -112,18 +113,24 @@ def get_order_ownership(request, given_user, guest_email):
     return None, guest_email
 
 
+
 class OrderUpdater(object):
     def update_order(self, order, basket, order_total,
                      shipping_method, shipping_charge, user=None,
                      shipping_address=None, billing_address=None,
-                     order_number=None, status=None, **kwargs):
-
+                     order_number=None, status=None, request=None, **kwargs):
+        """
+        Similar to OrderCreator.place_order, except this updates an existing "Payment Declined" order instead
+        of creating a new order.
+        """
         if basket.is_empty:
             raise ValueError(_("Empty baskets cannot be submitted"))
 
         if order.status != ORDER_STATUS_PAYMENT_DECLINED:
             raise ValueError(_("Can not update an order that isn't in payment declined state."))
 
+        # Make sure there isn't another order with this number already, besides of course the
+        # order we're trying to update.
         try:
             Order._default_manager.exclude(id=order.id).get(number=order_number)
         except Order.DoesNotExist:
@@ -144,15 +151,28 @@ class OrderUpdater(object):
             order_line.delete()
 
         # Use the built in OrderCreator, but specify a pk so that Django actually does an update instead
+        # Create the actual order.Order and order.Line models
         creator = OrderCreator()
+        # Needed Oscar 1.4 Compatibility. Remove reflection once Oscar 1.5 is minimum version.
+        order_model_arg_spec = inspect.getargspec(creator.create_order_model)
+        if 'request' in order_model_arg_spec.args:
+            kwargs['request'] = request
         order = creator.create_order_model(
-            user, basket, shipping_address, shipping_method, shipping_charge,
-            billing_address, order_total, order_number, status, id=order.id, **kwargs)
+            user, basket, shipping_address, shipping_method, shipping_charge, billing_address,
+            order_total, order_number, status, id=order.id, **kwargs)
 
         # Make new order lines to replace the ones we deleted.
         for basket_line in basket.all_lines():
             creator.create_line_models(order, basket_line)
             creator.update_stock_records(basket_line)
+
+        # Make sure all the vouchers are still available to the user placing the order (not necessarily the
+        # same as the order owner)
+        voucher_user = request.user if request and request.user else user
+        for voucher in basket.vouchers.select_for_update():
+                available_to_user, msg = voucher.is_available_to_user(user=voucher_user)
+                if not voucher.is_active() or not available_to_user:
+                    raise ValueError(msg)
 
         # Record any discounts associated with this order
         for application in basket.offer_applications:
@@ -173,7 +193,9 @@ class OrderUpdater(object):
             creator.create_discount_model(order, application)
             creator.record_discount(application)
 
+        # Record voucher usage for this order
         for voucher in basket.vouchers.all():
             creator.record_voucher_usage(order, voucher, user)
 
+        # Done! Return the order.Order model
         return order

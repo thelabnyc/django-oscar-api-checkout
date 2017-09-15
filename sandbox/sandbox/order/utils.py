@@ -1,3 +1,5 @@
+from oscar.apps.order.utils import OrderCreator as BaseOrderCreator
+from oscarapicheckout.mixins import OrderCreatorMixin
 import math
 import time
 import random
@@ -10,3 +12,7 @@ class OrderNumberGenerator(object):
         suffix = random.randrange(100, 999)
         number = 'O' + str(base_num) + basket_id + str(suffix)
         return number
+
+
+class OrderCreator(OrderCreatorMixin, BaseOrderCreator):
+    pass

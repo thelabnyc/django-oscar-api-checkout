@@ -193,6 +193,9 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         if existing_count > 1:
             raise exceptions.NotAcceptable(_("Multiple order exist for this basket! This should never happen and we don't know what to do."))
 
+        # Get request object from context
+        request = self.context.get('request', None)
+
         # If no orders were pre-existing, make a new one.
         if existing_count == 0:
             return self.place_order(
@@ -200,6 +203,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
                 user=user,
                 shipping_address=shipping_address,
                 billing_address=billing_address,
+                request=request,
                 **kwargs)
 
         # Update this order instead of making a new one.
@@ -221,4 +225,5 @@ class CheckoutSerializer(OscarCheckoutSerializer):
             shipping_address=shipping_address,
             billing_address=billing_address,
             status=status,
+            request=request,
             **kwargs)
