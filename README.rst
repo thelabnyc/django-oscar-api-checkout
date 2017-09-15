@@ -164,6 +164,7 @@ Changelog
 0.3.2
 ------------------
 - Fix issue in Python 3 when ``OrderCreator.place_order`` raises a ``ValueError`` exception.
+- Fix bug occurring in Oscar 1.5 when vouchers can be used by the user placing an order, but not by the order owner.
 
 0.3.1
 ------------------
