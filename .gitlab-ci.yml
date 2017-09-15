@@ -4,7 +4,6 @@ variables:
   POSTGRES_PASSWORD: ""
 
 stages:
-  - lint
   - test
 
 services:
@@ -17,11 +16,6 @@ cache:
 
 before_script:
   - pip install tox
-
-lint:
-  stage: lint
-  image: python:3.6
-  script: tox -e lint
 
 test_python34:
   stage: test
