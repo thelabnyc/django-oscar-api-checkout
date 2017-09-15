@@ -161,6 +161,10 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+0.3.2
+------------------
+- Fix issue in Python 3 when ``OrderCreator.place_order`` raises a ``ValueError`` exception.
+
 0.3.1
 ------------------
 - Add support for Django 1.11 and Oscar 1.5

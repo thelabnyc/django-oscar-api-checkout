@@ -178,7 +178,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
                 shipping_charge=validated_data.get('shipping_charge'),
                 guest_email=validated_data.get('guest_email') or '')
         except ValueError as e:
-            raise exceptions.NotAcceptable(e.message)
+            raise exceptions.NotAcceptable(str(e))
 
         # Return the order
         return order
