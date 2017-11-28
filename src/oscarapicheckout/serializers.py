@@ -122,6 +122,23 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         # Calculate totals and whatnot
         data = super().validate(data)
 
+        # Check that the basket is still valid
+        basket_errors = []
+        basket = data['basket']
+        for line in basket.all_lines():
+            result = basket.strategy.fetch_for_line(line)
+            is_permitted, reason = result.availability.is_purchase_permitted(line.quantity)
+            if not is_permitted:
+                # Create a meaningful message to return in the error response
+                ctx = {
+                    'title': line.product.get_title(),
+                    'reason': reason,
+                }
+                msg = _("'%(title)s' is no longer available to buy (%(reason)s). Please adjust your basket to continue.") % ctx
+                basket_errors.append(msg)
+        if len(basket_errors) > 0:
+            raise serializers.ValidationError({ 'basket': basket_errors })
+
         # Figure out who should own the order
         request = self.context['request']
         ownership_calc = self.get_ownership_calc()

@@ -13,6 +13,123 @@ Basket = get_model('basket', 'Basket')
 
 
 class CheckoutAPITest(BaseTest):
+
+    def test_minimal_cash_order(self):
+        self.login(is_staff=True)
+
+        # Place a cash order
+        basket_id = self._prepare_basket()
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'cash': {
+                'enabled': True,
+                'pay_balance': True,
+            }
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Fetch payment states
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Complete')
+        self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '10.00')
+        self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
+        self.assertPaymentSource(order_resp.data['number'], 'Cash', allocated=D('10.00'), debited=D('10.00'))
+
+
+    def test_out_of_stock_errors(self):
+        self.login(is_staff=True)
+
+        # Create a product with 4 items in stock, but 2 already allocated to other orders.
+        product = self._create_product()
+        product.product_class.track_stock = True
+        product.product_class.save()
+        stockrecord = product.stockrecords.first()
+        stockrecord.num_in_stock = 4
+        stockrecord.num_allocated = 2
+        stockrecord.save()
+
+        # Create a basket
+        basket_id = self._get_basket_id()
+
+        # Try to add 3 of the product, make sure it errors
+        resp = self._add_to_basket(product.id, quantity=3)
+        self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
+        self.assertEqual(resp.data['reason'], 'a maximum of 2 can be bought')
+
+        # Reduce the quantity from 3 to 2 and it should work
+        resp = self._add_to_basket(product.id, quantity=2)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.data['total_excl_tax'], '20.00')
+
+        # After the product is already in the basket, someone else bought one more of the items, meaning you can only buy 1.
+        stockrecord.num_allocated += 1
+        stockrecord.save()
+
+        # Now, try and checkout. Make sure it errors (since your basket has 2 of the item, but only 1 more exists)
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'cash': {
+                'enabled': True,
+                'pay_balance': True,
+            }
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
+        self.assertEqual(order_resp.data['basket'], [
+            "'My Product' is no longer available to buy (a maximum of 1 can be bought). Please adjust your basket to continue.",
+        ])
+
+        # Next, make the product completely out of stock.
+        stockrecord.num_allocated += 1
+        stockrecord.save()
+
+        # Try and checkout again without changing anything. Make sure it errors (since your basket has 2 of the item, but no more exists)
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'cash': {
+                'enabled': True,
+                'pay_balance': True,
+            }
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
+        self.assertEqual(order_resp.data['basket'], [
+            "'My Product' is no longer available to buy (no stock available). Please adjust your basket to continue.",
+        ])
+
+        # Increase the stock level so that 1 is available.
+        stockrecord.num_in_stock += 1
+        stockrecord.save()
+
+        # Reduce the basket quantity from 2 to 1.
+        resp = self._add_to_basket(product.id, quantity=-1)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.data['total_excl_tax'], '10.00')
+
+        # Try and checkout again once more. This time it should work.
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'cash': {
+                'enabled': True,
+                'pay_balance': True,
+            }
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Fetch payment states. Make sure the order went through.
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Complete')
+        self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '10.00')
+        self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
+        self.assertPaymentSource(order_resp.data['number'], 'Cash', allocated=D('10.00'), debited=D('10.00'))
+
+
     def test_signal_ordering(self):
         self.login(is_staff=True)
 
