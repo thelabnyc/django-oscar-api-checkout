@@ -161,6 +161,10 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+0.3.4
+------------------
+- Fix Django 2.0 Deprecation warnings.
+
 0.3.3
 ------------------
 - Add validation to checkout API to prevent placing an order for an item that went out of stock after the item was added to the customer's basket.
