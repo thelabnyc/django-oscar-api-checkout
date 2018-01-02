@@ -11,7 +11,7 @@ class PaymentMethodSerializerTest(BaseTest):
             'enabled': False,
         })
         self.assertTrue(s.is_valid())
-        self.assertEquals(s.validated_data, {
+        self.assertEqual(s.validated_data, {
             'enabled': False,
             'pay_balance': True,
             'reference': '',
@@ -25,7 +25,7 @@ class PaymentMethodSerializerTest(BaseTest):
             'amount': '10.00'
         })
         self.assertTrue(s.is_valid())
-        self.assertEquals(s.validated_data, {
+        self.assertEqual(s.validated_data, {
             'enabled': True,
             'pay_balance': True,
             'reference': '',
@@ -40,7 +40,7 @@ class PaymentMethodSerializerTest(BaseTest):
             'amount': '10.00'
         })
         self.assertTrue(s.is_valid())
-        self.assertEquals(s.validated_data, {
+        self.assertEqual(s.validated_data, {
             'enabled': True,
             'pay_balance': False,
             'amount': Decimal('10.00'),

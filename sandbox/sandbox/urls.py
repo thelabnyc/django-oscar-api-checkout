@@ -10,15 +10,15 @@ from sandbox.creditcards import urls as cc_urls
 
 urlpatterns = [
     url(r'^i18n/', include(i18n)),
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
     url(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
 
     # Include plugins
-    url(r'^api/', include(oscar_api_checkout.urls)),
-    url(r'^api/', include(oscar_api.urls)),
+    url(r'^api/', oscar_api_checkout.urls),
+    url(r'^api/', oscar_api.urls),
 
     url(r'^creditcards/', include(cc_urls)),
 
     # Include stock Oscar
-    url(r'', include(oscar_application.urls)),
+    url(r'', oscar_application.urls),
 ]

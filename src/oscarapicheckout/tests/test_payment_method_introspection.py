@@ -8,8 +8,8 @@ class PaymentMethodsViewTest(BaseTest):
         self.login(is_staff=True)
         url = reverse('api-checkout-payment-methods')
         resp = self.client.get(url)
-        self.assertEquals(resp.status_code, status.HTTP_200_OK)
-        self.assertEquals(resp.data, {
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.data, {
             'credit-card': {
                 'type': 'nested object',
                 'required': False,
@@ -82,8 +82,8 @@ class PaymentMethodsViewTest(BaseTest):
     def test_introspection_anonymous(self):
         url = reverse('api-checkout-payment-methods')
         resp = self.client.get(url)
-        self.assertEquals(resp.status_code, status.HTTP_200_OK)
-        self.assertEquals(resp.data, {
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.data, {
             'credit-card': {
                 'type': 'nested object',
                 'required': False,

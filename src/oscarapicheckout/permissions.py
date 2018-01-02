@@ -10,4 +10,4 @@ class Public(PaymentMethodPermission):
 
 class StaffOnly(PaymentMethodPermission):
     def is_permitted(self, request=None, user=None):
-        return (user and user.is_authenticated() and user.is_staff)
+        return (user and user.is_authenticated and user.is_staff)

@@ -3,7 +3,6 @@ from django.conf import settings
 from django.db import transaction
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
-import inspect
 
 Order = get_model('order', 'Order')
 order_placed = get_class('order.signals', 'order_placed')
@@ -45,13 +44,9 @@ class OrderCreatorMixin(object):
         # Open a transaction so that order creation is atomic.
         with transaction.atomic():
             # Create the actual order.Order and order.Line models
-            # Needed Oscar 1.4 Compatibility. Remove reflection once Oscar 1.5 is minimum version.
-            order_model_arg_spec = inspect.getargspec(self.create_order_model)
-            if 'request' in order_model_arg_spec.args:
-                kwargs['request'] = request
             order = self.create_order_model(
                 user, basket, shipping_address, shipping_method, shipping_charge,
-                billing_address, total, order_number, status, **kwargs)
+                billing_address, total, order_number, status, request=request, **kwargs)
             for line in basket.all_lines():
                 self.create_line_models(order, line)
                 self.update_stock_records(line)

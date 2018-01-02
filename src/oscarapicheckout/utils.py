@@ -7,7 +7,6 @@ from .signals import order_payment_declined, order_payment_authorized
 from .states import COMPLETE, DECLINED, Complete, Declined
 import pickle
 import base64
-import inspect
 
 Order = get_model('order', 'Order')
 OrderCreator = get_class('order.utils', 'OrderCreator')
@@ -108,7 +107,7 @@ def mark_payment_method_declined(order, request, code, amount):
 
 def get_order_ownership(request, given_user, guest_email):
     current_user = request.user
-    if current_user and current_user.is_authenticated():
+    if current_user and current_user.is_authenticated:
         return current_user, None
     return None, guest_email
 
@@ -153,13 +152,9 @@ class OrderUpdater(object):
         # Use the built in OrderCreator, but specify a pk so that Django actually does an update instead
         # Create the actual order.Order and order.Line models
         creator = OrderCreator()
-        # Needed Oscar 1.4 Compatibility. Remove reflection once Oscar 1.5 is minimum version.
-        order_model_arg_spec = inspect.getargspec(creator.create_order_model)
-        if 'request' in order_model_arg_spec.args:
-            kwargs['request'] = request
         order = creator.create_order_model(
             user, basket, shipping_address, shipping_method, shipping_charge, billing_address,
-            order_total, order_number, status, id=order.id, **kwargs)
+            order_total, order_number, status, id=order.id, request=request, **kwargs)
 
         # Make new order lines to replace the ones we deleted.
         for basket_line in basket.all_lines():
