@@ -31,3 +31,8 @@ test_python36:
   stage: test
   image: python:3.6
   script: tox -e 'py36-django111-oscar15'
+
+test_pypy35:
+  stage: test
+  image: pypy:3-5
+  script: tox -e 'pypy3-django111-oscar15'

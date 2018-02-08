@@ -1,6 +1,9 @@
 from oscar.defaults import *  # noqa
 from oscar import OSCAR_MAIN_TEMPLATE_DIR, get_core_apps
+from psycopg2cffi import compat
 import os
+
+compat.register()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
