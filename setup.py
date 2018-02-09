@@ -18,7 +18,7 @@ install_requires = [
 
 extras_require = {
     'development': [
-        'psycopg2>=2.6.2',
+        'psycopg2cffi>=2.7.7',
         'flake8>=3.2.1',
         'PyYAML>=3.12',
         'sphinx>=1.5.2',
