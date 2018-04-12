@@ -1,6 +1,7 @@
 PENDING = 'Pending'
 DECLINED = 'Declined'
 COMPLETE = 'Complete'
+CONSUMED = 'Consumed'
 
 
 class PaymentStatus(object):
@@ -21,6 +22,10 @@ class Complete(PaymentStatus):
 
 class Declined(PaymentStatus):
     status = DECLINED
+
+
+class Consumed(PaymentStatus):
+    status = CONSUMED
 
 
 class FormPostRequired(PaymentStatus):

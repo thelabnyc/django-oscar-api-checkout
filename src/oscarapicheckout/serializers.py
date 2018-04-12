@@ -4,6 +4,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.db import transaction
 from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import force_text
 from rest_framework import serializers, exceptions
 from oscar.core.loading import get_model, get_class
 from oscarapi.serializers.checkout import (
@@ -23,11 +24,81 @@ ShippingAddress = get_model('order', 'ShippingAddress')
 OrderTotalCalculator = get_class('checkout.calculators', 'OrderTotalCalculator')
 
 
-class PaymentMethodsSerializer(serializers.Serializer):
-    def __init__(self, *args, **kwargs):
+
+class DiscriminatedUnionSerializer(serializers.Serializer):
+    """
+    Serializer for building a discriminated-union of other serializers
+
+    Usage:
+
+    DiscriminatedUnionSerializer(
+        # (string) Field name that will uniquely identify which serializer to use.
+        discriminant_field_name="some_field_name",
+
+        # (dict <string: serializer class>) Dictionary that indicates which
+        # serializer class should be used, based on the value of ``discriminant_field_name``.
+        types={
+            "some_choice_in_some_field_name": SomeSerializer(),
+            ...
+        }
+
+        # Other serializers.Serializer arguments
+    )
+
+    See this documentation for a good introduction to the concept of discriminated unions.
+
+    - https://www.typescriptlang.org/docs/handbook/advanced-types.html#discriminated-unions
+    - https://en.wikipedia.org/wiki/Tagged_union
+
+    """
+    def __init__(self, discriminant_field_name, types, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields[discriminant_field_name] = serializers.ChoiceField(choices=[(t, t) for t in types.keys()])
+        self.discriminant_field_name = discriminant_field_name
+        self.type_mapping = types
+
+
+    def to_representation(self, obj):
+        concrete_type = self._get_concrete_type(obj)
+        if concrete_type:
+            return concrete_type.to_representation(obj)
+        return super().to_representation(obj)
+
+
+    def to_internal_value(self, data):
+        concrete_type = self._get_concrete_type(data)
+        if concrete_type:
+            return concrete_type.to_internal_value(data)
+        return super().to_internal_value(data)
+
+
+    def run_validation(self, data):
+        concrete_type = self._get_concrete_type(data)
+        if concrete_type:
+            return concrete_type.run_validation(data)
+        return super().run_validation(data)
+
+
+    def _get_obj_type(self, obj):
+        if hasattr(obj, 'get'):
+            return obj.get(self.discriminant_field_name)
+        return getattr(obj, self.discriminant_field_name)
+
+
+    def _get_concrete_type(self, obj):
+        obj_type = self._get_obj_type(obj)
+        return self.type_mapping.get(obj_type)
+
+
+
+class PaymentMethodsSerializer(serializers.DictField):
+    """
+    Dynamic serializer created based on the configured payment methods (settings.API_ENABLED_PAYMENT_METHODS)
+    """
+    def __init__(self, *args, context={}, **kwargs):
         super().__init__(*args, **kwargs)
 
-        request = self.context.get('request', None)
+        request = context.get('request', None)
         assert request is not None, (
             "`%s` requires the request in the serializer"
             " context. Add `context={'request': request}` when instantiating "
@@ -37,18 +108,43 @@ class PaymentMethodsSerializer(serializers.Serializer):
         self.methods = {}
         for m in settings.API_ENABLED_PAYMENT_METHODS:
             PermissionClass = import_string(m['permission'])
-            permission = PermissionClass()
+            permission = PermissionClass(**m.get('permission_kwargs', {}))
             if permission.is_permitted(request=request, user=request.user):
                 MethodClass = import_string(m['method'])
-                method = MethodClass()
-                self.fields[method.code] = method.serializer_class(required=False, context=self.context)
+                method = MethodClass(**m.get('method_kwargs', {}))
                 self.methods[method.code] = method
 
-        if not any(self.fields):
+        if not any(self.methods):
             raise RuntimeError('No payment methods were permitted for user %s' % request.user)
 
+        union_types = {}
+        for code, method in self.methods.items():
+            union_types[method.code] = method.serializer_class(
+                method_type_choices=[(code, force_text(method.name))],
+                required=False,
+                context=context)
 
-    def validate(self, data):
+        self.child = DiscriminatedUnionSerializer('method_type', union_types)
+        self.child.bind(field_name='', parent=self)
+
+
+    def run_child_validation(self, data):
+        # For API backwards compatibility with versions 0.3.x and earlier, if ``method_type`` isn't
+        # set, default it to the given method key.
+        tmp_data = {}
+        for key, value in data.items():
+            if 'method_type' not in value:
+                value['method_type'] = key
+                if key in self.methods:
+                    tmp_data[key] = value
+            else:
+                tmp_data[key] = value
+        data = tmp_data
+
+        # Run the field-level validation on each child serializer
+        data = super().run_child_validation(data)
+
+        # Finally, run the business logic validation
         # At least one method must be enabled
         enabled_methods = { k: v for k, v in data.items() if v['enabled'] }
         if len(enabled_methods) <= 0:
@@ -68,6 +164,7 @@ class PaymentMethodsSerializer(serializers.Serializer):
         return data
 
 
+
 class PaymentStateSerializer(serializers.Serializer):
     status = serializers.CharField()
     amount = serializers.DecimalField(max_digits=12, decimal_places=2)
@@ -77,8 +174,10 @@ class PaymentStateSerializer(serializers.Serializer):
         return state.get_required_action() if state.status == PENDING else None
 
 
+
 class OrderSerializer(OscarOrderSerializer):
     pass
+
 
 
 class CheckoutSerializer(OscarCheckoutSerializer):

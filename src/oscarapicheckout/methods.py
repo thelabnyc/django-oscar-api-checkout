@@ -14,6 +14,7 @@ Transaction = get_model('payment', 'Transaction')
 
 
 class PaymentMethodSerializer(serializers.Serializer):
+    method_type = serializers.ChoiceField(choices=tuple())
     enabled = serializers.BooleanField(default=False)
     pay_balance = serializers.BooleanField(default=True)
     amount = serializers.DecimalField(
@@ -24,15 +25,19 @@ class PaymentMethodSerializer(serializers.Serializer):
         max_length=128,
         default='')
 
+
+    def __init__(self, *args, method_type_choices=tuple(), **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['method_type'] = serializers.ChoiceField(choices=method_type_choices)
+
+
     def validate(self, data):
         if not data['enabled']:
             return data
-
         if data['pay_balance']:
             data.pop('amount', None)
         elif 'amount' not in data or not data['amount'] or data['amount'] <= Decimal('0.00'):
             raise serializers.ValidationError(_("Amount must be greater then 0.00 or pay_balance must be enabled."))
-
         return data
 
 
@@ -72,10 +77,10 @@ class PaymentMethod(object):
         return source
 
     @transaction.atomic()
-    def record_payment(self, request, order, amount=None, reference='', **kwargs):
+    def record_payment(self, request, order, method_key, amount=None, reference='', **kwargs):
         if not amount and amount != Decimal('0.00'):
             raise RuntimeError('Amount must be specified')
-        return self._record_payment(request, order, amount, reference, **kwargs)
+        return self._record_payment(request, order, method_key, amount=amount, reference=reference, **kwargs)
 
     def _record_payment(self, request, order, amount, reference, **kwargs):
         raise NotImplementedError('Subclass must implement _record_payment(request, order, amount, reference, **kwargs) method.')
@@ -89,7 +94,7 @@ class Cash(PaymentMethod):
     name = _('Cash')
     code = 'cash'
 
-    def _record_payment(self, request, order, amount, reference, **kwargs):
+    def _record_payment(self, request, order, method_key, amount, reference, **kwargs):
         source = self.get_source(order, reference)
 
         amount_to_allocate = amount - source.amount_allocated

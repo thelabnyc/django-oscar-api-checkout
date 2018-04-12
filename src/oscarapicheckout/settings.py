@@ -16,6 +16,8 @@ API_ENABLED_PAYMENT_METHODS = overridable('API_ENABLED_PAYMENT_METHODS', [
     {
         'method': 'oscarapicheckout.methods.Cash',
         'permission': 'oscarapicheckout.permissions.StaffOnly',
+        'method_kwargs': {},
+        'permission_kwargs': {},
     }
 ])
 API_MAX_PAYMENT_METHODS = overridable('API_MAX_PAYMENT_METHODS', 0)

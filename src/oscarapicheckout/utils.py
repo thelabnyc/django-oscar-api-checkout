@@ -4,7 +4,7 @@ from oscar.core.loading import get_class, get_model
 from oscarapi.basket import operations
 from .settings import ORDER_STATUS_AUTHORIZED, ORDER_STATUS_PAYMENT_DECLINED
 from .signals import order_payment_declined, order_payment_authorized
-from .states import COMPLETE, DECLINED, Complete, Declined
+from .states import COMPLETE, DECLINED, CONSUMED, Complete, Declined, Consumed
 import pickle
 import base64
 
@@ -29,9 +29,9 @@ def _session_unpickle(utfed):
     return obj
 
 
-def _update_payment_method_state(request, code, state):
+def _update_payment_method_state(request, method_key, state):
     states = request.session.get(CHECKOUT_PAYMENT_STEPS, {})
-    states[code] = _session_pickle(state)
+    states[method_key] = _session_pickle(state)
     request.session[CHECKOUT_PAYMENT_STEPS] = states
     request.session.modified = True
 
@@ -73,12 +73,15 @@ def _update_order_status(order, request):
 
     not_complete = [s for k, s in states.items() if s.status != COMPLETE]
     if len(not_complete) <= 0:
+        # Authorized the order and consume all the payments
         _set_order_authorized(order, request)
+        for key, state in states.items():
+            mark_payment_method_consumed(order, request, key, state.amount)
 
 
 def list_payment_method_states(request):
     states = request.session.get(CHECKOUT_PAYMENT_STEPS, {})
-    return { code: _session_unpickle(state) for code, state in states.items() }
+    return { method_key: _session_unpickle(state) for method_key, state in states.items() }
 
 
 def clear_payment_method_states(request):
@@ -86,23 +89,38 @@ def clear_payment_method_states(request):
     request.session.modified = True
 
 
-def update_payment_method_state(order, request, code, state):
-    _update_payment_method_state(request, code, state)
+def clear_consumed_payment_method_states(request):
+    curr_states = list_payment_method_states(request)
+    new_states = {}
+    for key, state in curr_states.items():
+        if state.status != CONSUMED:
+            new_states[key] = state
+    clear_payment_method_states(request)
+    for key, state in new_states.items():
+        _update_payment_method_state(request, key, state)
+
+
+def update_payment_method_state(order, request, method_key, state):
+    _update_payment_method_state(request, method_key, state)
     _update_order_status(order, request)
 
 
 def set_payment_method_states(order, request, states):
-    for code, state in states.items():
-        _update_payment_method_state(request, code, state)
+    for method_key, state in states.items():
+        _update_payment_method_state(request, method_key, state)
     _update_order_status(order, request)
 
 
-def mark_payment_method_completed(order, request, code, amount):
-    update_payment_method_state(order, request, code, Complete(amount))
+def mark_payment_method_completed(order, request, method_key, amount):
+    update_payment_method_state(order, request, method_key, Complete(amount))
 
 
-def mark_payment_method_declined(order, request, code, amount):
-    update_payment_method_state(order, request, code, Declined(amount))
+def mark_payment_method_declined(order, request, method_key, amount):
+    update_payment_method_state(order, request, method_key, Declined(amount))
+
+
+def mark_payment_method_consumed(order, request, method_key, amount):
+    update_payment_method_state(order, request, method_key, Consumed(amount))
 
 
 def get_order_ownership(request, given_user, guest_email):
