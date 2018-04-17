@@ -161,6 +161,11 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+0.4.0
+------------------
+- Improved split-pay support by allowing multiple payments of the same type. E.g. two credit cards, etc.
+    - *[Important]* To accomplish this, the payment provider plug-in interface changed slightly. Plugins must be updated to support the new interface. The REST API front-end added parameters, but retained backwards compatibility with ``0.3.x``.
+
 0.3.4
 ------------------
 - Fix Django 2.0 Deprecation warnings.
