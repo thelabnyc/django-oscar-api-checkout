@@ -1,11 +1,15 @@
+from collections import OrderedDict
 from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.db import transaction
+from django.utils import six
 from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
 from rest_framework import serializers, exceptions
+from rest_framework.utils import html
+from rest_framework.exceptions import ValidationError
 from oscar.core.loading import get_model, get_class
 from oscarapi.serializers.checkout import (
     CheckoutSerializer as OscarCheckoutSerializer,
@@ -128,6 +132,15 @@ class PaymentMethodsSerializer(serializers.DictField):
         self.child.bind(field_name='', parent=self)
 
 
+    def to_internal_value(self, data):
+        """Dicts of native values <- Dicts of primitive datatypes."""
+        if html.is_html_input(data):
+            data = html.parse_html_dict(data)
+        if not isinstance(data, dict):
+            self.fail('not_a_dict', input_type=type(data).__name__)
+        return self.run_child_validation(data)
+
+
     def run_child_validation(self, data):
         # For API backwards compatibility with versions 0.3.x and earlier, if ``method_type`` isn't
         # set, default it to the given method key.
@@ -142,11 +155,20 @@ class PaymentMethodsSerializer(serializers.DictField):
         data = tmp_data
 
         # Run the field-level validation on each child serializer
-        data = super().run_child_validation(data)
+        result = {}
+        errors = OrderedDict()
+        for key, value in data.items():
+            key = six.text_type(key)
+            try:
+                result[key] = self.child.run_validation(value)
+            except ValidationError as e:
+                errors[key] = e.detail
+        if errors:
+            raise ValidationError(errors)
 
         # Finally, run the business logic validation
         # At least one method must be enabled
-        enabled_methods = { k: v for k, v in data.items() if v['enabled'] }
+        enabled_methods = { k: v for k, v in result.items() if v['enabled'] }
         if len(enabled_methods) <= 0:
             raise serializers.ValidationError("At least one payment method must be enabled.")
 
@@ -161,7 +183,7 @@ class PaymentMethodsSerializer(serializers.DictField):
         elif len(balance_methods) < 1:
             raise serializers.ValidationError(_("Must set pay_balance flag on at least one payment method."))
 
-        return data
+        return result
 
 
 
