@@ -4,18 +4,32 @@ from .base import BaseTest
 
 
 class PaymentMethodsViewTest(BaseTest):
+    maxDiff = None
+
     def test_introspection_authenticated(self):
         self.login(is_staff=True)
         url = reverse('api-checkout-payment-methods')
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(resp.data, {
+        self.assertDictEqual(resp.data, {
             'credit-card': {
                 'type': 'nested object',
                 'required': False,
                 'read_only': False,
-                'label': 'Credit-card',
+                'label': 'Credit Card',
                 'children': {
+                    'method_type': {
+                        'type': 'choice',
+                        'required': True,
+                        'read_only': False,
+                        'label': 'Method type',
+                        'choices': [
+                            {
+                                "value": "credit-card",
+                                "display_name": "Credit Card"
+                            }
+                        ]
+                    },
                     'enabled': {
                         'type': 'boolean',
                         'required': False,
@@ -49,6 +63,18 @@ class PaymentMethodsViewTest(BaseTest):
                 'read_only': False,
                 'label': 'Cash',
                 'children': {
+                    'method_type': {
+                        'type': 'choice',
+                        'required': True,
+                        'read_only': False,
+                        'label': 'Method type',
+                        'choices': [
+                            {
+                                "value": "cash",
+                                "display_name": "Cash"
+                            }
+                        ]
+                    },
                     'enabled': {
                         'type': 'boolean',
                         'required': False,
@@ -83,13 +109,25 @@ class PaymentMethodsViewTest(BaseTest):
         url = reverse('api-checkout-payment-methods')
         resp = self.client.get(url)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(resp.data, {
+        self.assertDictEqual(resp.data, {
             'credit-card': {
                 'type': 'nested object',
                 'required': False,
                 'read_only': False,
-                'label': 'Credit-card',
+                'label': 'Credit Card',
                 'children': {
+                    'method_type': {
+                        'type': 'choice',
+                        'required': True,
+                        'read_only': False,
+                        'label': 'Method type',
+                        'choices': [
+                            {
+                                "value": "credit-card",
+                                "display_name": "Credit Card"
+                            }
+                        ]
+                    },
                     'enabled': {
                         'type': 'boolean',
                         'required': False,

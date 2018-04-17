@@ -14,6 +14,7 @@ packages = find_packages('src')
 install_requires = [
     'django-oscar>=1.5.0',
     'django-oscar-api>=1.2.0',
+    'phonenumberslite>=7.0.2',
 ]
 
 extras_require = {

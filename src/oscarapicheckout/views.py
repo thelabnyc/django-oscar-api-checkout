@@ -9,6 +9,7 @@ from .serializers import (
     PaymentStateSerializer
 )
 from .signals import order_placed
+from .states import DECLINED, CONSUMED
 from . import utils
 
 Order = get_model('order', 'Order')
@@ -20,8 +21,18 @@ class PaymentMethodsView(generics.GenericAPIView):
     serializer_class = PaymentMethodsSerializer
 
     def get(self, request):
-        serializer = self.get_serializer()
-        data = self.metadata_class().get_serializer_info(serializer)
+        root_serializer = self.get_serializer()
+        meta = self.metadata_class()
+        data = {}
+        for method_code, method_serializer in root_serializer.child.type_mapping.items():
+            method = root_serializer.methods[method_code]
+            data[method_code] = {
+                'type': 'nested object',
+                'required': False,
+                'read_only': False,
+                'label': method.name,
+                'children': meta.get_serializer_info(method_serializer),
+            }
         return Response(data)
 
 
@@ -68,7 +79,7 @@ class CheckoutView(generics.GenericAPIView):
 
     def post(self, request, format=None):
         # Wipe out any previous state data
-        utils.clear_payment_method_states(request)
+        utils.clear_consumed_payment_method_states(request)
 
         # Validate the input
         c_ser = self.get_serializer(data=request.data)
@@ -87,40 +98,51 @@ class CheckoutView(generics.GenericAPIView):
         order_placed.send(sender=self, order=order, user=request.user, request=request)
 
         # Save payment steps into session for processing
-        states = self._record_payments(
+        previous_states = utils.list_payment_method_states(request)
+        new_states = self._record_payments(
+            previous_states=previous_states,
             request=request,
             order=order,
             methods=c_ser.fields['payment'].methods,
             data=c_ser.validated_data['payment'])
-        utils.set_payment_method_states(order, request, states)
+        utils.set_payment_method_states(order, request, new_states)
 
         # Return order data
         o_ser = OrderSerializer(order, context={ 'request': request })
         return Response(o_ser.data)
 
 
-    def _record_payments(self, request, order, methods, data):
+    def _record_payments(self, previous_states, request, order, methods, data):
         order_balance = [order.total_incl_tax]
-        states = {}
+        new_states = {}
 
-        def record(code, method_data):
-            method = methods[code]
-            state = method.record_payment(request, order, **method_data)
+        def record(method_key, method_data):
+            # If a previous payment method at least partially succeeded, hasn't been consumed by an
+            # order, and is for the same amount, recycle it.
+            state = None
+            if method_key in previous_states:
+                prev = previous_states[method_key]
+                if prev.status not in (DECLINED, CONSUMED) and (prev.amount == method_data['amount']):
+                    state = prev
+            if not state:
+                code = method_data['method_type']
+                method = methods[code]
+                state = method.record_payment(request, order, method_key, **method_data)
             order_balance[0] = order_balance[0] - state.amount
             return state
 
         # Loop through each method with a specified amount to charge
         data_amount_specified = { k: v for k, v in data.items() if not v['pay_balance'] }
-        for code, method_data in data_amount_specified.items():
-            states[code] = record(code, method_data)
+        for key, method_data in data_amount_specified.items():
+            new_states[key] = record(key, method_data)
 
         # Change the remainder, not covered by the above methods, to the method marked with `pay_balance`
         data_pay_balance = { k: v for k, v in data.items() if v['pay_balance'] }
-        for code, method_data in data_pay_balance.items():
+        for key, method_data in data_pay_balance.items():
             method_data['amount'] = order_balance[0]
-            states[code] = record(code, method_data)
+            new_states[key] = record(key, method_data)
 
-        return states
+        return new_states
 
 
 class PaymentStatesView(generics.GenericAPIView):
@@ -136,9 +158,9 @@ class PaymentStatesView(generics.GenericAPIView):
         # Return order status and payment states
         states = utils.list_payment_method_states(request)
         state_data = {}
-        for code, state in states.items():
+        for key, state in states.items():
             ser = PaymentStateSerializer(instance=state)
-            state_data[code] = ser.data
+            state_data[key] = ser.data
 
         return Response({
             'order_status': order.status,

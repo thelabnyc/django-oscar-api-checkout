@@ -7,11 +7,13 @@ from ..methods import PaymentMethodSerializer, PaymentMethod, Cash
 
 class PaymentMethodSerializerTest(BaseTest):
     def test_disabled_is_valid(self):
-        s = PaymentMethodSerializer(data={
+        s = PaymentMethodSerializer(method_type_choices=[('cash', 'Cash')], data={
+            'method_type': 'cash',
             'enabled': False,
         })
         self.assertTrue(s.is_valid())
-        self.assertEqual(s.validated_data, {
+        self.assertDictEqual(s.validated_data, {
+            'method_type': 'cash',
             'enabled': False,
             'pay_balance': True,
             'reference': '',
@@ -19,13 +21,15 @@ class PaymentMethodSerializerTest(BaseTest):
 
 
     def test_pay_balance_without_amount_is_valid(self):
-        s = PaymentMethodSerializer(data={
+        s = PaymentMethodSerializer(method_type_choices=[('cash', 'Cash')], data={
+            'method_type': 'cash',
             'enabled': True,
             'pay_balance': True,
             'amount': '10.00'
         })
         self.assertTrue(s.is_valid())
-        self.assertEqual(s.validated_data, {
+        self.assertDictEqual(s.validated_data, {
+            'method_type': 'cash',
             'enabled': True,
             'pay_balance': True,
             'reference': '',
@@ -34,13 +38,15 @@ class PaymentMethodSerializerTest(BaseTest):
 
     def test_amount_specified_is_valid(self):
         # amount specified without amount is valid
-        s = PaymentMethodSerializer(data={
+        s = PaymentMethodSerializer(method_type_choices=[('cash', 'Cash')], data={
+            'method_type': 'cash',
             'enabled': True,
             'pay_balance': False,
             'amount': '10.00'
         })
         self.assertTrue(s.is_valid())
-        self.assertEqual(s.validated_data, {
+        self.assertDictEqual(s.validated_data, {
+            'method_type': 'cash',
             'enabled': True,
             'pay_balance': False,
             'amount': Decimal('10.00'),
@@ -49,7 +55,39 @@ class PaymentMethodSerializerTest(BaseTest):
 
 
     def test_missing_amount_is_not_valid(self):
-        s = PaymentMethodSerializer(data={
+        s = PaymentMethodSerializer(method_type_choices=[('cash', 'Cash')], data={
+            'method_type': 'cash',
+            'enabled': True,
+            'pay_balance': False,
+        })
+        self.assertFalse(s.is_valid())
+
+
+    def test_missing_method_type_is_not_valid(self):
+        s = PaymentMethodSerializer(method_type_choices=[('cash', 'Cash')], data={
+            'enabled': True,
+            'pay_balance': False,
+        })
+        self.assertFalse(s.is_valid())
+
+
+    def test_invalid_method_type_is_not_valid(self):
+        s = PaymentMethodSerializer(method_type_choices=[('cash', 'Cash')], data={
+            'method_type': 'credit-card',
+            'enabled': True,
+            'pay_balance': False,
+        })
+        self.assertFalse(s.is_valid())
+
+        s = PaymentMethodSerializer(method_type_choices=[], data={
+            'method_type': 'cash',
+            'enabled': True,
+            'pay_balance': False,
+        })
+        self.assertFalse(s.is_valid())
+
+        s = PaymentMethodSerializer(method_type_choices=['credit-card', 'Credit Card'], data={
+            'method_type': 'cash',
             'enabled': True,
             'pay_balance': False,
         })
@@ -75,7 +113,7 @@ class PaymentMethodTest(BaseTest):
 class CashTest(BaseTest):
     def test_record_payment(self):
         order = create_order()
-        state = Cash().record_payment(None, order, amount=Decimal('1.00'))
+        state = Cash().record_payment(None, order, 'cash', amount=Decimal('1.00'))
 
         self.assertEqual(state.status, 'Complete')
         self.assertEqual(state.amount, Decimal('1.00'))
