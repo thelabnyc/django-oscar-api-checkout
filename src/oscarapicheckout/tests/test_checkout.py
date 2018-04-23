@@ -1010,6 +1010,74 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSource(order_resp1.data['number'], 'Cash', allocated=D('10.00'), debited=D('10.00'))
 
 
+    def test_cannot_retry_declined_order_after_status_change(self):
+        self.login(is_staff=True)
+
+        resp = self._get_basket()
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        basket_id = resp.data['id']
+
+        product = self._create_product()
+        resp = self._add_to_basket(product.id, quantity=2)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        # Place an order
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'credit-card': {
+                'enabled': True,
+                'pay_balance': True,
+            },
+        }
+        order_resp1 = self._checkout(data)
+        self.assertEqual(order_resp1.status_code, status.HTTP_200_OK)
+
+        # Fetch payment states
+        states_resp = self.client.get(order_resp1.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '20.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'get-token')
+
+        # Perform the get-token step, but make it decline the request
+        required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
+        required_action['fields'].append({ 'key': 'deny', 'value': True })
+        get_token_resp = self._do_payment_step_form_post(required_action)
+        self.assertEqual(get_token_resp.data['status'], 'Declined')
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp1.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Payment Declined')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Declined')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '20.00')
+        self.assertIsNone(states_resp.data['payment_method_states']['credit-card']['required_action'])
+
+        # Make sure the Basket status is still Open
+        basket = Basket.objects.get(pk=basket_id)
+        self.assertEqual(basket.status, 'Open')
+
+        # Make sure we have access to the same basket
+        self.assertEqual(self._get_basket_id(), basket_id)
+
+        # Change the order status from declined to canceled.
+        order = Order.objects.get(number=order_resp1.data['number'])
+        order.set_status('Canceled')
+
+        # Make sure the Basket status was updated to be submitted.
+        basket = Basket.objects.get(pk=basket_id)
+        self.assertEqual(basket.status, 'Submitted')
+
+        # Make sure we have no longer have access to the original basket.
+        new_basket_id = self._get_basket_id()
+        self.assertNotEqual(new_basket_id, basket_id)
+
+        # Make sure the new basket is open
+        new_basket = Basket.objects.get(pk=new_basket_id)
+        self.assertEqual(new_basket.status, 'Open')
+
+
     def test_place_consecutive_orders(self):
         self.login(is_staff=True)
 
