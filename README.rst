@@ -165,6 +165,7 @@ Changelog
 ------------------
 - Improved split-pay support by allowing multiple payments of the same type. E.g. two credit cards, etc.
     - *[Important]* To accomplish this, the payment provider plug-in interface changed slightly. Plugins must be updated to support the new interface. The REST API front-end added parameters, but retained backwards compatibility with ``0.3.x``.
+- Fixed bug caused by changing the status of a Payment Declined order (e.g. to Canceled) caused checkout to break for the customer, because they were now editable a basket connected to a non-payment-declined order. Fixes the bug by setting a basket to "Submitted" status whenever the order status transitions from "Payment Declined" to another status.
 
 0.3.4
 ------------------
