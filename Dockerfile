@@ -1,12 +1,7 @@
 FROM python:3.6
-ENV PYTHONUNBUFFERED 0
-#FROM pypy:3-5
 
 RUN mkdir /code
 WORKDIR /code
-
-ADD requirements.txt /code/
-RUN pip install -r requirements.txt
 
 ADD . /code/
 RUN pip install -e .[development]
