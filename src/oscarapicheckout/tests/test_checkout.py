@@ -966,6 +966,88 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(order.lines.first().quantity, 3)
 
 
+    def test_switch_payment_types_and_retry_order_after_payment_decline(self):
+        self.login(is_staff=True)
+
+        resp = self._get_basket()
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        basket_id = resp.data['id']
+
+        product = self._create_product()
+        resp = self._add_to_basket(product.id, quantity=2)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        # Try to pay with credit card
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'credit-card': {
+                'enabled': True,
+                'pay_balance': True,
+            },
+        }
+        order_resp1 = self._checkout(data)
+        self.assertEqual(order_resp1.status_code, status.HTTP_200_OK)
+
+        # Fetch payment states
+        states_resp = self.client.get(order_resp1.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertTrue('credit-card' in states_resp.data['payment_method_states'])
+        self.assertFalse('cash' in states_resp.data['payment_method_states'])
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '20.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'get-token')
+
+        # Perform the get-token step, but make it decline the request
+        required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
+        required_action['fields'].append({ 'key': 'deny', 'value': True })
+        get_token_resp = self._do_payment_step_form_post(required_action)
+        self.assertEqual(get_token_resp.data['status'], 'Declined')
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp1.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Payment Declined')
+        self.assertTrue('credit-card' in states_resp.data['payment_method_states'])
+        self.assertFalse('cash' in states_resp.data['payment_method_states'])
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Declined')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '20.00')
+        self.assertIsNone(states_resp.data['payment_method_states']['credit-card']['required_action'])
+
+        # Make sure we have access to the same basket
+        self.assertEqual(self._get_basket_id(), basket_id)
+
+        # Retry the checkout, but this time, use cash instead of a credit card.
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'cash': {
+                'enabled': True,
+                'pay_balance': True,
+            },
+        }
+        order_resp2 = self._checkout(data)
+        self.assertEqual(order_resp2.status_code, status.HTTP_200_OK)
+
+        # Make sure the checkout attempt edited the existing, declined order, not made a new one.
+        self.assertEqual(order_resp2.data['number'], order_resp1.data['number'])
+
+        # Fetch payment states again. Credit card should still be declined, but cash payment should be complete and order should be authorized.
+        states_resp = self.client.get(order_resp2.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertFalse('credit-card' in states_resp.data['payment_method_states'])
+        self.assertTrue('cash' in states_resp.data['payment_method_states'])
+        self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Consumed')
+        self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '20.00')
+        self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
+        self.assertPaymentSource(order_resp1.data['number'], 'Cash', allocated=D('20.00'), debited=D('20.00'))
+
+        # Check order integrity after retry
+        order = Order.objects.get(number=order_resp2.data['number'])
+        self.assertEqual(order.lines.count(), 1)
+        self.assertEqual(order.lines.first().quantity, 2)
+
+
     def test_cannot_retry_order_unless_declined(self):
         self.login(is_staff=True)
         basket_id = self._prepare_basket()
