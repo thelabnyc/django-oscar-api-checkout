@@ -106,6 +106,7 @@ def update_payment_method_state(order, request, method_key, state):
 
 
 def set_payment_method_states(order, request, states):
+    clear_payment_method_states(request)
     for method_key, state in states.items():
         _update_payment_method_state(request, method_key, state)
     _update_order_status(order, request)
