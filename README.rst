@@ -161,6 +161,10 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+0.4.1
+------------------
+- Fixed bug that prevented transitioning an order from ``Payment Declined`` to ``Authorized`` if the payment type was changed.
+
 0.4.0
 ------------------
 - Improved split-pay support by allowing multiple payments of the same type. E.g. two credit cards, etc.
