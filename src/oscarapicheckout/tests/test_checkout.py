@@ -1,5 +1,7 @@
+import datetime
 from decimal import Decimal as D
 from django.contrib.auth.models import User
+from freezegun import freeze_time
 from oscar.core.loading import get_model
 from oscar.test import factories
 from rest_framework import status
@@ -236,6 +238,25 @@ class CheckoutAPITest(BaseTest):
         resp = self._checkout(data)
         self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
         self.assertEqual(resp.data['payment'][0], 'This field is required.')
+
+    @freeze_time("2017-11-05 06:04:41", tz_offset=-5)
+    def test_DST_checkout(self):
+        # Test checkout for Daylight Savings Time errors
+
+        # Check that its between 1-2am on the day DST changes in EST tz
+        self.assertEqual(datetime.datetime.now(), datetime.datetime(2017, 11, 5, 1, 4, 41))
+
+        self.login(is_staff=True)
+        basket_id = self._prepare_basket()
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'credit-card': {
+                'enabled': True,
+                'pay_balance': True,
+            },
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
 
 
     def test_no_payment_methods_selected(self):
