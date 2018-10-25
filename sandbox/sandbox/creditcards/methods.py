@@ -16,8 +16,8 @@ class CreditCard(PaymentMethod):
     serializer_class = PaymentMethodSerializer
 
 
-    # Payment Step 1
     def _record_payment(self, request, order, method_key, amount, reference, **kwargs):
+        """Payment Step 1"""
         fields = [
             {
                 'key': 'amount',
@@ -41,8 +41,8 @@ class CreditCard(PaymentMethod):
             fields=fields)
 
 
-    # Payment Step 2
     def require_authorization_post(self, order, method_key, amount):
+        """Payment Step 2"""
         fields = [
             {
                 'key': 'amount',
@@ -64,8 +64,8 @@ class CreditCard(PaymentMethod):
             fields=fields)
 
 
-    # Payment Step 3
     def record_successful_authorization(self, order, amount, reference):
+        """Payment Step 3"""
         source = self.get_source(order, reference)
 
         source.allocate(amount, reference)
