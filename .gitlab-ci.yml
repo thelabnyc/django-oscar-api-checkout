@@ -30,7 +30,7 @@ test_python36:
 test_python37:
   stage: test
   image: python:3.7
-  script: tox -e 'py37-django111-drf{38,39,3x}-oscar{15,16},py37-django{200,210}-drf{38,39,3x}-oscar16'
+  script: tox -e 'py37-django{200,210}-drf{38,39,3x}-oscar16'
 
 test_pypy35:
   stage: test
