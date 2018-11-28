@@ -20,19 +20,19 @@ before_script:
 test_python34:
   stage: test
   image: python:3.4
-  script: tox -e 'py34-django111-drf{36,37,38}-oscar{15,16},py34-django200-drf{37,38}-oscar16'
+  script: tox -e 'py34-django111-drf{38,39,3x}-oscar{15,16},py34-django200-drf{38,39,3x}-oscar16'
 
 test_python35:
   stage: test
   image: python:3.5
-  script: tox -e 'py35-django111-drf{36,37,38}-oscar{15,16},py35-django200-drf{37,38}-oscar16'
+  script: tox -e 'py35-django111-drf{38,39,3x}-oscar{15,16},py35-django200-drf{38,39,3x}-oscar16'
 
 test_python36:
   stage: test
   image: python:3.6
-  script: tox -e 'py36-django111-drf{36,37,38}-oscar{15,16},py36-django200-drf{37,38}-oscar16'
+  script: tox -e 'py36-django111-drf{38,39,3x}-oscar{15,16},py36-django200-drf{38,39,3x}-oscar16'
 
 test_pypy35:
   stage: test
   image: pypy:3-5
-  script: tox -e 'pypy3-django111-drf{36,37,38}-oscar{15,16},pypy3-django200-drf{37,38}-oscar16'
+  script: tox -e 'pypy3-django111-drf{38,39,3x}-oscar{15,16},pypy3-django200-drf{38,39,3x}-oscar16'
