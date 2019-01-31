@@ -184,9 +184,9 @@ class OrderUpdater(object):
         # same as the order owner)
         voucher_user = request.user if request and request.user else user
         for voucher in basket.vouchers.select_for_update():
-                available_to_user, msg = voucher.is_available_to_user(user=voucher_user)
-                if not voucher.is_active() or not available_to_user:
-                    raise ValueError(msg)
+            available_to_user, msg = voucher.is_available_to_user(user=voucher_user)
+            if not voucher.is_active() or not available_to_user:
+                raise ValueError(msg)
 
         # Record any discounts associated with this order
         for application in basket.offer_applications:
