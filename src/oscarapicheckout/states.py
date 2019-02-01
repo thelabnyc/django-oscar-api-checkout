@@ -16,15 +16,21 @@ class PaymentStatus(object):
         raise NotImplementedError('Subclass does not implement get_required_action()')
 
 
-class Complete(PaymentStatus):
+class SourceBoundPaymentStatus(PaymentStatus):
+    def __init__(self, amount, source_id=None):
+        super().__init__(amount)
+        self.source_id = source_id
+
+
+class Complete(SourceBoundPaymentStatus):
     status = COMPLETE
 
 
-class Declined(PaymentStatus):
+class Declined(SourceBoundPaymentStatus):
     status = DECLINED
 
 
-class Consumed(PaymentStatus):
+class Consumed(SourceBoundPaymentStatus):
     status = CONSUMED
 
 

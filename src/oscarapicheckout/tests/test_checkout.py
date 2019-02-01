@@ -33,10 +33,13 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['cash']))
         self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Consumed')
         self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '10.00')
         self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
-        self.assertPaymentSource(order_resp.data['number'], 'Cash', allocated=D('10.00'), debited=D('10.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('10.00'), debited=D('10.00')),
+        ])
 
 
     def test_out_of_stock_errors(self):
@@ -124,10 +127,13 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['cash']))
         self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Consumed')
         self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '10.00')
         self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
-        self.assertPaymentSource(order_resp.data['number'], 'Cash', allocated=D('10.00'), debited=D('10.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('10.00'), debited=D('10.00')),
+        ])
 
 
     def test_signal_ordering(self):
@@ -175,10 +181,13 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['cash']))
         self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Consumed')
         self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '5.00')
         self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
-        self.assertPaymentSource(order_resp.data['number'], 'Cash', allocated=D('5.00'), debited=D('5.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('5.00'), debited=D('5.00')),
+        ])
 
         # Cleanup signal handlers
         pre_calculate_total.disconnect(handle_pre_calculate_total)
@@ -331,10 +340,13 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['cash']))
         self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Consumed')
         self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '0.00')
         self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
-        self.assertPaymentSource(order_resp.data['number'], 'Cash')
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Cash', reference=''),
+        ])
 
 
     def test_payment_method_requiring_form_post(self):
@@ -355,6 +367,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '10.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'get-token')
@@ -368,24 +381,32 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '10.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'authorize')
 
         # Perform the authorize step
         required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
-        authorize_resp = self._do_payment_step_form_post(required_action)
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'uuid': '5b728222-92d1-43c3-95a1-dfb5d623519f',
+        })
         self.assertEqual(authorize_resp.data['status'], 'Success')
-        self.assertPaymentSource(order_resp.data['number'], 'Credit Card', allocated=D('10.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('10.00')),
+        ])
 
         # Fetch payment states again
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Consumed')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '10.00')
         self.assertIsNone(states_resp.data['payment_method_states']['credit-card']['required_action'])
-        self.assertPaymentSource(order_resp.data['number'], 'Credit Card', allocated=D('10.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('10.00')),
+        ])
 
 
     def test_split_payment_methods_conflict(self):
@@ -478,50 +499,66 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['cash', 'credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Complete')
         self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '2.00')
         self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '8.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'get-token')
-        self.assertPaymentSource(order_resp.data['number'], 'Cash', allocated=D('2.00'), debited=D('2.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('2.00'), debited=D('2.00')),
+        ])
 
         # Perform the get-token step
         required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data['status'], 'Success')
-        self.assertPaymentSource(order_resp.data['number'], 'Cash', allocated=D('2.00'), debited=D('2.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('2.00'), debited=D('2.00')),
+        ])
 
         # Fetch payment states again
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['cash', 'credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Complete')
         self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '2.00')
         self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '8.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'authorize')
-        self.assertPaymentSource(order_resp.data['number'], 'Cash', allocated=D('2.00'), debited=D('2.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('2.00'), debited=D('2.00')),
+        ])
 
         # Perform the authorize step
         required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
-        authorize_resp = self._do_payment_step_form_post(required_action)
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'uuid': '5b728222-92d1-43c3-95a1-dfb5d623519f',
+        })
         self.assertEqual(authorize_resp.data['status'], 'Success')
-        self.assertPaymentSource(order_resp.data['number'], 'Cash', allocated=D('2.00'), debited=D('2.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('2.00'), debited=D('2.00')),
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('8.00')),
+        ])
 
         # Fetch payment states again
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['cash', 'credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Consumed')
         self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '2.00')
         self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Consumed')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '8.00')
         self.assertIsNone(states_resp.data['payment_method_states']['credit-card']['required_action'])
-        self.assertPaymentSource(order_resp.data['number'], 'Cash', allocated=D('2.00'), debited=D('2.00'))
-        self.assertPaymentSource(order_resp.data['number'], 'Credit Card', allocated=D('8.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('2.00'), debited=D('2.00')),
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('8.00')),
+        ])
 
 
     def test_split_payment_methods_homogeneous(self):
@@ -550,6 +587,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action']['name'], 'get-token')
@@ -566,6 +604,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action']['name'], 'authorize')
@@ -575,21 +614,28 @@ class CheckoutAPITest(BaseTest):
 
         # Perform the authorize step for credit-card-1
         required_action = states_resp.data['payment_method_states']['credit-card-1']['required_action']
-        authorize_resp = self._do_payment_step_form_post(required_action)
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'uuid': '5b728222-92d1-43c3-95a1-dfb5d623519f',
+        })
         self.assertEqual(authorize_resp.data['status'], 'Success')
-        self.assertPaymentSource(order_resp.data['number'], 'Credit Card', allocated=D('3.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('3.00')),
+        ])
 
         # Fetch payment states again
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Complete')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '7.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'get-token')
-        self.assertPaymentSource(order_resp.data['number'], 'Credit Card', allocated=D('3.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('3.00')),
+        ])
 
         # Perform the get-token step for credit-card-2
         required_action = states_resp.data['payment_method_states']['credit-card-2']['required_action']
@@ -600,6 +646,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Complete')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
@@ -609,14 +656,20 @@ class CheckoutAPITest(BaseTest):
 
         # Perform the authorize step for credit-card-2
         required_action = states_resp.data['payment_method_states']['credit-card-2']['required_action']
-        authorize_resp = self._do_payment_step_form_post(required_action)
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'uuid': '2f558605-c348-401e-9bdb-976658fb739c',
+        })
         self.assertEqual(authorize_resp.data['status'], 'Success')
-        self.assertPaymentSource(order_resp.data['number'], 'Credit Card', allocated=D('10.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('3.00')),
+            dict(source_name='Credit Card', reference='2f558605-c348-401e-9bdb-976658fb739c', allocated=D('7.00')),
+        ])
 
         # Fetch payment states again
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Consumed')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
@@ -652,12 +705,14 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action']['name'], 'get-token')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '7.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'get-token')
+        self.assertPaymentSources(order_resp.data['number'], sources=[])
 
         # Perform the get-token step for credit-card-1
         required_action = states_resp.data['payment_method_states']['credit-card-1']['required_action']
@@ -668,30 +723,39 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action']['name'], 'authorize')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '7.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'get-token')
+        self.assertPaymentSources(order_resp.data['number'], sources=[])
 
         # Perform the authorize step for credit-card-1
         required_action = states_resp.data['payment_method_states']['credit-card-1']['required_action']
-        authorize_resp = self._do_payment_step_form_post(required_action)
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'uuid': '5b728222-92d1-43c3-95a1-dfb5d623519f',
+        })
         self.assertEqual(authorize_resp.data['status'], 'Success')
-        self.assertPaymentSource(order_resp.data['number'], 'Credit Card', allocated=D('3.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('3.00')),
+        ])
 
         # Fetch payment states again
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Complete')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '7.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'get-token')
-        self.assertPaymentSource(order_resp.data['number'], 'Credit Card', allocated=D('3.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('3.00')),
+        ])
 
         # Perform the get-token step for credit-card-2
         required_action = states_resp.data['payment_method_states']['credit-card-2']['required_action']
@@ -702,6 +766,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Complete')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
@@ -711,15 +776,21 @@ class CheckoutAPITest(BaseTest):
 
         # Perform the authorize step for credit-card-2 BUT FORCE A PAYMENT DECLINE
         required_action = states_resp.data['payment_method_states']['credit-card-2']['required_action']
-        required_action['fields'].append({ 'key': 'deny', 'value': True })
-        authorize_resp = self._do_payment_step_form_post(required_action)
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'deny': True,
+            'uuid': '2f558605-c348-401e-9bdb-976658fb739c',
+        })
         self.assertEqual(authorize_resp.data['status'], 'Declined')
-        self.assertPaymentSource(order_resp.data['number'], 'Credit Card', allocated=D('3.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('3.00')),
+            dict(source_name='Credit Card', reference='2f558605-c348-401e-9bdb-976658fb739c', allocated=D('0.00')),
+        ])
 
         # Fetch payment states again
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Payment Declined')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Complete')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
@@ -750,6 +821,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Complete')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
@@ -766,6 +838,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Complete')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
@@ -775,14 +848,21 @@ class CheckoutAPITest(BaseTest):
 
         # Perform the authorize step for credit-card-2 and allow it to succeed this time
         required_action = states_resp.data['payment_method_states']['credit-card-2']['required_action']
-        authorize_resp = self._do_payment_step_form_post(required_action)
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'uuid': 'ae7736fb-9f64-48f1-9631-a91764b2d63a',
+        })
         self.assertEqual(authorize_resp.data['status'], 'Success')
-        self.assertPaymentSource(order_resp.data['number'], 'Credit Card', allocated=D('10.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('3.00')),
+            dict(source_name='Credit Card', reference='2f558605-c348-401e-9bdb-976658fb739c', allocated=D('0.00')),
+            dict(source_name='Credit Card', reference='ae7736fb-9f64-48f1-9631-a91764b2d63a', allocated=D('7.00')),
+        ])
 
         # Fetch payment states again
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Consumed')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
@@ -813,12 +893,506 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action']['name'], 'get-token')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '7.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'get-token')
+
+
+
+    def test_split_payment_methods_homogeneous_partial_decline_changed_amounts(self):
+        self.login(is_staff=True)
+        basket_id = self._prepare_basket()
+
+        # Provide split payments
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'credit-card-1': {
+                'method_type': 'credit-card',
+                'enabled': True,
+                'pay_balance': False,
+                'amount': '3.00'
+            },
+            'credit-card-2': {
+                'method_type': 'credit-card',
+                'enabled': True,
+                'pay_balance': True,
+            },
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Fetch payment states
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action']['name'], 'get-token')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '7.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'get-token')
+        self.assertPaymentSources(order_resp.data['number'], sources=[])
+
+        # Perform the get-token step for credit-card-1
+        required_action = states_resp.data['payment_method_states']['credit-card-1']['required_action']
+        get_token_resp = self._do_payment_step_form_post(required_action)
+        self.assertEqual(get_token_resp.data['status'], 'Success')
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action']['name'], 'authorize')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '7.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'get-token')
+        self.assertPaymentSources(order_resp.data['number'], sources=[])
+
+        # Perform the authorize step for credit-card-1
+        required_action = states_resp.data['payment_method_states']['credit-card-1']['required_action']
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'uuid': '5b728222-92d1-43c3-95a1-dfb5d623519f',
+        })
+        self.assertEqual(authorize_resp.data['status'], 'Success')
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('3.00')),
+        ])
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Complete')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '7.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'get-token')
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('3.00')),
+        ])
+
+        # Perform the get-token step for credit-card-2
+        required_action = states_resp.data['payment_method_states']['credit-card-2']['required_action']
+        get_token_resp = self._do_payment_step_form_post(required_action)
+        self.assertEqual(get_token_resp.data['status'], 'Success')
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Complete')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '7.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'authorize')
+
+        # Perform the authorize step for credit-card-2 BUT FORCE A PAYMENT DECLINE
+        required_action = states_resp.data['payment_method_states']['credit-card-2']['required_action']
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'deny': True,
+            'uuid': '2e125bdb-1f6f-48cd-9353-bc2b8411a1f9',
+        })
+        self.assertEqual(authorize_resp.data['status'], 'Declined')
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('3.00')),
+            dict(source_name='Credit Card', reference='2e125bdb-1f6f-48cd-9353-bc2b8411a1f9', allocated=D('0.00')),
+        ])
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Payment Declined')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Complete')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Declined')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '7.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action'], None)
+
+        # Checkout again to retry payment, BUT CHANGE AMOUNT FOR THE COMPLETED PAYMENT TYPE.
+        # This will force the system to throw out the already-successful authorization
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'credit-card-1': {
+                'method_type': 'credit-card',
+                'enabled': True,
+                'pay_balance': False,
+                'amount': '4.00'  # Was $3 on the first try
+            },
+            'credit-card-2': {
+                'method_type': 'credit-card',
+                'enabled': True,
+                'pay_balance': True,
+            },
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Fetch payment states again. Payment from credit-card-1 was previously successful, but the amount changed, so
+        # it should be pending again and the Original PaymentSource's value got set back to 0.
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '4.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action']['name'], 'get-token')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '6.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'get-token')
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('0.00')),
+            dict(source_name='Credit Card', reference='2e125bdb-1f6f-48cd-9353-bc2b8411a1f9', allocated=D('0.00')),
+        ])
+
+        # Perform the get-token step for credit-card-1
+        required_action = states_resp.data['payment_method_states']['credit-card-1']['required_action']
+        get_token_resp = self._do_payment_step_form_post(required_action)
+        self.assertEqual(get_token_resp.data['status'], 'Success')
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '4.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action']['name'], 'authorize')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '6.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'get-token')
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('0.00')),
+            dict(source_name='Credit Card', reference='2e125bdb-1f6f-48cd-9353-bc2b8411a1f9', allocated=D('0.00')),
+        ])
+
+        # Perform the authorize step for credit-card-1
+        required_action = states_resp.data['payment_method_states']['credit-card-1']['required_action']
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'uuid': 'a4887268-a9ab-4a18-80c9-4ab6096c20cf',
+        })
+        self.assertEqual(authorize_resp.data['status'], 'Success')
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('0.00')),
+            dict(source_name='Credit Card', reference='2e125bdb-1f6f-48cd-9353-bc2b8411a1f9', allocated=D('0.00')),
+            dict(source_name='Credit Card', reference='a4887268-a9ab-4a18-80c9-4ab6096c20cf', allocated=D('4.00')),
+        ])
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Complete')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '4.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '6.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'get-token')
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('0.00')),
+            dict(source_name='Credit Card', reference='2e125bdb-1f6f-48cd-9353-bc2b8411a1f9', allocated=D('0.00')),
+            dict(source_name='Credit Card', reference='a4887268-a9ab-4a18-80c9-4ab6096c20cf', allocated=D('4.00')),
+        ])
+
+        # Perform the get-token step for credit-card-2 again
+        required_action = states_resp.data['payment_method_states']['credit-card-2']['required_action']
+        get_token_resp = self._do_payment_step_form_post(required_action)
+        self.assertEqual(get_token_resp.data['status'], 'Success')
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Complete')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '4.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '6.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'authorize')
+
+        # Perform the authorize step for credit-card-2 and allow it to succeed this time
+        required_action = states_resp.data['payment_method_states']['credit-card-2']['required_action']
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'uuid': '43b54d03-5768-48d7-8126-947b0bce21a1',
+        })
+        self.assertEqual(authorize_resp.data['status'], 'Success')
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('0.00')),
+            dict(source_name='Credit Card', reference='2e125bdb-1f6f-48cd-9353-bc2b8411a1f9', allocated=D('0.00')),
+            dict(source_name='Credit Card', reference='a4887268-a9ab-4a18-80c9-4ab6096c20cf', allocated=D('4.00')),
+            dict(source_name='Credit Card', reference='43b54d03-5768-48d7-8126-947b0bce21a1', allocated=D('6.00')),
+        ])
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Consumed')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '4.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Consumed')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '6.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action'], None)
+
+        # Start to place a SECOND ORDER
+        basket_id = self._prepare_basket()
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'credit-card-1': {
+                'method_type': 'credit-card',
+                'enabled': True,
+                'pay_balance': False,
+                'amount': '3.00'
+            },
+            'credit-card-2': {
+                'method_type': 'credit-card',
+                'enabled': True,
+                'pay_balance': True,
+            },
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Fetch payment states. The completed transactions form the first order should not have rolled over since the first order was completed.
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action']['name'], 'get-token')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '7.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'get-token')
+
+
+    def test_split_payment_methods_homogeneous_partial_decline_remove_method(self):
+        self.login(is_staff=True)
+        basket_id = self._prepare_basket()
+
+        # Provide split payments
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'credit-card-1': {
+                'method_type': 'credit-card',
+                'enabled': True,
+                'pay_balance': False,
+                'amount': '3.00'
+            },
+            'credit-card-2': {
+                'method_type': 'credit-card',
+                'enabled': True,
+                'pay_balance': True,
+            },
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Fetch payment states
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action']['name'], 'get-token')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '7.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'get-token')
+        self.assertPaymentSources(order_resp.data['number'], sources=[])
+
+        # Perform the get-token step for credit-card-1
+        required_action = states_resp.data['payment_method_states']['credit-card-1']['required_action']
+        get_token_resp = self._do_payment_step_form_post(required_action)
+        self.assertEqual(get_token_resp.data['status'], 'Success')
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action']['name'], 'authorize')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '7.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'get-token')
+        self.assertPaymentSources(order_resp.data['number'], sources=[])
+
+        # Perform the authorize step for credit-card-1
+        required_action = states_resp.data['payment_method_states']['credit-card-1']['required_action']
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'uuid': '5b728222-92d1-43c3-95a1-dfb5d623519f',
+        })
+        self.assertEqual(authorize_resp.data['status'], 'Success')
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('3.00')),
+        ])
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Complete')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '7.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'get-token')
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('3.00')),
+        ])
+
+        # Perform the get-token step for credit-card-2
+        required_action = states_resp.data['payment_method_states']['credit-card-2']['required_action']
+        get_token_resp = self._do_payment_step_form_post(required_action)
+        self.assertEqual(get_token_resp.data['status'], 'Success')
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Complete')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '7.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action']['name'], 'authorize')
+
+        # Perform the authorize step for credit-card-2 BUT FORCE A PAYMENT DECLINE
+        required_action = states_resp.data['payment_method_states']['credit-card-2']['required_action']
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'deny': True,
+            'uuid': '2e125bdb-1f6f-48cd-9353-bc2b8411a1f9',
+        })
+        self.assertEqual(authorize_resp.data['status'], 'Declined')
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('3.00')),
+            dict(source_name='Credit Card', reference='2e125bdb-1f6f-48cd-9353-bc2b8411a1f9', allocated=D('0.00')),
+        ])
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Payment Declined')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1', 'credit-card-2']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Complete')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '3.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['status'], 'Declined')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['amount'], '7.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-2']['required_action'], None)
+
+        # Checkout again to retry payment, BUT CHANGE FROM SPLIT PAY TO SINGLE PAY
+        # This will force the system to throw out the already-successful authorization AND drop a payment method
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'credit-card-1': {
+                'method_type': 'credit-card',
+                'enabled': True,
+                'pay_balance': True,
+            },
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Fetch payment states again. Payment from credit-card-1 was previously successful, but the amount changed, so
+        # it should be pending again and the Original PaymentSource's value got set back to 0.
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1']))  # credit-card-2 should no longer exist
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '10.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action']['name'], 'get-token')
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('0.00')),
+            dict(source_name='Credit Card', reference='2e125bdb-1f6f-48cd-9353-bc2b8411a1f9', allocated=D('0.00')),
+        ])
+
+        # Perform the get-token step for credit-card-1
+        required_action = states_resp.data['payment_method_states']['credit-card-1']['required_action']
+        get_token_resp = self._do_payment_step_form_post(required_action)
+        self.assertEqual(get_token_resp.data['status'], 'Success')
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '10.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action']['name'], 'authorize')
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('0.00')),
+            dict(source_name='Credit Card', reference='2e125bdb-1f6f-48cd-9353-bc2b8411a1f9', allocated=D('0.00')),
+        ])
+
+        # Perform the authorize step for credit-card-1
+        required_action = states_resp.data['payment_method_states']['credit-card-1']['required_action']
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'uuid': 'a4887268-a9ab-4a18-80c9-4ab6096c20cf',
+        })
+        self.assertEqual(authorize_resp.data['status'], 'Success')
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('0.00')),
+            dict(source_name='Credit Card', reference='2e125bdb-1f6f-48cd-9353-bc2b8411a1f9', allocated=D('0.00')),
+            dict(source_name='Credit Card', reference='a4887268-a9ab-4a18-80c9-4ab6096c20cf', allocated=D('10.00')),
+        ])
+
+        # Fetch payment states again
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Consumed')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '10.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action'], None)
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('0.00')),
+            dict(source_name='Credit Card', reference='2e125bdb-1f6f-48cd-9353-bc2b8411a1f9', allocated=D('0.00')),
+            dict(source_name='Credit Card', reference='a4887268-a9ab-4a18-80c9-4ab6096c20cf', allocated=D('10.00')),
+        ])
+
+        # Start to place a SECOND ORDER
+        basket_id = self._prepare_basket()
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'credit-card-1': {
+                'method_type': 'credit-card',
+                'enabled': True,
+                'pay_balance': True
+            },
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Fetch payment states. The completed transactions form the first order should not have rolled over since the first order was completed.
+        states_resp = self.client.get(order_resp.data['payment_url'])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card-1']))
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['amount'], '10.00')
+        self.assertEqual(states_resp.data['payment_method_states']['credit-card-1']['required_action']['name'], 'get-token')
 
 
 
@@ -853,32 +1427,40 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp1.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['cash', 'credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Complete')
         self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '10.00')
         self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '10.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'get-token')
-        self.assertPaymentSource(order_resp1.data['number'], 'Cash', allocated=D('10.00'), debited=D('10.00'))
+        self.assertPaymentSources(order_resp1.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('10.00'), debited=D('10.00')),
+        ])
 
         # Perform the get-token step, but make it decline the request
         required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
         required_action['fields'].append({ 'key': 'deny', 'value': True })
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data['status'], 'Declined')
-        self.assertPaymentSource(order_resp1.data['number'], 'Cash', allocated=D('10.00'), debited=D('10.00'))
+        self.assertPaymentSources(order_resp1.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('10.00'), debited=D('10.00')),
+        ])
 
         # Fetch payment states again
         states_resp = self.client.get(order_resp1.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Payment Declined')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['cash', 'credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Complete')
         self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '10.00')
         self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Declined')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '10.00')
         self.assertIsNone(states_resp.data['payment_method_states']['credit-card']['required_action'])
-        self.assertPaymentSource(order_resp1.data['number'], 'Cash', allocated=D('10.00'), debited=D('10.00'))
+        self.assertPaymentSources(order_resp1.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('10.00'), debited=D('10.00')),
+        ])
 
         # Make sure we have access to the same basket
         self.assertEqual(self._get_basket_id(), basket_id)
@@ -915,50 +1497,66 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp2.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['cash', 'credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Complete')
         self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '12.75')
         self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '17.25')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'get-token')
-        self.assertPaymentSource(order_resp2.data['number'], 'Cash', allocated=D('12.75'), debited=D('12.75'))
+        self.assertPaymentSources(order_resp2.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('12.75'), debited=D('12.75')),
+        ])
 
         # Perform the get-token step, but make it decline the request
         required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data['status'], 'Success')
-        self.assertPaymentSource(order_resp2.data['number'], 'Cash', allocated=D('12.75'), debited=D('12.75'))
+        self.assertPaymentSources(order_resp2.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('12.75'), debited=D('12.75')),
+        ])
 
         # Fetch payment states again
         states_resp = self.client.get(order_resp2.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['cash', 'credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Complete')
         self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '12.75')
         self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '17.25')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'authorize')
-        self.assertPaymentSource(order_resp2.data['number'], 'Cash', allocated=D('12.75'), debited=D('12.75'))
+        self.assertPaymentSources(order_resp2.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('12.75'), debited=D('12.75')),
+        ])
 
         # Perform the authorize step
         required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
-        authorize_resp = self._do_payment_step_form_post(required_action)
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'uuid': '5b728222-92d1-43c3-95a1-dfb5d623519f',
+        })
         self.assertEqual(authorize_resp.data['status'], 'Success')
-        self.assertPaymentSource(order_resp2.data['number'], 'Cash', allocated=D('12.75'), debited=D('12.75'))
+        self.assertPaymentSources(order_resp2.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('12.75'), debited=D('12.75')),
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('17.25')),
+        ])
 
         # Fetch payment states again
         states_resp = self.client.get(order_resp2.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['cash', 'credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Consumed')
         self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '12.75')
         self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Consumed')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '17.25')
         self.assertIsNone(states_resp.data['payment_method_states']['credit-card']['required_action'])
-        self.assertPaymentSource(order_resp2.data['number'], 'Cash', allocated=D('12.75'), debited=D('12.75'))
-        self.assertPaymentSource(order_resp2.data['number'], 'Credit Card', allocated=D('17.25'))
+        self.assertPaymentSources(order_resp2.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('12.75'), debited=D('12.75')),
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('17.25')),
+        ])
 
         # Check order integrity after retry
         order = Order.objects.get(number=order_resp2.data['number'])
@@ -992,8 +1590,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp1.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
-        self.assertTrue('credit-card' in states_resp.data['payment_method_states'])
-        self.assertFalse('cash' in states_resp.data['payment_method_states'])
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '20.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'get-token')
@@ -1008,8 +1605,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp1.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Payment Declined')
-        self.assertTrue('credit-card' in states_resp.data['payment_method_states'])
-        self.assertFalse('cash' in states_resp.data['payment_method_states'])
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Declined')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '20.00')
         self.assertIsNone(states_resp.data['payment_method_states']['credit-card']['required_action'])
@@ -1035,12 +1631,13 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp2.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Authorized')
-        self.assertFalse('credit-card' in states_resp.data['payment_method_states'])
-        self.assertTrue('cash' in states_resp.data['payment_method_states'])
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['cash']))
         self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Consumed')
         self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '20.00')
         self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
-        self.assertPaymentSource(order_resp1.data['number'], 'Cash', allocated=D('20.00'), debited=D('20.00'))
+        self.assertPaymentSources(order_resp1.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('20.00'), debited=D('20.00')),
+        ])
 
         # Check order integrity after retry
         order = Order.objects.get(number=order_resp2.data['number'])
@@ -1061,7 +1658,9 @@ class CheckoutAPITest(BaseTest):
         }
         order_resp1 = self._checkout(data)
         self.assertEqual(order_resp1.status_code, status.HTTP_200_OK)
-        self.assertPaymentSource(order_resp1.data['number'], 'Cash', allocated=D('10.00'), debited=D('10.00'))
+        self.assertPaymentSources(order_resp1.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('10.00'), debited=D('10.00')),
+        ])
 
         # Check order integrity
         order = Order.objects.get(number=order_resp1.data['number'])
@@ -1072,6 +1671,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp1.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['cash']))
         self.assertEqual(states_resp.data['payment_method_states']['cash']['status'], 'Consumed')
         self.assertEqual(states_resp.data['payment_method_states']['cash']['amount'], '10.00')
         self.assertIsNone(states_resp.data['payment_method_states']['cash']['required_action'])
@@ -1089,7 +1689,9 @@ class CheckoutAPITest(BaseTest):
         }
         order_resp2 = self._checkout(data)
         self.assertEqual(order_resp2.status_code, status.HTTP_406_NOT_ACCEPTABLE)
-        self.assertPaymentSource(order_resp1.data['number'], 'Cash', allocated=D('10.00'), debited=D('10.00'))
+        self.assertPaymentSources(order_resp1.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('10.00'), debited=D('10.00')),
+        ])
 
 
     def test_cannot_retry_declined_order_after_status_change(self):
@@ -1118,6 +1720,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp1.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '20.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'get-token')
@@ -1132,6 +1735,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp1.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Payment Declined')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Declined')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '20.00')
         self.assertIsNone(states_resp.data['payment_method_states']['credit-card']['required_action'])
@@ -1174,7 +1778,9 @@ class CheckoutAPITest(BaseTest):
         }
         order_resp1 = self._checkout(data)
         self.assertEqual(order_resp1.status_code, status.HTTP_200_OK)
-        self.assertPaymentSource(order_resp1.data['number'], 'Cash', allocated=D('10.00'), debited=D('10.00'))
+        self.assertPaymentSources(order_resp1.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('10.00'), debited=D('10.00')),
+        ])
         order = Order.objects.get(number=order_resp1.data['number'])
         self.assertEqual(order.lines.count(), 1)
         self.assertEqual(order.lines.first().quantity, 1)
@@ -1190,7 +1796,9 @@ class CheckoutAPITest(BaseTest):
         }
         order_resp2 = self._checkout(data)
         self.assertEqual(order_resp2.status_code, status.HTTP_200_OK)
-        self.assertPaymentSource(order_resp2.data['number'], 'Cash', allocated=D('10.00'), debited=D('10.00'))
+        self.assertPaymentSources(order_resp2.data['number'], sources=[
+            dict(source_name='Cash', reference='', allocated=D('10.00'), debited=D('10.00')),
+        ])
         order = Order.objects.get(number=order_resp2.data['number'])
         self.assertEqual(order.lines.count(), 1)
         self.assertEqual(order.lines.first().quantity, 1)
@@ -1275,6 +1883,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'get-token')
@@ -1292,6 +1901,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'authorize')
@@ -1302,17 +1912,22 @@ class CheckoutAPITest(BaseTest):
 
         # Perform the authorize step
         required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
-        authorize_resp = self._do_payment_step_form_post(required_action)
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'uuid': '5b728222-92d1-43c3-95a1-dfb5d623519f',
+        })
         self.assertEqual(authorize_resp.data['status'], 'Success')
 
         # Fetch payment states again
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Consumed')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
         self.assertIsNone(states_resp.data['payment_method_states']['credit-card']['required_action'])
-        self.assertPaymentSource(order_resp.data['number'], 'Credit Card', allocated=D('5.00'))
+        self.assertPaymentSources(order_resp.data['number'], sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('5.00')),
+        ])
 
         # Check order integrity
         order = Order.objects.get(number=order_resp.data['number'])
@@ -1360,6 +1975,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'get-token')
@@ -1377,6 +1993,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'authorize')
@@ -1387,14 +2004,17 @@ class CheckoutAPITest(BaseTest):
 
         # Perform the authorize step, but make the payment method decline payment
         required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
-        required_action['fields'].append({ 'key': 'deny', 'value': True })
-        authorize_resp = self._do_payment_step_form_post(required_action)
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'deny': True,
+            'uuid': '5b728222-92d1-43c3-95a1-dfb5d623519f',
+        })
         self.assertEqual(authorize_resp.data['status'], 'Declined')
 
         # Fetch payment states again
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Payment Declined')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Declined')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
         self.assertIsNone(states_resp.data['payment_method_states']['credit-card']['required_action'])
@@ -1430,6 +2050,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'get-token')
@@ -1447,6 +2068,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Pending')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Pending')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['required_action']['name'], 'authorize')
@@ -1457,17 +2079,23 @@ class CheckoutAPITest(BaseTest):
 
         # Perform the authorize step, this time make it accept the transaction
         required_action = states_resp.data['payment_method_states']['credit-card']['required_action']
-        authorize_resp = self._do_payment_step_form_post(required_action)
+        authorize_resp = self._do_payment_step_form_post(required_action, extra={
+            'uuid': 'edd1e904-0bd5-45b5-940f-36ce27fa6929',
+        })
         self.assertEqual(authorize_resp.data['status'], 'Success')
 
         # Fetch payment states again
         states_resp = self.client.get(order_resp.data['payment_url'])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data['order_status'], 'Authorized')
+        self.assertEqual(states_resp.data['payment_method_states'].keys(), set(['credit-card']))
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['status'], 'Consumed')
         self.assertEqual(states_resp.data['payment_method_states']['credit-card']['amount'], '5.00')
         self.assertIsNone(states_resp.data['payment_method_states']['credit-card']['required_action'])
-        self.assertPaymentSource(order_number2, 'Credit Card', allocated=D('5.00'))
+        self.assertPaymentSources(order_number2, sources=[
+            dict(source_name='Credit Card', reference='5b728222-92d1-43c3-95a1-dfb5d623519f', allocated=D('0.00')),
+            dict(source_name='Credit Card', reference='edd1e904-0bd5-45b5-940f-36ce27fa6929', allocated=D('5.00')),
+        ])
 
         # Check order integrity
         order = Order.objects.get(number=order_number2)
@@ -1482,20 +2110,36 @@ class CheckoutAPITest(BaseTest):
 
 
 
-    def assertPaymentSource(self, order_number, source_name, allocated=D('0.00'), debited=D('0.00'), refunded=D('0.00')):
+    def assertPaymentSources(self, order_number, sources):
         order = Order.objects.get(number=order_number)
-        source = order.sources.get(source_type__name=source_name)
+        # Check source names
+        order_source_types_names = sorted([s.source_type.name for s in order.sources.all()])
+        given_names = sorted([s['source_name'] for s in sources])
+        self.assertEqual(order_source_types_names, given_names)
+        # Check source reference numbers
+        order_source_refs = sorted([s.reference for s in order.sources.all()])
+        given_refs = sorted([s['reference'] for s in sources])
+        self.assertEqual(order_source_refs, given_refs)
+        # Check amounts for each source
+        for source in sources:
+            self.assertPaymentSource(order_number, **source)
+
+
+    def assertPaymentSource(self, order_number, source_name, reference='', allocated=D('0.00'), debited=D('0.00'), refunded=D('0.00')):
+        order = Order.objects.get(number=order_number)
+        source = order.sources.get(source_type__name=source_name, reference=reference)
         self.assertEqual(source.amount_allocated, allocated)
         self.assertEqual(source.amount_debited, debited)
         self.assertEqual(source.amount_refunded, refunded)
 
 
-    def _do_payment_step_form_post(self, required_action):
+    def _do_payment_step_form_post(self, required_action, extra={}):
         method = required_action['method'].lower()
         url = required_action['url']
 
         fields = required_action['fields']
         fields = { field['key']: field['value'] for field in fields }
+        fields.update(extra)
 
         resp = getattr(self.client, method)(url, fields)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)

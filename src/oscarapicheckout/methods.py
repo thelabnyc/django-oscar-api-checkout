@@ -4,6 +4,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 from oscar.core.loading import get_model
 from . import states
+import logging
 
 PaymentEventType = get_model('order', 'PaymentEventType')
 PaymentEvent = get_model('order', 'PaymentEvent')
@@ -11,6 +12,8 @@ PaymentEventQuantity = get_model('order', 'PaymentEventQuantity')
 SourceType = get_model('payment', 'SourceType')
 Source = get_model('payment', 'Source')
 Transaction = get_model('payment', 'Transaction')
+
+logger = logging.getLogger(__name__)
 
 
 class PaymentMethodSerializer(serializers.Serializer):
@@ -70,11 +73,26 @@ class PaymentMethod(object):
 
     def get_source(self, order, reference=''):
         stype, created = SourceType.objects.get_or_create(name=self.name)
-        source, created = Source.objects.get_or_create(order=order, source_type=stype)
+        source, created = Source.objects.get_or_create(order=order, source_type=stype, reference=reference)
         source.currency = order.currency
-        source.reference = reference
         source.save()
         return source
+
+    @transaction.atomic()
+    def void_existing_payment(self, order, method_key, state_to_void):
+        source = Source.objects.filter(pk=getattr(state_to_void, 'source_id', None)).first()
+        if not source:
+            logger.warning('Attempted to void PaymentSource for Order[{}], MethodKey[{}], but no source was found.',
+                order.number,
+                method_key)
+            return
+        source.amount_allocated = max(0, (source.amount_allocated - state_to_void.amount))
+        source.save()
+        logger.info('Voided Amount[{}] from PaymentSource[{}] for Order[{}], MethodKey[{}].',
+            state_to_void.amount,
+            source,
+            order.number,
+            method_key)
 
     @transaction.atomic()
     def record_payment(self, request, order, method_key, amount=None, reference='', **kwargs):
@@ -107,4 +125,4 @@ class Cash(PaymentMethod):
         for line in order.lines.all():
             self.make_event_quantity(event, line, line.quantity)
 
-        return states.Complete(source.amount_debited)
+        return states.Complete(source.amount_debited, source_id=source.pk)
