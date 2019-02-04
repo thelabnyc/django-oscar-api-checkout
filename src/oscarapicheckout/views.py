@@ -133,7 +133,7 @@ class CheckoutView(generics.GenericAPIView):
             method = methods[code]
             # Previous payment exists but we can't recycle it; void whatever already exists.
             if should_void:
-                method.void_existing_payment(order, method_key, prev)
+                method.void_existing_payment(request, order, method_key, prev)
             # Previous payment method doesn't exist or can't be reused. Create it now.
             if not state:
                 state = method.record_payment(request, order, method_key, **method_data)

@@ -79,7 +79,7 @@ class PaymentMethod(object):
         return source
 
     @transaction.atomic()
-    def void_existing_payment(self, order, method_key, state_to_void):
+    def void_existing_payment(self, request, order, method_key, state_to_void):
         source = Source.objects.filter(pk=getattr(state_to_void, 'source_id', None)).first()
         if not source:
             logger.warning('Attempted to void PaymentSource for Order[{}], MethodKey[{}], but no source was found.',
