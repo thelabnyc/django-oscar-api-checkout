@@ -1,7 +1,10 @@
 from django.core.signing import Signer
 from rest_framework.reverse import reverse
+from oscar.core.loading import get_model
 from oscarapicheckout.methods import PaymentMethod, PaymentMethodSerializer
-from oscarapicheckout.states import FormPostRequired, Complete
+from oscarapicheckout.states import FormPostRequired, Complete, Declined
+
+Transaction = get_model('payment', 'Transaction')
 
 
 class CreditCard(PaymentMethod):
@@ -65,12 +68,19 @@ class CreditCard(PaymentMethod):
 
 
     def record_successful_authorization(self, order, amount, reference):
-        """Payment Step 3"""
+        """Payment Step 3 Succeeded"""
         source = self.get_source(order, reference)
 
-        source.allocate(amount, reference)
+        source.allocate(amount, reference=reference, status='ACCEPTED')
         event = self.make_authorize_event(order, amount, reference)
         for line in order.lines.all():
             self.make_event_quantity(event, line, line.quantity)
 
-        return Complete(amount)
+        return Complete(amount, source_id=source.pk)
+
+
+    def record_declined_authorization(self, order, amount, reference):
+        """Payment Step 3 Failed"""
+        source = self.get_source(order, reference)
+        source._create_transaction(Transaction.AUTHORISE, amount, reference=reference, status='DECLINED')
+        return Declined(amount, source_id=source.pk)

@@ -76,7 +76,7 @@ def _update_order_status(order, request):
         # Authorized the order and consume all the payments
         _set_order_authorized(order, request)
         for key, state in states.items():
-            mark_payment_method_consumed(order, request, key, state.amount)
+            mark_payment_method_consumed(order, request, key, state.amount, source_id=getattr(state, 'source_id', None))
 
 
 def list_payment_method_states(request):
@@ -112,16 +112,16 @@ def set_payment_method_states(order, request, states):
     _update_order_status(order, request)
 
 
-def mark_payment_method_completed(order, request, method_key, amount):
-    update_payment_method_state(order, request, method_key, Complete(amount))
+def mark_payment_method_completed(order, request, method_key, amount, source_id=None):
+    update_payment_method_state(order, request, method_key, Complete(amount, source_id=source_id))
 
 
-def mark_payment_method_declined(order, request, method_key, amount):
-    update_payment_method_state(order, request, method_key, Declined(amount))
+def mark_payment_method_declined(order, request, method_key, amount, source_id=None):
+    update_payment_method_state(order, request, method_key, Declined(amount, source_id=source_id))
 
 
-def mark_payment_method_consumed(order, request, method_key, amount):
-    update_payment_method_state(order, request, method_key, Consumed(amount))
+def mark_payment_method_consumed(order, request, method_key, amount, source_id=None):
+    update_payment_method_state(order, request, method_key, Consumed(amount, source_id=source_id))
 
 
 def get_order_ownership(request, given_user, guest_email):

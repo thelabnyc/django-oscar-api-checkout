@@ -19,6 +19,7 @@ install_requires = [
 
 extras_require = {
     'development': [
+        'coverage>=4.4.2',
         'psycopg2cffi>=2.7.7',
         'flake8>=3.2.1',
         'PyYAML>=3.12',

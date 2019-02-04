@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from oscar.core.loading import get_model
 from oscarapicheckout import utils
 from .methods import CreditCard
-import uuid
 
 Order = get_model('order', 'Order')
 
@@ -45,15 +44,19 @@ class AuthorizeCardView(generics.GenericAPIView):
         # Get the method key
         method_key = Signer().unsign(request.data['transaction_id'])
 
+        # Get transaction UUID
+        reference = request.data['uuid']
+
         # Decline the payment
         if request.data.get('deny'):
-            utils.mark_payment_method_declined(order, request, method_key, request.data['amount'])
+            new_state = CreditCard().record_declined_authorization(order, amount, reference)
+            utils.update_payment_method_state(order, request, method_key, new_state)
             return Response({
                 'status': 'Declined',
             })
 
         # Record the funds allocation
-        new_state = CreditCard().record_successful_authorization(order, amount, uuid.uuid1())
+        new_state = CreditCard().record_successful_authorization(order, amount, reference)
         utils.update_payment_method_state(order, request, method_key, new_state)
         return Response({
             'status': 'Success',

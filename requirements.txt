@@ -1,5 +1,6 @@
 alabaster==0.7.10
 Babel==2.3.4
+coverage==4.4
 Django==1.10.5
 django-extra-views==0.6.4
 django-haystack==2.5.1
