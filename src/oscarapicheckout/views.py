@@ -119,21 +119,21 @@ class CheckoutView(generics.GenericAPIView):
         def record(method_key, method_data):
             # If a previous payment method at least partially succeeded, hasn't been consumed by an
             # order, and is for the same amount, recycle it. This requires that the amount hasn't changed.
+
+            # Get the processor class for this method
+            code = method_data['method_type']
+            method = methods[code]
+
             state = None
-            should_void = False
             if method_key in previous_states:
                 prev = previous_states[method_key]
                 if prev.status not in (DECLINED, CONSUMED):
                     if prev.amount == method_data['amount']:
                         state = prev
                     else:
-                        should_void = True
-            # Get the processor class for this method
-            code = method_data['method_type']
-            method = methods[code]
-            # Previous payment exists but we can't recycle it; void whatever already exists.
-            if should_void:
-                method.void_existing_payment(request, order, method_key, prev)
+                        # Previous payment exists but we can't recycle it; void whatever already exists.
+                        method.void_existing_payment(request, order, method_key, prev)
+
             # Previous payment method doesn't exist or can't be reused. Create it now.
             if not state:
                 state = method.record_payment(request, order, method_key, **method_data)
