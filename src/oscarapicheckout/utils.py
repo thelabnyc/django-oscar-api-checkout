@@ -56,6 +56,11 @@ def _set_order_payment_declined(order, request):
     # Set the order status
     order.set_status(ORDER_STATUS_PAYMENT_DECLINED)
 
+    # Delete some related objects
+    order.discounts.all().delete()
+    order.line_prices.all().delete()
+    order.voucherapplication_set.all().delete()
+
     # Thaw the basket and put it back into the request.session so that it can be retried
     order.basket.thaw()
     operations.store_basket_in_session(order.basket, request.session)
@@ -155,11 +160,6 @@ class OrderUpdater(object):
             pass
         else:
             raise ValueError(_("There is already an order with number %s") % order_number)
-
-        # Delete some related objects
-        order.discounts.all().delete()
-        order.line_prices.all().delete()
-        order.voucherapplication_set.all().delete()
 
         # Remove all the order lines and cancel and stock they allocated. We'll make new lines from the
         # basket after this.
