@@ -177,6 +177,7 @@ Changelog
 0.5.0
 ------------------
 - Make payment methods create separate ``payment.Source`` objects per Reference number (`!6 <https://gitlab.com/thelabnyc/django-oscar/django-oscar-api-checkout/merge_requests/6>`_).
+- Delete Voucher applications upon payment decline, rather than waiting for an order placement retry. This fixes issues associated with payment declined orders consuming vouchers.
 
 0.4.1
 ------------------
