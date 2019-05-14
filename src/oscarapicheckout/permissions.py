@@ -11,3 +11,8 @@ class Public(PaymentMethodPermission):
 class StaffOnly(PaymentMethodPermission):
     def is_permitted(self, request=None, user=None):
         return (user and user.is_authenticated and user.is_staff)
+
+
+class CustomerOnly(PaymentMethodPermission):
+    def is_permitted(self, request=None, user=None):
+        return (user is None or not user.is_authenticated or (user.is_authenticated and not user.is_staff))
