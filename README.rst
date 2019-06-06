@@ -174,6 +174,10 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+0.5.1
+------------------
+- Add new permission: ``oscarapicheckout.permissions.CustomerOnly``
+
 0.5.0
 ------------------
 - Make payment methods create separate ``payment.Source`` objects per Reference number (`!6 <https://gitlab.com/thelabnyc/django-oscar/django-oscar-api-checkout/merge_requests/6>`_).
