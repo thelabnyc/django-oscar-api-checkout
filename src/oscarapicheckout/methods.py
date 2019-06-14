@@ -88,11 +88,11 @@ class PaymentMethod(object):
             return
         source.amount_allocated = max(0, (source.amount_allocated - state_to_void.amount))
         source.save()
-        logger.info('Voided Amount[{}] from PaymentSource[{}] for Order[{}], MethodKey[{}].',
+        logger.info('Voided Amount[{}] from PaymentSource[{}] for Order[{}], MethodKey[{}].'.format(
             state_to_void.amount,
             source,
             order.number,
-            method_key)
+            method_key))
 
     @transaction.atomic()
     def record_payment(self, request, order, method_key, amount=None, reference='', **kwargs):
