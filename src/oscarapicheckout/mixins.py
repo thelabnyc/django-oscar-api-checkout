@@ -24,6 +24,7 @@ class OrderCreatorMixin(object):
         """
         # Make sure basket isn't empty
         if basket.is_empty:
+            # Translators: User facing error message in checkout
             raise ValueError(_("Empty baskets cannot be submitted"))
 
         # Allocate an order number
@@ -38,8 +39,8 @@ class OrderCreatorMixin(object):
 
         # Make sure there isn't already an order with this order number
         if Order._default_manager.filter(number=order_number).exists():
-            raise ValueError(_("There is already an order with number %s")
-                             % order_number)
+            # Translators: User facing error message in checkout
+            raise ValueError(_("There is already an order with number %(order_number)s") % dict(order_number=order_number))
 
         # Open a transaction so that order creation is atomic.
         with transaction.atomic():

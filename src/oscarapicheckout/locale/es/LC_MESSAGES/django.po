@@ -1,0 +1,108 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2019-06-21 21:22+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. Translators: Backend Library Name
+#: config.py:9
+msgid "Oscar API-Checkout"
+msgstr ""
+
+#. Translators: User facing error message in checkout
+#: methods.py:44
+msgid "Amount must be greater then 0.00 or pay_balance must be enabled."
+msgstr ""
+
+#. Translators: Description of payment method in checkout
+#: methods.py:50
+msgid "Abstract Payment Method"
+msgstr ""
+
+#. Translators: Description of payment method in checkout
+#: methods.py:115
+msgid "Cash"
+msgstr ""
+
+#. Translators: User facing error message in checkout
+#. Translators: Error message in checkout
+#: mixins.py:28 utils.py:151
+msgid "Empty baskets cannot be submitted"
+msgstr ""
+
+#. Translators: User facing error message in checkout
+#. Translators: Error message in checkout
+#: mixins.py:43 utils.py:165
+#, python-format
+msgid "There is already an order with number %(order_number)s"
+msgstr ""
+
+#. Translators: User facing error message in checkout
+#: serializers.py:174
+msgid "At least one payment method must be enabled."
+msgstr ""
+
+#. Translators: User facing error message in checkout
+#: serializers.py:179
+#, python-format
+msgid "No more than %(num)s payment method can be enabled."
+msgstr ""
+
+#. Translators: User facing error message in checkout
+#: serializers.py:186
+msgid "Can not set pay_balance flag on multiple payment methods."
+msgstr ""
+
+#. Translators: User facing error message in checkout
+#: serializers.py:189
+msgid "Must set pay_balance flag on at least one payment method."
+msgstr ""
+
+#. Translators: User facing error message in checkout
+#: serializers.py:260
+#, python-format
+msgid ""
+"'%(title)s' is no longer available to buy (%(reason)s). Please adjust your "
+"basket to continue."
+msgstr ""
+
+#. Translators: User facing error message in checkout
+#: serializers.py:274
+msgid "Email address is required."
+msgstr ""
+
+#. Translators: User facing error message in checkout
+#: serializers.py:295
+msgid "Specified payment amounts exceed order total."
+msgstr ""
+
+#. Translators: User facing error message in checkout
+#: serializers.py:336
+msgid "An non-declined order already exists for this basket."
+msgstr ""
+
+#. Translators: User facing error message in checkout
+#: serializers.py:341
+msgid ""
+"Multiple order exist for this basket! This should never happen and we don't "
+"know what to do."
+msgstr ""
+
+#. Translators: Error message in checkout
+#: utils.py:155
+msgid "Can not update an order that isn't in payment declined state."
+msgstr ""
