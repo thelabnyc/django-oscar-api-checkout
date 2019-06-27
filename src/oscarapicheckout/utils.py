@@ -147,9 +147,11 @@ class OrderUpdater(object):
         of creating a new order.
         """
         if basket.is_empty:
+            # Translators: Error message in checkout
             raise ValueError(_("Empty baskets cannot be submitted"))
 
         if order.status != ORDER_STATUS_PAYMENT_DECLINED:
+            # Translators: Error message in checkout
             raise ValueError(_("Can not update an order that isn't in payment declined state."))
 
         # Make sure there isn't another order with this number already, besides of course the
@@ -159,7 +161,9 @@ class OrderUpdater(object):
         except Order.DoesNotExist:
             pass
         else:
-            raise ValueError(_("There is already an order with number %s") % order_number)
+            # Translators: Error message in checkout
+            msg = _("There is already an order with number %(order_number)s") % dict(order_number=order_number)
+            raise ValueError(msg)
 
         # Remove all the order lines and cancel and stock they allocated. We'll make new lines from the
         # basket after this.

@@ -170,17 +170,22 @@ class PaymentMethodsSerializer(serializers.DictField):
         # At least one method must be enabled
         enabled_methods = { k: v for k, v in result.items() if v['enabled'] }
         if len(enabled_methods) <= 0:
-            raise serializers.ValidationError("At least one payment method must be enabled.")
+            # Translators: User facing error message in checkout
+            raise serializers.ValidationError(_("At least one payment method must be enabled."))
 
         # Respect payment method limit
         if settings.API_MAX_PAYMENT_METHODS > 0 and len(enabled_methods) > settings.API_MAX_PAYMENT_METHODS:
-            raise serializers.ValidationError("No more than %s payment method can be enabled." % settings.API_MAX_PAYMENT_METHODS)
+            # Translators: User facing error message in checkout
+            msg = _("No more than %(num)s payment method can be enabled.") % dict(num=settings.API_MAX_PAYMENT_METHODS)
+            raise serializers.ValidationError(msg)
 
         # Must set pay_balance flag on exactly one payment method
         balance_methods = { k: v for k, v in enabled_methods.items() if v['pay_balance'] }
         if len(balance_methods) > 1:
+            # Translators: User facing error message in checkout
             raise serializers.ValidationError(_("Can not set pay_balance flag on multiple payment methods."))
         elif len(balance_methods) < 1:
+            # Translators: User facing error message in checkout
             raise serializers.ValidationError(_("Must set pay_balance flag on at least one payment method."))
 
         return result
@@ -251,11 +256,11 @@ class CheckoutSerializer(OscarCheckoutSerializer):
             is_permitted, reason = result.availability.is_purchase_permitted(line.quantity)
             if not is_permitted:
                 # Create a meaningful message to return in the error response
-                ctx = {
+                # Translators: User facing error message in checkout
+                msg = _("'%(title)s' is no longer available to buy (%(reason)s). Please adjust your basket to continue.") % {
                     'title': line.product.get_title(),
                     'reason': reason,
                 }
-                msg = _("'%(title)s' is no longer available to buy (%(reason)s). Please adjust your basket to continue.") % ctx
                 basket_errors.append(msg)
         if len(basket_errors) > 0:
             raise serializers.ValidationError({ 'basket': basket_errors })
@@ -265,6 +270,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         ownership_calc = self.get_ownership_calc()
         user, guest_email = ownership_calc(request, given_user, guest_email)
         if not ((user and user.email) or guest_email):
+            # Translators: User facing error message in checkout
             raise serializers.ValidationError(_("Email address is required."))
         data['user'] = user
         data['guest_email'] = guest_email
@@ -285,6 +291,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
             posted_total += method['amount']
 
         if posted_total > data['total'].incl_tax:
+            # Translators: User facing error message in checkout
             raise serializers.ValidationError(_("Specified payment amounts exceed order total."))
 
         return data
@@ -325,10 +332,12 @@ class CheckoutSerializer(OscarCheckoutSerializer):
     def _insupd_order(self, basket, user=None, shipping_address=None, billing_address=None, **kwargs):
         existing_orders = basket.order_set.all()
         if existing_orders.exclude(status=settings.ORDER_STATUS_PAYMENT_DECLINED).exists():
+            # Translators: User facing error message in checkout
             raise exceptions.NotAcceptable(_("An non-declined order already exists for this basket."))
 
         existing_count = existing_orders.count()
         if existing_count > 1:
+            # Translators: User facing error message in checkout
             raise exceptions.NotAcceptable(_("Multiple order exist for this basket! This should never happen and we don't know what to do."))
 
         # Get request object from context

@@ -40,11 +40,13 @@ class PaymentMethodSerializer(serializers.Serializer):
         if data['pay_balance']:
             data.pop('amount', None)
         elif 'amount' not in data or not data['amount'] or data['amount'] <= Decimal('0.00'):
+            # Translators: User facing error message in checkout
             raise serializers.ValidationError(_("Amount must be greater then 0.00 or pay_balance must be enabled."))
         return data
 
 
 class PaymentMethod(object):
+    # Translators: Description of payment method in checkout
     name = _('Abstract Payment Method')
     code = 'abstract-payment-method'
     serializer_class = PaymentMethodSerializer
@@ -109,6 +111,7 @@ class Cash(PaymentMethod):
     Cash payments are an example of how to implement a payment method plug-in. It
     doesn't do anything more than record a transaction and payment source.
     """
+    # Translators: Description of payment method in checkout
     name = _('Cash')
     code = 'cash'
 
