@@ -12,8 +12,8 @@ from versiontag import get_version, cache_git_tag  # NOQA
 packages = find_packages('src')
 
 install_requires = [
-    'django-oscar>=1.5.0',
-    'django-oscar-api>=1.2.0',
+    'django-oscar>=1.6.0,<2.0.0',
+    'django-oscar-api>=1.4.0',
     'phonenumberslite>=7.0.2',
 ]
 
