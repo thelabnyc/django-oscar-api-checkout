@@ -174,6 +174,10 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+0.5.2
+------------------
+- Internationalization
+
 0.5.1
 ------------------
 - Add new permission: ``oscarapicheckout.permissions.CustomerOnly``
