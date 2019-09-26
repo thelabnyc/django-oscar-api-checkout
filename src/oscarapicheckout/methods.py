@@ -84,13 +84,13 @@ class PaymentMethod(object):
     def void_existing_payment(self, request, order, method_key, state_to_void):
         source = Source.objects.filter(pk=getattr(state_to_void, 'source_id', None)).first()
         if not source:
-            logger.warning('Attempted to void PaymentSource for Order[{}], MethodKey[{}], but no source was found.',
+            logger.warning('Attempted to void PaymentSource for Order[%s], MethodKey[%s], but no source was found.',
                 order.number,
                 method_key)
             return
         source.amount_allocated = max(0, (source.amount_allocated - state_to_void.amount))
         source.save()
-        logger.info('Voided Amount[{}] from PaymentSource[{}] for Order[{}], MethodKey[{}].',
+        logger.info('Voided Amount[%s] from PaymentSource[%s] for Order[%s], MethodKey[%s].',
             state_to_void.amount,
             source,
             order.number,
