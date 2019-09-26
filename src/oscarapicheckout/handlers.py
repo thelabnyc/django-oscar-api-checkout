@@ -31,6 +31,6 @@ def update_basket_status_upon_order_status_change(sender, order, old_status, new
     if not basket.can_be_edited:
         return
 
-    logger.info("Changing status of Basket[{}] from {} to Submitted due to order status change from {} to {}.".format(
-        basket.pk, basket.status, old_status, new_status))
+    logger.info("Changing status of Basket[%s] from %s to Submitted due to order status change from %s to %s.",
+        basket.pk, basket.status, old_status, new_status)
     basket.submit()
