@@ -1,1 +1,1 @@
-default_app_config = 'sandbox.order.config.OrderConfig'
+default_app_config = 'sandbox.order.apps.OrderConfig'

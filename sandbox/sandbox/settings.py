@@ -1,6 +1,5 @@
 from django.utils.translation import ugettext_lazy as _
 from oscar.defaults import *  # noqa
-from oscar import OSCAR_MAIN_TEMPLATE_DIR, get_core_apps
 from psycopg2cffi import compat
 import os
 
@@ -22,6 +21,7 @@ LANGUAGES = (
 ROOT_URLCONF = 'sandbox.urls'
 
 INSTALLED_APPS = [
+    # Core Django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -31,13 +31,51 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.flatpages',
+
+    # django-oscar
+    'oscar',
+    'oscar.apps.analytics',
+    'oscar.apps.checkout',
+    'oscar.apps.address',
+    'oscar.apps.shipping',
+    'oscar.apps.catalogue',
+    'oscar.apps.catalogue.reviews',
+    'oscar.apps.partner',
+    'oscar.apps.basket',
+    'oscar.apps.payment',
+    'oscar.apps.offer',
+    'sandbox.order',  # 'oscar.apps.order',
+    'oscar.apps.customer',
+    'oscar.apps.search',
+    'oscar.apps.voucher',
+    'oscar.apps.wishlists',
+    'oscar.apps.dashboard',
+    'oscar.apps.dashboard.reports',
+    'oscar.apps.dashboard.users',
+    'oscar.apps.dashboard.orders',
+    'oscar.apps.dashboard.catalogue',
+    'oscar.apps.dashboard.offers',
+    'oscar.apps.dashboard.partners',
+    'oscar.apps.dashboard.pages',
+    'oscar.apps.dashboard.ranges',
+    'oscar.apps.dashboard.reviews',
+    'oscar.apps.dashboard.vouchers',
+    'oscar.apps.dashboard.communications',
+    'oscar.apps.dashboard.shipping',
+
+    # 3rd-party apps that oscar depends on
     'widget_tweaks',
+    'haystack',
+    'treebeard',
+    'sorl.thumbnail',
+    'django_tables2',
+
+    # django-oscar-api
     'rest_framework',
     'oscarapi',
+
     'oscarapicheckout',
-] + get_core_apps([
-    'sandbox.order',
-])
+]
 
 
 LOGGING = {
@@ -80,9 +118,7 @@ MIDDLEWARE = (
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            OSCAR_MAIN_TEMPLATE_DIR,
-        ],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -92,7 +128,6 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.i18n',
                 'oscar.apps.search.context_processors.search_form',
-                'oscar.apps.promotions.context_processors.promotions',
                 'oscar.apps.checkout.context_processors.checkout',
                 'oscar.apps.customer.notifications.context_processors.notifications',
                 'oscar.core.context_processors.metadata',

@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from ..signals import pre_calculate_total, order_placed, order_payment_authorized
 from .base import BaseTest
-import mock
+from unittest import mock
 
 Order = get_model('order', 'Order')
 Basket = get_model('basket', 'Basket')

@@ -18,7 +18,6 @@ imagesize==0.7.1
 Jinja2==2.9.5
 MarkupSafe==1.0
 mccabe==0.6.1
-mock==2.0.0
 olefile==0.44
 pbr==1.10.0
 phonenumbers==8.2.0
