@@ -94,12 +94,13 @@ Installation
 
     # myproject/urls.py
     ...
+    from django.apps import apps
     from oscarapi.app import application as oscar_api
     from oscarapicheckout.app import application as oscar_api_checkout
 
     urlpatterns = patterns('',
         ...
-        url(r'^api/', include(oscar_api_checkout.urls)), # Must be before oscar_api.urls
+        url(r'^api/', include(apps.get_app_config("oscarapicheckout").urls[0])), # Must be before oscar_api.urls
         url(r'^api/', include(oscar_api.urls)),
         ...
     )
