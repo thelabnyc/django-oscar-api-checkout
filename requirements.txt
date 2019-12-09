@@ -31,7 +31,7 @@ pyflakes==1.5.0
 Pygments==2.2.0
 python-dateutil==2.6.0
 pytz==2016.10
-PyYAML==3.12
+PyYAML==5.1
 requests==2.13.0
 six==1.10.0
 snowballstemmer==1.2.1
