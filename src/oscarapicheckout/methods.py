@@ -103,7 +103,7 @@ class PaymentMethod(object):
         return self._record_payment(request, order, method_key, amount=amount, reference=reference, **kwargs)
 
     def _record_payment(self, request, order, method_key, amount, reference, **kwargs):
-        raise NotImplementedError('Subclass must implement _record_payment(request, order, amount, reference, **kwargs) method.')
+        raise NotImplementedError('Subclass must implement _record_payment(request, order, method_key, amount, reference, **kwargs) method.')
 
 
 class Cash(PaymentMethod):
