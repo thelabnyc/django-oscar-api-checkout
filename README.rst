@@ -175,6 +175,10 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+0.6.1
+------------------
+- Remove direct dependency on ``phonenumberslite`` since it's actually a dependency of ``django-oscar``.
+
 0.6.0
 ------------------
 - Add support for django-oscar 2.x.
