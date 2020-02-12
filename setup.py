@@ -15,7 +15,6 @@ install_requires = [
     'Django>=1.11,<3.0',
     'django-oscar-api>=2.0.0',
     'django-oscar>=2.0.0',
-    'phonenumberslite>=7.0.2',
 ]
 
 extras_require = {
