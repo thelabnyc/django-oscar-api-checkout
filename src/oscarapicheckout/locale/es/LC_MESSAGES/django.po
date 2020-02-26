@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-26 13:41-0400\n"
+"POT-Creation-Date: 2020-02-26 20:44+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,61 +18,61 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: apps.py:11
+#: oscarapicheckout/apps.py:11
 msgid "Oscar API-Checkout"
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: methods.py:44
+#: oscarapicheckout/methods.py:44
 msgid "Amount must be greater then 0.00 or pay_balance must be enabled."
 msgstr ""
 
 #. Translators: Description of payment method in checkout
-#: methods.py:50
+#: oscarapicheckout/methods.py:50
 msgid "Abstract Payment Method"
 msgstr ""
 
 #. Translators: Description of payment method in checkout
-#: methods.py:115
+#: oscarapicheckout/methods.py:115
 msgid "Cash"
 msgstr ""
 
 #. Translators: User facing error message in checkout
 #. Translators: Error message in checkout
-#: mixins.py:28 utils.py:151
+#: oscarapicheckout/mixins.py:28 oscarapicheckout/utils.py:151
 msgid "Empty baskets cannot be submitted"
 msgstr ""
 
 #. Translators: User facing error message in checkout
 #. Translators: Error message in checkout
-#: mixins.py:43 utils.py:165
+#: oscarapicheckout/mixins.py:43 oscarapicheckout/utils.py:165
 #, python-format
 msgid "There is already an order with number %(order_number)s"
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: serializers.py:174
+#: oscarapicheckout/serializers.py:174
 msgid "At least one payment method must be enabled."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: serializers.py:179
+#: oscarapicheckout/serializers.py:179
 #, python-format
 msgid "No more than %(num)s payment method can be enabled."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: serializers.py:186
+#: oscarapicheckout/serializers.py:186
 msgid "Can not set pay_balance flag on multiple payment methods."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: serializers.py:189
+#: oscarapicheckout/serializers.py:189
 msgid "Must set pay_balance flag on at least one payment method."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: serializers.py:260
+#: oscarapicheckout/serializers.py:260
 #, python-format
 msgid ""
 "'%(title)s' is no longer available to buy (%(reason)s). Please adjust your "
@@ -80,28 +80,28 @@ msgid ""
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: serializers.py:274
+#: oscarapicheckout/serializers.py:274
 msgid "Email address is required."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: serializers.py:295
+#: oscarapicheckout/serializers.py:295
 msgid "Specified payment amounts exceed order total."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: serializers.py:336
+#: oscarapicheckout/serializers.py:336
 msgid "An non-declined order already exists for this basket."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: serializers.py:341
+#: oscarapicheckout/serializers.py:341
 msgid ""
 "Multiple order exist for this basket! This should never happen and we don't "
 "know what to do."
 msgstr ""
 
 #. Translators: Error message in checkout
-#: utils.py:155
+#: oscarapicheckout/utils.py:155
 msgid "Can not update an order that isn't in payment declined state."
 msgstr ""
