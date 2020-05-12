@@ -279,7 +279,8 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         pre_calculate_total.send(
             sender=self.__class__,
             basket=data['basket'],
-            shipping_address=data['shipping_address'])
+            shipping_address=data['shipping_address'],
+            shipping_charge=data['shipping_charge'])
 
         # Figure out the final total order price
         data['total'] = OrderTotalCalculator().calculate(data['basket'], data['shipping_charge'])
