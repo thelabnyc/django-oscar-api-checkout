@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-02-26 20:44+0000\n"
+"POT-Creation-Date: 2020-05-12 23:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -85,17 +85,17 @@ msgid "Email address is required."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: oscarapicheckout/serializers.py:295
+#: oscarapicheckout/serializers.py:296
 msgid "Specified payment amounts exceed order total."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: oscarapicheckout/serializers.py:336
+#: oscarapicheckout/serializers.py:337
 msgid "An non-declined order already exists for this basket."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: oscarapicheckout/serializers.py:341
+#: oscarapicheckout/serializers.py:342
 msgid ""
 "Multiple order exist for this basket! This should never happen and we don't "
 "know what to do."
