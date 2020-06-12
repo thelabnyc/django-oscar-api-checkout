@@ -1,15 +1,18 @@
 from decimal import Decimal as D
 from django.contrib.auth.models import User
-from oscar.core.loading import get_model
+from oscar.core.loading import get_model, get_class
 from oscar.test import factories
 from rest_framework import status
 from rest_framework.reverse import reverse
 from ..signals import pre_calculate_total, order_placed, order_payment_authorized
+from ..utils import _set_order_payment_declined
 from .base import BaseTest
 from unittest import mock
 
 Order = get_model('order', 'Order')
 Basket = get_model('basket', 'Basket')
+Default = get_class('partner.strategy', 'Default')
+OrderCreator = get_class('order.utils', 'OrderCreator')
 
 
 class CheckoutAPITest(BaseTest):
@@ -2108,7 +2111,37 @@ class CheckoutAPITest(BaseTest):
         # API should return a new Basket now
         self.assertNotEqual(self._get_basket_id(), basket_id)
 
+    def test_voucher_for_order_payment_declined(self):
+        # Login as one user
+        self.login(is_staff=False)
 
+        # Make a basket
+        basket_id = self._prepare_basket()
+        voucher = factories.create_voucher()
+        self._add_voucher(voucher)
+
+        self.assertEqual(voucher.num_orders, 0)
+
+        data = self._get_checkout_data(basket_id)
+        data['payment'] = {
+            'credit-card': {
+                'enabled': True,
+                'pay_balance': True,
+            }
+        }
+
+        url = reverse('api-checkout')
+        order_resp = self.client.post(url, data, format='json')
+        order_number = order_resp.data['number']
+        order = Order.objects.get(number=order_number)
+
+        voucher.refresh_from_db()
+        self.assertEqual(voucher.num_orders, 1)
+
+        _set_order_payment_declined(order, order_resp.wsgi_request)
+
+        voucher.refresh_from_db()
+        self.assertEqual(voucher.num_orders, 0)
 
     def assertPaymentSources(self, order_number, sources):
         order = Order.objects.get(number=order_number)
@@ -2223,3 +2256,8 @@ class CheckoutAPITest(BaseTest):
     def _checkout(self, data):
         url = reverse('api-checkout')
         return self.client.post(url, data, format='json')
+
+
+    def _add_voucher(self, voucher):
+        url = reverse('api-basket-add-voucher')
+        self.client.post(url, data={'vouchercode': voucher.code}, format='json')
