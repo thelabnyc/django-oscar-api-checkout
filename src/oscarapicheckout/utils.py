@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.db.models import F
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
 from oscarapi.basket import operations
@@ -63,10 +64,10 @@ def _set_order_payment_declined(order, request):
 
         parent = getattr(voucher, 'parent', None)
         if parent:
-            parent.num_orders -= 1
+            parent.num_orders = F('num_orders') - 1
             parent.save()
 
-        voucher.num_orders -= 1
+        voucher.num_orders = F('num_orders') - 1
         voucher.save()
 
     # Delete some related objects
