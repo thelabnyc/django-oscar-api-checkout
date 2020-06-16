@@ -65,7 +65,7 @@ def _set_order_payment_declined(order, request):
         parent = getattr(voucher, 'parent', None)
         if parent:
             parent.num_orders = F('num_orders') - 1
-            parent.save()
+            parent.save(update_children=False)
 
         voucher.num_orders = F('num_orders') - 1
         voucher.save()

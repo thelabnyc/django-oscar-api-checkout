@@ -3,6 +3,7 @@ variables:
   POSTGRES_USER: postgres
   POSTGRES_PASSWORD: ""
   POSTGRES_HOST_AUTH_METHOD: 'trust'
+  SP_VERSION: 11-10-stable
 
 stages:
   - test
