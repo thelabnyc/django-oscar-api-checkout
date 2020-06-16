@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.db.models import F
 from django.utils.translation import ugettext_lazy as _
 from oscar.core.loading import get_class, get_model
 from oscarapi.basket import operations
@@ -56,10 +57,23 @@ def _set_order_payment_declined(order, request):
     # Set the order status
     order.set_status(ORDER_STATUS_PAYMENT_DECLINED)
 
+    voucher_applications = order.voucherapplication_set.all()
+
+    for voucher_application in voucher_applications:
+        voucher = voucher_application.voucher
+
+        parent = getattr(voucher, 'parent', None)
+        if parent:
+            parent.num_orders = F('num_orders') - 1
+            parent.save(update_children=False)
+
+        voucher.num_orders = F('num_orders') - 1
+        voucher.save()
+
     # Delete some related objects
     order.discounts.all().delete()
     order.line_prices.all().delete()
-    order.voucherapplication_set.all().delete()
+    voucher_applications.delete()
 
     # Thaw the basket and put it back into the request.session so that it can be retried
     order.basket.thaw()
