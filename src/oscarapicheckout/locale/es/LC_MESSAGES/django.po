@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-16 15:05+0000\n"
+"POT-Creation-Date: 2020-06-18 17:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -51,28 +51,28 @@ msgid "There is already an order with number %(order_number)s"
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: oscarapicheckout/serializers.py:174
+#: oscarapicheckout/serializers.py:173
 msgid "At least one payment method must be enabled."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: oscarapicheckout/serializers.py:179
+#: oscarapicheckout/serializers.py:178
 #, python-format
 msgid "No more than %(num)s payment method can be enabled."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: oscarapicheckout/serializers.py:186
+#: oscarapicheckout/serializers.py:185
 msgid "Can not set pay_balance flag on multiple payment methods."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: oscarapicheckout/serializers.py:189
+#: oscarapicheckout/serializers.py:188
 msgid "Must set pay_balance flag on at least one payment method."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: oscarapicheckout/serializers.py:260
+#: oscarapicheckout/serializers.py:259
 #, python-format
 msgid ""
 "'%(title)s' is no longer available to buy (%(reason)s). Please adjust your "
@@ -80,22 +80,22 @@ msgid ""
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: oscarapicheckout/serializers.py:274
+#: oscarapicheckout/serializers.py:273
 msgid "Email address is required."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: oscarapicheckout/serializers.py:296
+#: oscarapicheckout/serializers.py:295
 msgid "Specified payment amounts exceed order total."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: oscarapicheckout/serializers.py:337
+#: oscarapicheckout/serializers.py:336
 msgid "An non-declined order already exists for this basket."
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: oscarapicheckout/serializers.py:342
+#: oscarapicheckout/serializers.py:341
 msgid ""
 "Multiple order exist for this basket! This should never happen and we don't "
 "know what to do."
