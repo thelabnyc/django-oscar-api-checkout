@@ -178,6 +178,7 @@ Changelog
 1.1.0
 ------------------
 - Add support for calculating taxes on shipping charges.
+- Fix bug with ``Voucher.num_orders`` value when retrying payment declined orders.
 
 1.0.0
 ------------------
