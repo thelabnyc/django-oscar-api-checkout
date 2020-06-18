@@ -3,7 +3,6 @@ from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
 from django.db import transaction
-from django.utils import six
 from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
 from django.utils.encoding import force_text
@@ -158,7 +157,7 @@ class PaymentMethodsSerializer(serializers.DictField):
         result = {}
         errors = OrderedDict()
         for key, value in data.items():
-            key = six.text_type(key)
+            key = str(key)
             try:
                 result[key] = self.child.run_validation(value)
             except ValidationError as e:
