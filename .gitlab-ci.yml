@@ -20,24 +20,6 @@ include:
   - project: thelabnyc/gitlab-ci-templates
     file: /ci/sast.gitlab-ci.yml
 
-test_python35:
-  stage: test
-  tags:
-    - django-oscar
-  image: python:3.5
-  script:
-    - pip install tox
-    - tox -e 'py35-django{220}-drf{39,310}-oscar20'
-
-test_python36:
-  stage: test
-  tags:
-    - django-oscar
-  image: python:3.6
-  script:
-    - pip install tox
-    - tox -e 'py36-django{220}-drf{39,310}-oscar20'
-
 test_python37:
   stage: test
   tags:
@@ -45,7 +27,7 @@ test_python37:
   image: python:3.7
   script:
     - pip install tox
-    - tox -e 'py37-django{220}-drf{39,310}-oscar20'
+    - tox -e 'py37-django{220,300}-drf{310,311}-oscar{21}'
 
 test_python38:
   stage: test
@@ -54,13 +36,13 @@ test_python38:
   image: python:3.8
   script:
     - pip install tox
-    - tox -e 'py38-django{220}-drf{39,310}-oscar20'
+    - tox -e 'py38-django{220,300}-drf{310,311}-oscar{21}'
 
-test_pypy35:
+test_pypy3:
   stage: test
   tags:
     - django-oscar
-  image: pypy:3-5
+  image: pypy:3
   script:
     - pip install tox
-    - tox -e 'pypy3-django{220}-drf{39,310}-oscar20'
+    - tox -e 'pypy3-django{220,300}-drf{310,311}-oscar{21}'
