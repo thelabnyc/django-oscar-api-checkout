@@ -1,7 +1,7 @@
 from django.dispatch import receiver
 from oscar.core.loading import get_class
 from .email import OrderMessageSender
-from .settings import ORDER_PLACED_COMMUNICATION_TYPE_CODE, ORDER_STATUS_PAYMENT_DECLINED
+from .settings import ORDER_STATUS_PAYMENT_DECLINED
 from .signals import order_payment_authorized
 import logging
 
@@ -12,7 +12,7 @@ order_status_changed = get_class('order.signals', 'order_status_changed')
 
 @receiver(order_payment_authorized)
 def send_order_confirmation_message(sender, order, request, **kwargs):
-    OrderMessageSender(request).send_confirmation_message(order, ORDER_PLACED_COMMUNICATION_TYPE_CODE)
+    OrderMessageSender(request).send_order_placed_email(order)
 
 
 @receiver(order_status_changed)
