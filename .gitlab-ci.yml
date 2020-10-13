@@ -3,7 +3,6 @@ variables:
   POSTGRES_USER: postgres
   POSTGRES_PASSWORD: ""
   POSTGRES_HOST_AUTH_METHOD: 'trust'
-  SP_VERSION: 11-10-stable
 
 stages:
   - test
@@ -15,10 +14,6 @@ cache:
   key: "$CI_PROJECT_NAME"
   paths:
     - $HOME/.cache/pip
-
-include:
-  - project: thelabnyc/gitlab-ci-templates
-    file: /ci/sast.gitlab-ci.yml
 
 test_python37:
   stage: test
