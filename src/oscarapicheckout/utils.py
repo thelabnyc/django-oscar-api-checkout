@@ -79,9 +79,6 @@ def _set_order_payment_declined(order, request):
     order.basket.thaw()
     operations.store_basket_in_session(order.basket, request.session)
 
-    # Send a signal
-    order_payment_declined.send(sender=order, order=order, request=request)
-
 
 def _update_order_status(order, request):
     states = list_payment_method_states(request)
@@ -128,6 +125,10 @@ def set_payment_method_states(order, request, states):
     clear_payment_method_states(request)
     for method_key, state in states.items():
         _update_payment_method_state(request, method_key, state)
+
+    declined = [s for k, s in states.items() if s.status == DECLINED]
+    if len(declined) > 0:
+        order_payment_declined.send(sender=order, order=order, request=request)
     _update_order_status(order, request)
 
 
