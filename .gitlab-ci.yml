@@ -23,6 +23,12 @@ test:
   script:
     - pip install tox
     - tox -e $TOX_ENVS
+  artifacts:
+    paths:
+      - junit-*/
+    reports:
+      junit:
+        - junit-*/TEST-*.xml
   parallel:
     matrix:
       - IMAGE: python:3.7

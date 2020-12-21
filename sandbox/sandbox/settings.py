@@ -18,6 +18,14 @@ LANGUAGES = (
     ('es', _('Spanish')),
 )
 
+# Configure JUnit XML output
+TEST_RUNNER = 'xmlrunner.extra.djangotestrunner.XMLTestRunner'
+_tox_env_name = os.environ.get('TOX_ENV_NAME')
+if _tox_env_name:
+    TEST_OUTPUT_DIR = os.path.join(BASE_DIR, f'../../junit-{_tox_env_name}/')
+else:
+    TEST_OUTPUT_DIR = os.path.join(BASE_DIR, '../../junit/')
+
 ROOT_URLCONF = 'sandbox.urls'
 
 INSTALLED_APPS = [
