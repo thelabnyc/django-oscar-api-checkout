@@ -13,7 +13,7 @@ packages = find_packages('src')
 
 install_requires = [
     'django>=2.2',
-    'django-oscar>=2.1',
+    'django-oscar>=3.0',
     'django-oscar-api>=2.0.0',
 ]
 
