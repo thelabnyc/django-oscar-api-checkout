@@ -175,6 +175,13 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+3.0.0
+------------------
+- Oscar 3.0 Compatibility
+
+2.0.0
+------------------
+
 1.1.0
 ------------------
 - Add support for calculating taxes on shipping charges.
