@@ -48,7 +48,7 @@ publish_pkg:
   image: python:3.9
   stage: release
   rules:
-    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_TAG && $CI_COMMIT_REF_PROTECTED
   script:
     - pip install twine
     - python setup.py sdist bdist_wheel
@@ -69,7 +69,7 @@ publish_gitlab_release:
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   stage: release
   rules:
-    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_TAG && $CI_COMMIT_REF_PROTECTED
   script:
     - echo 'release job'
   release:
