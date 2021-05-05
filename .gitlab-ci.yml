@@ -33,16 +33,16 @@ test:
   parallel:
     matrix:
       - IMAGE: python:3.7
-        TOX_ENVS: py37-django{220,300,310}-drf{312}-oscar{30}
+        TOX_ENVS: py37-django{220,300,310,320}-drf{312}-oscar{30}
 
       - IMAGE: python:3.8
-        TOX_ENVS: py38-django{220,300,310}-drf{312}-oscar{30}
+        TOX_ENVS: py38-django{220,300,310,320}-drf{312}-oscar{30}
 
       - IMAGE: python:3.9
-        TOX_ENVS: py39-django{220,300,310}-drf{312}-oscar{30}
+        TOX_ENVS: py39-django{220,300,310,320}-drf{312}-oscar{30}
 
       - IMAGE: pypy:3
-        TOX_ENVS: pypy3-django{220,300,310}-drf{312}-oscar{30}
+        TOX_ENVS: pypy3-django{220,300,310,320}-drf{312}-oscar{30}
 
 publish_pkg:
   image: python:3.9
