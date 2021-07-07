@@ -1,6 +1,6 @@
 from oscar.core.loading import get_class
 
-OrderPlacementMixin = get_class('checkout.mixins', 'OrderPlacementMixin')
+OrderPlacementMixin = get_class("checkout.mixins", "OrderPlacementMixin")
 
 
 class OrderMessageSender(OrderPlacementMixin):

@@ -4,7 +4,7 @@ from rest_framework import serializers
 from oscar.core.loading import get_model
 from . import settings as pkgsettings
 
-Country = get_model('address', 'Country')
+Country = get_model("address", "Country")
 
 
 class EmailAddressSerializer(serializers.Serializer):
@@ -19,7 +19,7 @@ class ShippingMethodSerializer(serializers.Serializer):
 
 class AbstractCheckoutCache(object):
     serializer_class_path = None
-    cache_timeout = (60 * 60 * 24)  # 24 hours
+    cache_timeout = 60 * 60 * 24  # 24 hours
 
     def __init__(self, basket_id, enable_validation=True):
         self.basket_id = basket_id
@@ -27,7 +27,9 @@ class AbstractCheckoutCache(object):
 
     @property
     def cache_key(self):
-        return 'oscarapicheckout.cache.{}.{}'.format(self.__class__.__name__, self.basket_id)
+        return "oscarapicheckout.cache.{}.{}".format(
+            self.__class__.__name__, self.basket_id
+        )
 
     def set(self, data):
         data = self._transform_incoming_data(data)
@@ -66,31 +68,39 @@ class AbstractCheckoutCache(object):
 class AbstractCheckoutAddressCache(AbstractCheckoutCache):
     def _transform_incoming_data(self, data):
         data = super()._transform_incoming_data(data)
-        if data and 'country' in data and hasattr(data['country'], 'pk'):
-            data['country'] = data['country'].pk
+        if data and "country" in data and hasattr(data["country"], "pk"):
+            data["country"] = data["country"].pk
         return data
 
     def _transform_outgoing_data(self, data):
         data = super()._transform_outgoing_data(data)
-        if data and 'country' in data and not hasattr(data['country'], 'pk'):
+        if data and "country" in data and not hasattr(data["country"], "pk"):
             try:
-                data['country'] = Country.objects.get(pk=data['country'])
+                data["country"] = Country.objects.get(pk=data["country"])
             except Country.DoesNotExist:
-                data['country'] = None
+                data["country"] = None
         return data
 
 
 class EmailAddressCache(AbstractCheckoutCache):
-    serializer_class_path = pkgsettings.CHECKOUT_CACHE_SERIALIZERS.get('email_address', 'oscarapicheckout.cache.EmailAddressSerializer')
+    serializer_class_path = pkgsettings.CHECKOUT_CACHE_SERIALIZERS.get(
+        "email_address", "oscarapicheckout.cache.EmailAddressSerializer"
+    )
 
 
 class ShippingAddressCache(AbstractCheckoutAddressCache):
-    serializer_class_path = pkgsettings.CHECKOUT_CACHE_SERIALIZERS.get('shipping_address', 'oscarapi.serializers.checkout.ShippingAddressSerializer')
+    serializer_class_path = pkgsettings.CHECKOUT_CACHE_SERIALIZERS.get(
+        "shipping_address", "oscarapi.serializers.checkout.ShippingAddressSerializer"
+    )
 
 
 class BillingAddressCache(AbstractCheckoutAddressCache):
-    serializer_class_path = pkgsettings.CHECKOUT_CACHE_SERIALIZERS.get('billing_address', 'oscarapi.serializers.checkout.BillingAddressSerializer')
+    serializer_class_path = pkgsettings.CHECKOUT_CACHE_SERIALIZERS.get(
+        "billing_address", "oscarapi.serializers.checkout.BillingAddressSerializer"
+    )
 
 
 class ShippingMethodCache(AbstractCheckoutCache):
-    serializer_class_path = pkgsettings.CHECKOUT_CACHE_SERIALIZERS.get('shipping_method', 'oscarapicheckout.cache.ShippingMethodSerializer')
+    serializer_class_path = pkgsettings.CHECKOUT_CACHE_SERIALIZERS.get(
+        "shipping_method", "oscarapicheckout.cache.ShippingMethodSerializer"
+    )

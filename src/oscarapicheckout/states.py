@@ -1,7 +1,7 @@
-PENDING = 'Pending'
-DECLINED = 'Declined'
-COMPLETE = 'Complete'
-CONSUMED = 'Consumed'
+PENDING = "Pending"
+DECLINED = "Declined"
+COMPLETE = "Complete"
+CONSUMED = "Consumed"
 
 
 class PaymentStatus(object):
@@ -10,10 +10,10 @@ class PaymentStatus(object):
 
     @property
     def status(self):
-        raise NotImplementedError('Subclass must implement status property')
+        raise NotImplementedError("Subclass must implement status property")
 
     def get_required_action(self):
-        raise NotImplementedError('Subclass does not implement get_required_action()')
+        raise NotImplementedError("Subclass does not implement get_required_action()")
 
 
 class SourceBoundPaymentStatus(PaymentStatus):
@@ -37,14 +37,14 @@ class Consumed(SourceBoundPaymentStatus):
 class FormPostRequired(PaymentStatus):
     status = PENDING
 
-    def __init__(self, amount, name, url, method='POST', fields=[]):
+    def __init__(self, amount, name, url, method="POST", fields=[]):
         super().__init__(amount)
         self.form_data = {
-            'type': 'form',
-            'name': name,
-            'url': url,
-            'method': method,
-            'fields': fields,
+            "type": "form",
+            "name": name,
+            "url": url,
+            "method": method,
+            "fields": fields,
         }
 
     def get_required_action(self):

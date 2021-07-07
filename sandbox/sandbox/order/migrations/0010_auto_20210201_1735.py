@@ -6,28 +6,36 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('order', '0009_surcharge'),
+        ("order", "0009_surcharge"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='orderdiscount',
-            options={'ordering': ['pk'], 'verbose_name': 'Order Discount', 'verbose_name_plural': 'Order Discounts'},
+            name="orderdiscount",
+            options={
+                "ordering": ["pk"],
+                "verbose_name": "Order Discount",
+                "verbose_name_plural": "Order Discounts",
+            },
         ),
         migrations.AlterModelOptions(
-            name='ordernote',
-            options={'ordering': ['-date_updated'], 'verbose_name': 'Order Note', 'verbose_name_plural': 'Order Notes'},
+            name="ordernote",
+            options={
+                "ordering": ["-date_updated"],
+                "verbose_name": "Order Note",
+                "verbose_name_plural": "Order Notes",
+            },
         ),
         migrations.RemoveField(
-            model_name='line',
-            name='est_dispatch_date',
+            model_name="line",
+            name="est_dispatch_date",
         ),
         migrations.RemoveField(
-            model_name='line',
-            name='unit_cost_price',
+            model_name="line",
+            name="unit_cost_price",
         ),
         migrations.RemoveField(
-            model_name='line',
-            name='unit_retail_price',
+            model_name="line",
+            name="unit_retail_price",
         ),
     ]

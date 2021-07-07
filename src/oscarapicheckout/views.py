@@ -6,15 +6,15 @@ from .serializers import (
     CheckoutSerializer,
     OrderSerializer,
     PaymentMethodsSerializer,
-    PaymentStateSerializer
+    PaymentStateSerializer,
 )
 from .signals import order_placed
 from .states import DECLINED, CONSUMED
 from . import utils
 
-Order = get_model('order', 'Order')
+Order = get_model("order", "Order")
 
-CHECKOUT_ORDER_ID = 'checkout_order_id'
+CHECKOUT_ORDER_ID = "checkout_order_id"
 
 
 class PaymentMethodsView(generics.GenericAPIView):
@@ -24,14 +24,17 @@ class PaymentMethodsView(generics.GenericAPIView):
         root_serializer = self.get_serializer()
         meta = self.metadata_class()
         data = {}
-        for method_code, method_serializer in root_serializer.child.type_mapping.items():
+        for (
+            method_code,
+            method_serializer,
+        ) in root_serializer.child.type_mapping.items():
             method = root_serializer.methods[method_code]
             data[method_code] = {
-                'type': 'nested object',
-                'required': False,
-                'read_only': False,
-                'label': method.name,
-                'children': meta.get_serializer_info(method_serializer),
+                "type": "nested object",
+                "required": False,
+                "read_only": False,
+                "label": method.name,
+                "children": meta.get_serializer_info(method_serializer),
             }
         return Response(data)
 
@@ -75,6 +78,7 @@ class CheckoutView(generics.GenericAPIView):
 
     Returns the order object.
     """
+
     serializer_class = CheckoutSerializer
 
     def post(self, request, format=None):
@@ -87,7 +91,7 @@ class CheckoutView(generics.GenericAPIView):
             return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
 
         # Freeze basket
-        basket = c_ser.validated_data.get('basket')
+        basket = c_ser.validated_data.get("basket")
         basket.freeze()
 
         # Save Order
@@ -103,14 +107,14 @@ class CheckoutView(generics.GenericAPIView):
             previous_states=previous_states,
             request=request,
             order=order,
-            methods=c_ser.fields['payment'].methods,
-            data=c_ser.validated_data['payment'])
+            methods=c_ser.fields["payment"].methods,
+            data=c_ser.validated_data["payment"],
+        )
         utils.set_payment_method_states(order, request, new_states)
 
         # Return order data
-        o_ser = OrderSerializer(order, context={ 'request': request })
+        o_ser = OrderSerializer(order, context={"request": request})
         return Response(o_ser.data)
-
 
     def _record_payments(self, previous_states, request, order, methods, data):
         order_balance = [order.total_incl_tax]
@@ -121,14 +125,14 @@ class CheckoutView(generics.GenericAPIView):
             # order, and is for the same amount, recycle it. This requires that the amount hasn't changed.
 
             # Get the processor class for this method
-            code = method_data['method_type']
+            code = method_data["method_type"]
             method = methods[code]
 
             state = None
             if method_key in previous_states:
                 prev = previous_states[method_key]
                 if prev.status not in (DECLINED, CONSUMED):
-                    if prev.amount == method_data['amount']:
+                    if prev.amount == method_data["amount"]:
                         state = prev
                     else:
                         # Previous payment exists but we can't recycle it; void whatever already exists.
@@ -142,14 +146,14 @@ class CheckoutView(generics.GenericAPIView):
             return state
 
         # Loop through each method with a specified amount to charge
-        data_amount_specified = { k: v for k, v in data.items() if not v['pay_balance'] }
+        data_amount_specified = {k: v for k, v in data.items() if not v["pay_balance"]}
         for key, method_data in data_amount_specified.items():
             new_states[key] = record(key, method_data)
 
         # Change the remainder, not covered by the above methods, to the method marked with `pay_balance`
-        data_pay_balance = { k: v for k, v in data.items() if v['pay_balance'] }
+        data_pay_balance = {k: v for k, v in data.items() if v["pay_balance"]}
         for key, method_data in data_pay_balance.items():
-            method_data['amount'] = order_balance[0]
+            method_data["amount"] = order_balance[0]
             new_states[key] = record(key, method_data)
 
         return new_states
@@ -172,7 +176,9 @@ class PaymentStatesView(generics.GenericAPIView):
             ser = PaymentStateSerializer(instance=state)
             state_data[key] = ser.data
 
-        return Response({
-            'order_status': order.status,
-            'payment_method_states': state_data if any(state_data) else None
-        })
+        return Response(
+            {
+                "order_status": order.status,
+                "payment_method_states": state_data if any(state_data) else None,
+            }
+        )
