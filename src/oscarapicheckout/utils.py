@@ -9,22 +9,22 @@ from .states import COMPLETE, DECLINED, CONSUMED, Complete, Declined, Consumed
 import pickle
 import base64
 
-Order = get_model('order', 'Order')
-OrderCreator = get_class('order.utils', 'OrderCreator')
+Order = get_model("order", "Order")
+OrderCreator = get_class("order.utils", "OrderCreator")
 
-CHECKOUT_ORDER_ID = 'api_checkout_pending_order_id'
-CHECKOUT_PAYMENT_STEPS = 'api_checkout_payment_steps'
+CHECKOUT_ORDER_ID = "api_checkout_pending_order_id"
+CHECKOUT_PAYMENT_STEPS = "api_checkout_payment_steps"
 
 
 def _session_pickle(obj):
     pickled = pickle.dumps(obj)
     base64ed = base64.standard_b64encode(pickled)
-    utfed = base64ed.decode('utf8')
+    utfed = base64ed.decode("utf8")
     return utfed
 
 
 def _session_unpickle(utfed):
-    base64ed = utfed.encode('utf8')
+    base64ed = utfed.encode("utf8")
     pickled = base64.standard_b64decode(base64ed)
     obj = pickle.loads(pickled)
     return obj
@@ -62,12 +62,12 @@ def _set_order_payment_declined(order, request):
     for voucher_application in voucher_applications:
         voucher = voucher_application.voucher
 
-        parent = getattr(voucher, 'parent', None)
+        parent = getattr(voucher, "parent", None)
         if parent:
-            parent.num_orders = F('num_orders') - 1
+            parent.num_orders = F("num_orders") - 1
             parent.save(update_children=False)
 
-        voucher.num_orders = F('num_orders') - 1
+        voucher.num_orders = F("num_orders") - 1
         voucher.save()
 
     # Delete some related objects
@@ -95,12 +95,20 @@ def _update_order_status(order, request):
         # Authorized the order and consume all the payments
         _set_order_authorized(order, request)
         for key, state in states.items():
-            mark_payment_method_consumed(order, request, key, state.amount, source_id=getattr(state, 'source_id', None))
+            mark_payment_method_consumed(
+                order,
+                request,
+                key,
+                state.amount,
+                source_id=getattr(state, "source_id", None),
+            )
 
 
 def list_payment_method_states(request):
     states = request.session.get(CHECKOUT_PAYMENT_STEPS, {})
-    return { method_key: _session_unpickle(state) for method_key, state in states.items() }
+    return {
+        method_key: _session_unpickle(state) for method_key, state in states.items()
+    }
 
 
 def clear_payment_method_states(request):
@@ -132,15 +140,21 @@ def set_payment_method_states(order, request, states):
 
 
 def mark_payment_method_completed(order, request, method_key, amount, source_id=None):
-    update_payment_method_state(order, request, method_key, Complete(amount, source_id=source_id))
+    update_payment_method_state(
+        order, request, method_key, Complete(amount, source_id=source_id)
+    )
 
 
 def mark_payment_method_declined(order, request, method_key, amount, source_id=None):
-    update_payment_method_state(order, request, method_key, Declined(amount, source_id=source_id))
+    update_payment_method_state(
+        order, request, method_key, Declined(amount, source_id=source_id)
+    )
 
 
 def mark_payment_method_consumed(order, request, method_key, amount, source_id=None):
-    update_payment_method_state(order, request, method_key, Consumed(amount, source_id=source_id))
+    update_payment_method_state(
+        order, request, method_key, Consumed(amount, source_id=source_id)
+    )
 
 
 def get_order_ownership(request, given_user, guest_email):
@@ -150,12 +164,22 @@ def get_order_ownership(request, given_user, guest_email):
     return None, guest_email
 
 
-
 class OrderUpdater(object):
-    def update_order(self, order, basket, order_total,
-                     shipping_method, shipping_charge, user=None,
-                     shipping_address=None, billing_address=None,
-                     order_number=None, status=None, request=None, **kwargs):
+    def update_order(
+        self,
+        order,
+        basket,
+        order_total,
+        shipping_method,
+        shipping_charge,
+        user=None,
+        shipping_address=None,
+        billing_address=None,
+        order_number=None,
+        status=None,
+        request=None,
+        **kwargs
+    ):
         """
         Similar to OrderCreator.place_order, except this updates an existing "Payment Declined" order instead
         of creating a new order.
@@ -166,7 +190,9 @@ class OrderUpdater(object):
 
         if order.status != ORDER_STATUS_PAYMENT_DECLINED:
             # Translators: Error message in checkout
-            raise ValueError(_("Can not update an order that isn't in payment declined state."))
+            raise ValueError(
+                _("Can not update an order that isn't in payment declined state.")
+            )
 
         # Make sure there isn't another order with this number already, besides of course the
         # order we're trying to update.
@@ -176,7 +202,9 @@ class OrderUpdater(object):
             pass
         else:
             # Translators: Error message in checkout
-            msg = _("There is already an order with number %(order_number)s") % dict(order_number=order_number)
+            msg = _("There is already an order with number %(order_number)s") % dict(
+                order_number=order_number
+            )
             raise ValueError(msg)
 
         # Remove all the order lines and cancel and stock they allocated. We'll make new lines from the
@@ -190,8 +218,19 @@ class OrderUpdater(object):
         # Create the actual order.Order and order.Line models
         creator = OrderCreator()
         order = creator.create_order_model(
-            user, basket, shipping_address, shipping_method, shipping_charge, billing_address,
-            order_total, order_number, status, id=order.id, request=request, **kwargs)
+            user,
+            basket,
+            shipping_address,
+            shipping_method,
+            shipping_charge,
+            billing_address,
+            order_total,
+            order_number,
+            status,
+            id=order.id,
+            request=request,
+            **kwargs
+        )
 
         # Make new order lines to replace the ones we deleted.
         for basket_line in basket.all_lines():
@@ -210,18 +249,20 @@ class OrderUpdater(object):
         for application in basket.offer_applications:
             # Trigger any deferred benefits from offers and capture the
             # resulting message
-            application['message'] = application['offer'].apply_deferred_benefit(basket, order, application)
+            application["message"] = application["offer"].apply_deferred_benefit(
+                basket, order, application
+            )
 
             # Record offer application results
-            if application['result'].affects_shipping:
+            if application["result"].affects_shipping:
                 # Skip zero shipping discounts
                 shipping_discount = shipping_method.discount(basket)
-                if shipping_discount <= Decimal('0.00'):
+                if shipping_discount <= Decimal("0.00"):
                     continue
                 # If a shipping offer, we need to grab the actual discount off
                 # the shipping method instance, which should be wrapped in an
                 # OfferDiscount instance.
-                application['discount'] = shipping_discount
+                application["discount"] = shipping_discount
             creator.create_discount_model(order, application)
             creator.record_discount(application)
 

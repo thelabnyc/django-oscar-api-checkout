@@ -10,7 +10,7 @@ class OrderNumberGenerator(object):
         base_num = int(math.floor(time.time() / (3600 * 24)))
         basket_id = str(basket.id).zfill(3)[::-1]
         suffix = random.randrange(100, 999)
-        number = 'O' + str(base_num) + basket_id + str(suffix)
+        number = "O" + str(base_num) + basket_id + str(suffix)
         return number
 
 

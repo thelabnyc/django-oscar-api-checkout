@@ -7,7 +7,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-order_status_changed = get_class('order.signals', 'order_status_changed')
+order_status_changed = get_class("order.signals", "order_status_changed")
 
 
 @receiver(order_payment_authorized)
@@ -16,7 +16,9 @@ def send_order_confirmation_message(sender, order, request, **kwargs):
 
 
 @receiver(order_status_changed)
-def update_basket_status_upon_order_status_change(sender, order, old_status, new_status, **kwargs):
+def update_basket_status_upon_order_status_change(
+    sender, order, old_status, new_status, **kwargs
+):
     """
     When an order transitions from "Payment Declined" to any other status, make sure
     it's associated basket is not still editable.
@@ -31,6 +33,11 @@ def update_basket_status_upon_order_status_change(sender, order, old_status, new
     if not basket.can_be_edited:
         return
 
-    logger.info("Changing status of Basket[%s] from %s to Submitted due to order status change from %s to %s.",
-        basket.pk, basket.status, old_status, new_status)
+    logger.info(
+        "Changing status of Basket[%s] from %s to Submitted due to order status change from %s to %s.",
+        basket.pk,
+        basket.status,
+        old_status,
+        new_status,
+    )
     basket.submit()
