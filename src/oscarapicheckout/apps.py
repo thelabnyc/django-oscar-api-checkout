@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import re_path
 from django.views.decorators.cache import never_cache
 from django.utils.translation import gettext_lazy as _
 from oscar.core.application import OscarConfig
@@ -21,17 +21,17 @@ class Config(OscarConfig):
         view_states = never_cache(PaymentStatesView.as_view())
         view_checkout = never_cache(CheckoutView.as_view())
         urlpatterns = [
-            url(
+            re_path(
                 r"^checkout/payment-methods/$",
                 view_methods,
                 name="api-checkout-payment-methods",
             ),
-            url(r"^checkout/payment-states/$", view_states, name="api-payment"),
-            url(
+            re_path(r"^checkout/payment-states/$", view_states, name="api-payment"),
+            re_path(
                 r"^checkout/payment-states/(?P<pk>\d+)/$",
                 view_states,
                 name="api-payment",
             ),
-            url(r"^checkout/$", view_checkout, name="api-checkout"),
+            re_path(r"^checkout/$", view_checkout, name="api-checkout"),
         ]
         return self.post_process_urls(urlpatterns)
