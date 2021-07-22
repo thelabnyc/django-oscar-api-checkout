@@ -5,7 +5,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.db import transaction
 from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from rest_framework import serializers, exceptions
 from rest_framework.utils import html
 from rest_framework.exceptions import ValidationError
@@ -122,7 +122,7 @@ class PaymentMethodsSerializer(serializers.DictField):
         union_types = {}
         for code, method in self.methods.items():
             union_types[method.code] = method.serializer_class(
-                method_type_choices=[(code, force_text(method.name))],
+                method_type_choices=[(code, force_str(method.name))],
                 required=False,
                 context=context,
             )
