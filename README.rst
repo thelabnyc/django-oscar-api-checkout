@@ -175,6 +175,10 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+3.1.0
+------------------
+- Add new “Pay Later” deferred payment functionality.
+
 3.0.0
 ------------------
 - Oscar 3.0 Compatibility
