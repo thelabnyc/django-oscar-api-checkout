@@ -1,6 +1,7 @@
 PENDING = "Pending"
 DECLINED = "Declined"
 COMPLETE = "Complete"
+DEFERRED = "Deferred"
 CONSUMED = "Consumed"
 
 
@@ -24,6 +25,10 @@ class SourceBoundPaymentStatus(PaymentStatus):
 
 class Complete(SourceBoundPaymentStatus):
     status = COMPLETE
+
+
+class Deferred(SourceBoundPaymentStatus):
+    status = DEFERRED
 
 
 class Declined(SourceBoundPaymentStatus):

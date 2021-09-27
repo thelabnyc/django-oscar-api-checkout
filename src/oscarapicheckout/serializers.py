@@ -2,10 +2,11 @@ from collections import OrderedDict
 from decimal import Decimal
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AnonymousUser
+from django.core.signing import Signer, BadSignature
 from django.db import transaction
 from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
-from django.utils.encoding import force_str
+from django.utils.encoding import force_str, smart_str
 from rest_framework import serializers, exceptions
 from rest_framework.utils import html
 from rest_framework.exceptions import ValidationError
@@ -18,6 +19,7 @@ from oscarapi.basket.operations import get_basket
 from .signals import pre_calculate_total
 from .states import PENDING
 from . import utils, settings
+import logging
 
 Basket = get_model("basket", "Basket")
 Order = get_model("order", "Order")
@@ -25,6 +27,8 @@ BillingAddress = get_model("order", "BillingAddress")
 ShippingAddress = get_model("order", "ShippingAddress")
 
 OrderTotalCalculator = get_class("checkout.calculators", "OrderTotalCalculator")
+
+logger = logging.getLogger(__name__)
 
 
 class DiscriminatedUnionSerializer(serializers.Serializer):
@@ -197,6 +201,76 @@ class PaymentMethodsSerializer(serializers.DictField):
             )
 
         return result
+
+
+class SignedTokenRelatedField(serializers.SlugRelatedField):
+    """
+    Similar to a SlugRelatedField, but uses a server-signed version of the slug.
+    Thus, this can be used to both identify an object and verify the client has
+    permission to view/modify it.
+    """
+
+    @classmethod
+    def get_signer(cls):
+        signer = Signer(salt=f"oscarapicheckout.{cls.__name__}")
+        print(f"salt == oscarapicheckout.{cls.__name__}")
+        return signer
+
+    @classmethod
+    def verify_token(cls, token):
+        return cls.get_signer().unsign(token)
+
+    def get_token(self, model_inst):
+        """Generate the signed token value for the given model instance"""
+        raw_value = getattr(model_inst, self.slug_field)
+        logger.info(
+            "Generating %s token for %s[%s]",
+            self.__class__.__name__,
+            model_inst.__class__.__name__,
+            raw_value,
+        )
+        return self.get_signer().sign(raw_value)
+
+    def get_choices(self, cutoff=None):
+        """Don't include choices in the DRF HTML form"""
+        return {}
+
+    def to_internal_value(self, data):
+        # Verify the token
+        try:
+            raw_value = self.verify_token(data)
+        except BadSignature:
+            self.fail(
+                "does_not_exist", slug_name=self.slug_field, value=smart_str(data)
+            )
+        except (TypeError, ValueError):
+            self.fail("invalid")
+        return super().to_internal_value(raw_value)
+
+    def to_representation(self, obj):
+        return self.get_token(obj)
+
+
+class OrderTokenField(SignedTokenRelatedField):
+    @classmethod
+    def get_order_token(cls, order):
+        return cls().get_token(order)
+
+    def __init__(self, **kwargs):
+        kwargs["queryset"] = Order.objects.all()
+        kwargs["slug_field"] = "number"
+        super().__init__(**kwargs)
+
+
+class BasketTokenField(SignedTokenRelatedField):
+    @classmethod
+    def get_basket_token(cls, basket):
+        return cls().get_token(basket)
+
+    def __init__(self, **kwargs):
+        kwargs["queryset"] = Basket.objects.all()
+        kwargs["slug_field"] = "pk"
+        super().__init__(**kwargs)
 
 
 class PaymentStateSerializer(serializers.Serializer):
@@ -378,7 +452,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
                 shipping_address=shipping_address,
                 billing_address=billing_address,
                 request=request,
-                **kwargs
+                **kwargs,
             )
 
         # Update this order instead of making a new one.
@@ -392,7 +466,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
             user=user,
             billing_address=billing_address,
             shipping_address=shipping_address,
-            **kwargs
+            **kwargs,
         )
         return utils.OrderUpdater().update_order(
             order=order,
@@ -402,5 +476,18 @@ class CheckoutSerializer(OscarCheckoutSerializer):
             billing_address=billing_address,
             status=status,
             request=request,
-            **kwargs
+            **kwargs,
         )
+
+
+class CompleteDeferredPaymentSerializer(serializers.Serializer):
+    order = OrderTokenField(
+        help_text=_(
+            "Server-signed order number token used to identify the order and verify the client has permission to modify it."
+        )
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Build PaymentMethods field
+        self.fields["payment"] = PaymentMethodsSerializer(context=self.context)

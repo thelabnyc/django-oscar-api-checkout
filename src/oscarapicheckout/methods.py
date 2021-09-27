@@ -149,3 +149,26 @@ class Cash(PaymentMethod):
             self.make_event_quantity(event, line, line.quantity)
 
         return states.Complete(source.amount_debited, source_id=source.pk)
+
+
+class PayLater(PaymentMethod):
+    """
+    The PayLater method method is similar to the Cash payment method—it doesn't
+    actually authorize any payment. This method exists to differentiate two
+    different types of not-really-authorized orders:
+
+    - `Cash` is intended for use by employees when they are going to collect
+        payment directly by some means other than Oscar.
+    - `PayLater` is used by customers as an failover system when the normal
+        payment processor is experiencing downtime. It allows a customer to
+        place an order, then come back and complete the payment authorization
+        later.
+    """
+
+    # Translators: Description of payment method in checkout
+    name = _("Pay Later")
+    code = "pay-later"
+
+    def _record_payment(self, request, order, method_key, amount, reference, **kwargs):
+        source = self.get_source(order, reference)
+        return states.Deferred(Decimal("0.00"), source_id=source.pk)

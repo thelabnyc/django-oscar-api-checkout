@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from oscar.core.loading import get_model
 from .serializers import (
     CheckoutSerializer,
+    CompleteDeferredPaymentSerializer,
     OrderSerializer,
     PaymentMethodsSerializer,
     PaymentStateSerializer,
@@ -41,7 +42,7 @@ class PaymentMethodsView(generics.GenericAPIView):
 
 class CheckoutView(generics.GenericAPIView):
     """
-    Checkout and use a WFRS account as payment.
+    Checkout and begin collecting payment.
 
     POST(basket, shipping_address, wfrs_source_account,
          [total, shipping_method_code, shipping_charge, billing_address]):
@@ -157,6 +158,43 @@ class CheckoutView(generics.GenericAPIView):
             new_states[key] = record(key, method_data)
 
         return new_states
+
+
+class CompleteDeferredPaymentView(CheckoutView):
+    """
+    Authorize payment for an order previously placed using the “Pay Later”
+    deferred payment method.
+    """
+
+    serializer_class = CompleteDeferredPaymentSerializer
+
+    def post(self, request, format=None):
+        # Wipe out any previous state data
+        utils.clear_consumed_payment_method_states(request)
+
+        # Validate the input
+        c_ser = self.get_serializer(data=request.data)
+        if not c_ser.is_valid():
+            return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
+
+        # Update the session to note that we're working on this order
+        order = c_ser.validated_data["order"]
+        request.session[CHECKOUT_ORDER_ID] = order.id
+
+        # Save payment steps into session for processing
+        previous_states = utils.list_payment_method_states(request)
+        new_states = self._record_payments(
+            previous_states=previous_states,
+            request=request,
+            order=order,
+            methods=c_ser.fields["payment"].methods,
+            data=c_ser.validated_data["payment"],
+        )
+        utils.set_payment_method_states(order, request, new_states)
+
+        # Return order data
+        o_ser = OrderSerializer(order, context={"request": request})
+        return Response(o_ser.data)
 
 
 class PaymentStatesView(generics.GenericAPIView):

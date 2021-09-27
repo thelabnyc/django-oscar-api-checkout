@@ -15,11 +15,19 @@ class Config(OscarConfig):
         from . import handlers  # NOQA
 
     def get_urls(self):
-        from .views import PaymentMethodsView, CheckoutView, PaymentStatesView
+        from .views import (
+            PaymentMethodsView,
+            CheckoutView,
+            CompleteDeferredPaymentView,
+            PaymentStatesView,
+        )
 
         view_methods = never_cache(PaymentMethodsView.as_view())
         view_states = never_cache(PaymentStatesView.as_view())
         view_checkout = never_cache(CheckoutView.as_view())
+        view_complete_deferred_payment = never_cache(
+            CompleteDeferredPaymentView.as_view()
+        )
         urlpatterns = [
             re_path(
                 r"^checkout/payment-methods/$",
@@ -31,6 +39,11 @@ class Config(OscarConfig):
                 r"^checkout/payment-states/(?P<pk>\d+)/$",
                 view_states,
                 name="api-payment",
+            ),
+            re_path(
+                r"^checkout/complete-deferred-payment/$",
+                view_complete_deferred_payment,
+                name="api-complete-deferred-payment",
             ),
             re_path(r"^checkout/$", view_checkout, name="api-checkout"),
         ]

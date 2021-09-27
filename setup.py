@@ -21,7 +21,7 @@ extras_require = {
     "development": [
         "coverage>=4.4.2",
         "flake8>=3.2.1",
-        "psycopg2cffi>=2.7.7",
+        "psycopg2-binary>=2.8.3",
         "PyYAML>=3.12",
         "sorl-thumbnail>=11.04",
         "sphinx>=1.5.2",
