@@ -6,6 +6,7 @@ from rest_framework import status
 from rest_framework.reverse import reverse
 from ..signals import pre_calculate_total, order_placed, order_payment_authorized
 from ..utils import _set_order_payment_declined
+from ..serializers import OrderTokenField
 from .base import BaseTest
 from unittest import mock
 
@@ -50,6 +51,98 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
+                dict(
+                    source_name="Cash",
+                    reference="",
+                    allocated=D("10.00"),
+                    debited=D("10.00"),
+                ),
+            ],
+        )
+
+    def test_pay_later_order(self):
+        self.login(is_staff=True)
+
+        # Place a cash order
+        basket_id = self._prepare_basket()
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {
+            "pay-later": {
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Fetch payment states
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data["order_status"], "Pending")
+        self.assertEqual(
+            states_resp.data["payment_method_states"].keys(), set(["pay-later"])
+        )
+        self.assertEqual(
+            states_resp.data["payment_method_states"]["pay-later"]["status"], "Deferred"
+        )
+        self.assertEqual(
+            states_resp.data["payment_method_states"]["pay-later"]["amount"], "0.00"
+        )
+        self.assertIsNone(
+            states_resp.data["payment_method_states"]["pay-later"]["required_action"]
+        )
+        self.assertPaymentSources(
+            order_resp.data["number"],
+            sources=[
+                dict(
+                    source_name="Pay Later",
+                    reference="",
+                    allocated=D("0.00"),
+                    debited=D("0.00"),
+                ),
+            ],
+        )
+
+        # Complete payment with cash method
+        order = Order.objects.get(number=order_resp.data["number"])
+        order_resp = self._complete_deferred_payment(
+            {
+                "order": OrderTokenField.get_order_token(order),
+                "payment": {
+                    "cash": {
+                        "enabled": True,
+                        "pay_balance": True,
+                    }
+                },
+            }
+        )
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Fetch payment states
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data["order_status"], "Authorized")
+        self.assertEqual(
+            states_resp.data["payment_method_states"].keys(), set(["cash"])
+        )
+        self.assertEqual(
+            states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
+        )
+        self.assertEqual(
+            states_resp.data["payment_method_states"]["cash"]["amount"], "10.00"
+        )
+        self.assertIsNone(
+            states_resp.data["payment_method_states"]["cash"]["required_action"]
+        )
+        self.assertPaymentSources(
+            order_resp.data["number"],
+            sources=[
+                dict(
+                    source_name="Pay Later",
+                    reference="",
+                    allocated=D("0.00"),
+                    debited=D("0.00"),
+                ),
                 dict(
                     source_name="Cash",
                     reference="",
@@ -3953,6 +4046,10 @@ class CheckoutAPITest(BaseTest):
 
     def _checkout(self, data):
         url = reverse("api-checkout")
+        return self.client.post(url, data, format="json")
+
+    def _complete_deferred_payment(self, data):
+        url = reverse("api-complete-deferred-payment")
         return self.client.post(url, data, format="json")
 
     def _add_voucher(self, voucher):

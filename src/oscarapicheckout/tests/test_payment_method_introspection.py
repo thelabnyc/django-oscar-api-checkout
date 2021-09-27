@@ -96,6 +96,48 @@ class PaymentMethodsViewTest(BaseTest):
                         },
                     },
                 },
+                "pay-later": {
+                    "type": "nested object",
+                    "required": False,
+                    "read_only": False,
+                    "label": "Pay Later",
+                    "children": {
+                        "method_type": {
+                            "type": "choice",
+                            "required": True,
+                            "read_only": False,
+                            "label": "Method type",
+                            "choices": [
+                                {"value": "pay-later", "display_name": "Pay Later"}
+                            ],
+                        },
+                        "enabled": {
+                            "type": "boolean",
+                            "required": False,
+                            "read_only": False,
+                            "label": "Enabled",
+                        },
+                        "pay_balance": {
+                            "type": "boolean",
+                            "required": False,
+                            "read_only": False,
+                            "label": "Pay balance",
+                        },
+                        "amount": {
+                            "type": "decimal",
+                            "required": False,
+                            "read_only": False,
+                            "label": "Amount",
+                        },
+                        "reference": {
+                            "type": "string",
+                            "required": False,
+                            "read_only": False,
+                            "label": "Reference",
+                            "max_length": 128,
+                        },
+                    },
+                },
             },
         )
 
@@ -119,6 +161,48 @@ class PaymentMethodsViewTest(BaseTest):
                             "label": "Method type",
                             "choices": [
                                 {"value": "credit-card", "display_name": "Credit Card"}
+                            ],
+                        },
+                        "enabled": {
+                            "type": "boolean",
+                            "required": False,
+                            "read_only": False,
+                            "label": "Enabled",
+                        },
+                        "pay_balance": {
+                            "type": "boolean",
+                            "required": False,
+                            "read_only": False,
+                            "label": "Pay balance",
+                        },
+                        "amount": {
+                            "type": "decimal",
+                            "required": False,
+                            "read_only": False,
+                            "label": "Amount",
+                        },
+                        "reference": {
+                            "type": "string",
+                            "required": False,
+                            "read_only": False,
+                            "label": "Reference",
+                            "max_length": 128,
+                        },
+                    },
+                },
+                "pay-later": {
+                    "type": "nested object",
+                    "required": False,
+                    "read_only": False,
+                    "label": "Pay Later",
+                    "children": {
+                        "method_type": {
+                            "type": "choice",
+                            "required": True,
+                            "read_only": False,
+                            "label": "Method type",
+                            "choices": [
+                                {"value": "pay-later", "display_name": "Pay Later"}
                             ],
                         },
                         "enabled": {

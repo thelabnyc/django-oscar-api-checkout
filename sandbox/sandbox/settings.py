@@ -221,4 +221,8 @@ API_ENABLED_PAYMENT_METHODS = [
         "method": "sandbox.creditcards.methods.CreditCard",
         "permission": "oscarapicheckout.permissions.Public",
     },
+    {
+        "method": "oscarapicheckout.methods.PayLater",
+        "permission": "oscarapicheckout.permissions.Public",
+    },
 ]
