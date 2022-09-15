@@ -1,12 +1,15 @@
-postgres:
-  image: postgres:latest
-  environment:
-    POSTGRES_HOST_AUTH_METHOD: 'trust'
+version: '3.4'
 
-test:
-  build: .
-  command: env
-  links:
-    - postgres
-  volumes:
-    - .:/code
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: 'trust'
+
+  test:
+    build: .
+    command: env
+    links:
+      - postgres
+    volumes:
+      - .:/code

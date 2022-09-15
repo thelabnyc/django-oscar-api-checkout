@@ -9,6 +9,7 @@ class Config(OscarConfig):
     label = "oscarapicheckout"
     verbose_name = _("Oscar API-Checkout")
     namespace = "oscarapicheckout"
+    default = True
 
     def ready(self):
         # Register signal handlers
