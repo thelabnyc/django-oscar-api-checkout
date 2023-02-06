@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-09-27 21:05+0000\n"
+"POT-Creation-Date: 2023-02-06 21:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,12 +43,12 @@ msgstr ""
 
 #. Translators: User facing error message in checkout
 #. Translators: Error message in checkout
-#: oscarapicheckout/mixins.py:39 oscarapicheckout/utils.py:189
+#: oscarapicheckout/mixins.py:39 oscarapicheckout/utils.py:190
 msgid "Empty baskets cannot be submitted"
 msgstr ""
 
 #. Translators: Error message in checkout
-#: oscarapicheckout/mixins.py:55 oscarapicheckout/utils.py:205
+#: oscarapicheckout/mixins.py:55 oscarapicheckout/utils.py:206
 #, python-format
 msgid "There is already an order with number %(order_number)s"
 msgstr ""
@@ -103,6 +103,6 @@ msgid ""
 "client has permission to modify it."
 msgstr ""
 
-#: oscarapicheckout/utils.py:194
+#: oscarapicheckout/utils.py:195
 msgid "Can not update an order that isn't in payment declined state."
 msgstr ""
