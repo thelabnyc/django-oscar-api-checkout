@@ -1,5 +1,6 @@
 from decimal import Decimal
 from django.db.models import F
+from django.db.models.functions import Greatest
 from django.utils.translation import gettext_lazy as _
 from oscar.core.loading import get_class, get_model
 from oscarapi.basket import operations
@@ -64,10 +65,10 @@ def _set_order_payment_declined(order, request):
 
         parent = getattr(voucher, "parent", None)
         if parent:
-            parent.num_orders = F("num_orders") - 1
+            parent.num_orders = Greatest(F("num_orders") - 1, 0)
             parent.save(update_children=False)
 
-        voucher.num_orders = F("num_orders") - 1
+        voucher.num_orders = Greatest(F("num_orders") - 1, 0)
         voucher.save()
 
     # Delete some related objects
