@@ -175,6 +175,11 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+3.2.0
+------------------
+- Add support for django-oscar 3.2.2
+- Add support for django 4.2
+
 3.1.1
 ------------------
 - Fix bug where, on occasion, ``OrderUpdater`` would try to decrement ``Voucher.num_orders`` below 0.
