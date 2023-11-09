@@ -1,0 +1,33 @@
+[build-system]
+requires = [ "poetry-core>=1.0.0",]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "django-oscar-api-checkout"
+version = "3.2.0.post2"
+description = "An extension on top of django-oscar-api providing a more flexible checkout API with a pluggable payment methods interface."
+authors = [ "thelabnyc <thelabdev@thelabnyc.com>",]
+readme = "README.rst"
+homepage = "https://gitlab.com/thelabnyc/django-oscar/django-oscar-api-checkout"
+repository = "https://gitlab.com/thelabnyc/django-oscar/django-oscar-api-checkout"
+license = "ISC"
+
+[[tool.poetry.packages]]
+include = "oscarapicheckout"
+from = "src"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+Django = ">=3.2"
+django-oscar = ">=3.2.2"
+django-oscar-api = ">=3.0.0"
+
+[tool.poetry.group.dev.dependencies]
+coverage = ">=4.4.2"
+flake8 = ">=3.2.1"
+psycopg2-binary = ">=2.8.3"
+PyYAML = ">=3.12"
+sorl-thumbnail = ">=11.04"
+sphinx = ">=1.5.2"
+tox = ">=2.6.0"
+unittest-xml-reporting = ">=3.0.4"
