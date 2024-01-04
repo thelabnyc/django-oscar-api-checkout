@@ -6,7 +6,6 @@ import oscar.core.utils
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("order", "0001_initial"),
     ]

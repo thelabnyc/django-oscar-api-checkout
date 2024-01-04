@@ -9,7 +9,6 @@ from django.conf import settings
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("partner", "0001_initial"),
         ("customer", "0001_initial"),
