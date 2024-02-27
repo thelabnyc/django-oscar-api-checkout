@@ -3907,15 +3907,24 @@ class CheckoutAPITest(BaseTest):
         self.assertNotEqual(self._get_basket_id(), basket_id)
 
     def test_voucher_for_order_payment_declined(self):
+        print("Starting test for voucher with declined order payment")
+
         # Login as one user
         self.login(is_staff=False)
+        print("Logged in as non-staff user")  # Use print instead of print
 
         # Make a basket
         basket_id = self._prepare_basket()
+        print(f"Prepared basket with ID: {basket_id}")  # Use print
+
         voucher = factories.create_voucher()
+        print(f"Created voucher: {voucher.code}")  # Use print
+
         self._add_voucher(voucher)
+        print(f"Added voucher {voucher.code} to basket")  # Use print
 
         self.assertEqual(voucher.num_orders, 0)
+        print("Confirmed that voucher num_orders is initially 0")  # Use print
 
         data = self._get_checkout_data(basket_id)
         data["payment"] = {
@@ -3927,16 +3936,34 @@ class CheckoutAPITest(BaseTest):
 
         url = reverse("api-checkout")
         order_resp = self.client.post(url, data, format="json")
-        order_number = order_resp.data["number"]
-        order = Order.objects.get(number=order_number)
+        print(
+            f"Posted checkout data, response status code: {order_resp.status_code}"
+        )  # Correct usage for print
+
+        order_number = order_resp.data.get("number")
+        if order_number:
+            print(
+                f"Order created with number: {order_number}"
+            )  # Correct usage for print
+            order = Order.objects.get(number=order_number)
+        else:
+            print(
+                "Order creation failed, no order number in response"
+            )  # Correct usage for print
+            return
 
         voucher.refresh_from_db()
         self.assertEqual(voucher.num_orders, 1)
+        print(
+            "Confirmed that voucher num_orders increased to 1 after order"
+        )  # Correct usage for print
 
         _set_order_payment_declined(order, order_resp.wsgi_request)
+        print(f"Set order {order_number}'s payment as declined")  # Use print
 
         voucher.refresh_from_db()
         self.assertEqual(voucher.num_orders, 0)
+        print("Confirmed that voucher num_orders reverted to 0 after declining payment")
 
     def assertPaymentSources(self, order_number, sources):
         order = Order.objects.get(number=order_number)
