@@ -1,4 +1,5 @@
 from django.dispatch import receiver
+from django.db import transaction
 from oscar.core.loading import get_class
 from .email import OrderMessageSender
 from .settings import ORDER_STATUS_PAYMENT_DECLINED
@@ -12,7 +13,9 @@ order_status_changed = get_class("order.signals", "order_status_changed")
 
 @receiver(order_payment_authorized)
 def send_order_confirmation_message(sender, order, request, **kwargs):
-    OrderMessageSender(request).send_order_placed_email(order)
+    transaction.on_commit(
+        lambda: OrderMessageSender(request).send_order_placed_email(order)
+    )
 
 
 @receiver(order_status_changed)
