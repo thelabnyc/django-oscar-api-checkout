@@ -175,6 +175,10 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+3.3.0
+------------------
+- Add support for requiring a recaptcha field at checkout. Enable with the ``API_CHECKOUT_CAPTCHA`` setting.
+
 3.2.0
 ------------------
 - Add support for django-oscar 3.2.2
