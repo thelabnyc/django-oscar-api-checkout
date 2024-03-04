@@ -73,6 +73,7 @@ INSTALLED_APPS = [
     "treebeard",
     "sorl.thumbnail",
     "django_tables2",
+    "drf_recaptcha",
     # django-oscar-api
     "rest_framework",
     "oscarapi",
@@ -226,3 +227,10 @@ API_ENABLED_PAYMENT_METHODS = [
         "permission": "oscarapicheckout.permissions.Public",
     },
 ]
+
+# Enable captcha in checkout?
+API_CHECKOUT_CAPTCHA = False
+
+# See https://github.com/llybin/drf-recaptcha
+DRF_RECAPTCHA_SECRET_KEY = "FAKE"
+DRF_RECAPTCHA_TESTING = True

@@ -16,10 +16,12 @@ from oscarapi.serializers.checkout import (
     OrderSerializer as OscarOrderSerializer,
 )
 from oscarapi.basket.operations import get_basket
+from drf_recaptcha.fields import ReCaptchaV2Field
 from .signals import pre_calculate_total
 from .states import PENDING
 from . import utils, settings
 import logging
+
 
 Basket = get_model("basket", "Basket")
 Order = get_model("order", "Order")
@@ -298,6 +300,10 @@ class CheckoutSerializer(OscarCheckoutSerializer):
 
         # Build PaymentMethods field
         self.fields["payment"] = PaymentMethodsSerializer(context=self.context)
+
+        # Optionally add a captcha field
+        if settings.API_CHECKOUT_CAPTCHA:
+            self.fields["recaptcha"] = ReCaptchaV2Field()
 
         # We require a request because we need to know what accounts are valid for the
         # user to be drafting from. This is derived from the user when authenticated or
