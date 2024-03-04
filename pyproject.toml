@@ -19,7 +19,7 @@ from = "src"
 [tool.poetry.dependencies]
 python = "^3.10"
 Django = ">=3.2"
-django-oscar = ">=3.2.4"
+django-oscar = ">=3.2.2"
 django-oscar-api = ">=3.0.0"
 
 [tool.poetry.group.dev.dependencies]
