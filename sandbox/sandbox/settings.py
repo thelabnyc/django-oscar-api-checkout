@@ -234,3 +234,11 @@ API_CHECKOUT_CAPTCHA = False
 # See https://github.com/llybin/drf-recaptcha
 DRF_RECAPTCHA_SECRET_KEY = "FAKE"
 DRF_RECAPTCHA_TESTING = True
+
+# Enable fraud check rules in checkout
+API_CHECKOUT_FRAUD_CHECKS = [
+    {
+        "rule": "oscarapicheckout.fraud.AddressVelocity",
+        "kwargs": {},
+    },
+]
