@@ -178,6 +178,7 @@ Changelog
 3.3.0
 ------------------
 - Add support for requiring a recaptcha field at checkout. Enable with the ``API_CHECKOUT_CAPTCHA`` setting.
+- Add support for customizable fraud check rules that run during checkout. These are controlled with the ``API_CHECKOUT_FRAUD_CHECKS`` setting. Once example rule is provided: ``oscarapicheckout.fraud.AddressVelocity``.
 
 3.2.0
 ------------------
