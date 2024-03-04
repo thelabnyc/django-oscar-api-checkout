@@ -19,7 +19,7 @@ from oscarapi.basket.operations import get_basket
 from drf_recaptcha.fields import ReCaptchaV2Field
 from .signals import pre_calculate_total
 from .states import PENDING
-from . import utils, settings
+from . import utils, settings, fraud
 import logging
 
 
@@ -352,6 +352,10 @@ class CheckoutSerializer(OscarCheckoutSerializer):
                 basket_errors.append(msg)
         if len(basket_errors) > 0:
             raise serializers.ValidationError({"basket": basket_errors})
+
+        # Screen the order through the enabled fraud rules. A rule will raise a
+        # serializers.ValidationError() if it finds something fishy.
+        fraud.run_enabled_fraud_checks(data)
 
         # Figure out who should own the order
         request = self.context["request"]
