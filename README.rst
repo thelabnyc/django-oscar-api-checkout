@@ -175,6 +175,10 @@ These are the basic steps to add an item to the basket and checkout using the AP
 Changelog
 =========
 
+3.3.1
+------------------
+- Ensure order confirmation emails are not sent until after the DB transaction wrapping checkout is committed.
+
 3.3.0
 ------------------
 - Add support for requiring a recaptcha field at checkout. Enable with the ``API_CHECKOUT_CAPTCHA`` setting.
