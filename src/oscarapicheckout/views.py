@@ -100,7 +100,13 @@ class CheckoutView(generics.GenericAPIView):
         request.session[CHECKOUT_ORDER_ID] = order.id
 
         # Send order_placed signal
-        order_placed.send(sender=self, order=order, user=request.user, request=request)
+        order_placed.send(
+            sender=self,
+            order=order,
+            user=request.user,
+            request=request,
+            recaptcha_score=c_ser.get_recaptcha_score(),
+        )
 
         # Save payment steps into session for processing
         previous_states = utils.list_payment_method_states(request)

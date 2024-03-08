@@ -16,7 +16,7 @@ from oscarapi.serializers.checkout import (
     OrderSerializer as OscarOrderSerializer,
 )
 from oscarapi.basket.operations import get_basket
-from drf_recaptcha.fields import ReCaptchaV2Field
+from drf_recaptcha.fields import ReCaptchaV3Field
 from .signals import pre_calculate_total
 from .states import PENDING
 from . import utils, settings, fraud
@@ -303,7 +303,13 @@ class CheckoutSerializer(OscarCheckoutSerializer):
 
         # Optionally add a captcha field
         if settings.API_CHECKOUT_CAPTCHA:
-            self.fields["recaptcha"] = ReCaptchaV2Field()
+            kwargs = {
+                "action": "checkout",
+                "required_score": 0.5,
+            }
+            if isinstance(settings.API_CHECKOUT_CAPTCHA, dict):
+                kwargs = settings.API_CHECKOUT_CAPTCHA
+            self.fields["recaptcha"] = ReCaptchaV3Field(**kwargs)
 
         # We require a request because we need to know what accounts are valid for the
         # user to be drafting from. This is derived from the user when authenticated or
@@ -323,6 +329,12 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         if hasattr(settings.ORDER_OWNERSHIP_CALCULATOR, "__call__"):
             return settings.ORDER_OWNERSHIP_CALCULATOR
         return import_string(settings.ORDER_OWNERSHIP_CALCULATOR)
+
+    def get_recaptcha_score(self) -> float | None:
+        recaptcha_score = None
+        if "recaptcha" in self.fields:
+            recaptcha_score = self.fields["recaptcha"].score
+        return recaptcha_score
 
     def validate(self, data):
         # Cache guest email since it might get removed during super validation
@@ -355,7 +367,11 @@ class CheckoutSerializer(OscarCheckoutSerializer):
 
         # Screen the order through the enabled fraud rules. A rule will raise a
         # serializers.ValidationError() if it finds something fishy.
-        fraud.run_enabled_fraud_checks(data)
+        fraud.run_enabled_fraud_checks(
+            data=data,
+            recaptcha_score=self.get_recaptcha_score(),
+            request=self.context.get("request", None),
+        )
 
         # Figure out who should own the order
         request = self.context["request"]

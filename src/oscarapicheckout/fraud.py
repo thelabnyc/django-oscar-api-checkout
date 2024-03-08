@@ -5,8 +5,11 @@ from django.utils.module_loading import import_string
 from oscar.core.loading import get_model
 from rest_framework import serializers
 from . import settings
+import logging
 
 Order = get_model("order", "Order")
+
+logger = logging.getLogger(__name__)
 
 
 def get_enabled_fraud_checks():
@@ -16,9 +19,9 @@ def get_enabled_fraud_checks():
         yield rule
 
 
-def run_enabled_fraud_checks(data):
+def run_enabled_fraud_checks(**kwargs):
     for rule in get_enabled_fraud_checks():
-        rule.validate(data)
+        rule.validate(**kwargs)
     return None
 
 
@@ -36,7 +39,7 @@ class AddressVelocity:
         self.period = period or timedelta(hours=24)
         self.threshold = threshold
 
-    def validate(self, data) -> None:
+    def validate(self, data, **kwargs) -> None:
         self._validate_addr("shipping_address", data)
         self._validate_addr("billing_address", data)
 
@@ -56,4 +59,5 @@ class AddressVelocity:
 
         address_use_count = Order.objects.filter(**filter_args).count()
         if address_use_count >= self.threshold:
+            logger.info("Rejected order due to address velocity rules")
             raise serializers.ValidationError(_("Order rejected."))
