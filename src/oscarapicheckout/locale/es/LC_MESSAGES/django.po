@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-04 23:05+0000\n"
+"POT-Creation-Date: 2024-03-08 23:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgstr ""
 msgid "Oscar API-Checkout"
 msgstr ""
 
-#: oscarapicheckout/fraud.py:59
+#: oscarapicheckout/fraud.py:63
 msgid "Order rejected."
 msgstr ""
 
@@ -75,7 +75,7 @@ msgstr ""
 msgid "Must set pay_balance flag on at least one payment method."
 msgstr ""
 
-#: oscarapicheckout/serializers.py:347
+#: oscarapicheckout/serializers.py:359
 #, python-format
 msgid ""
 "'%(title)s' is no longer available to buy (%(reason)s). Please adjust your "
@@ -83,25 +83,25 @@ msgid ""
 msgstr ""
 
 #. Translators: User facing error message in checkout
-#: oscarapicheckout/serializers.py:366
+#: oscarapicheckout/serializers.py:382
 msgid "Email address is required."
 msgstr ""
 
-#: oscarapicheckout/serializers.py:396
+#: oscarapicheckout/serializers.py:412
 msgid "Specified payment amounts exceed order total."
 msgstr ""
 
-#: oscarapicheckout/serializers.py:442
+#: oscarapicheckout/serializers.py:458
 msgid "An non-declined order already exists for this basket."
 msgstr ""
 
-#: oscarapicheckout/serializers.py:450
+#: oscarapicheckout/serializers.py:466
 msgid ""
 "Multiple order exist for this basket! This should never happen and we don't "
 "know what to do."
 msgstr ""
 
-#: oscarapicheckout/serializers.py:496
+#: oscarapicheckout/serializers.py:512
 msgid ""
 "Server-signed order number token used to identify the order and verify the "
 "client has permission to modify it."
