@@ -19,9 +19,9 @@ def get_enabled_fraud_checks():
         yield rule
 
 
-def run_enabled_fraud_checks(**kwargs):
+def run_enabled_fraud_checks(data, **kwargs):
     for rule in get_enabled_fraud_checks():
-        rule.validate(**kwargs)
+        rule.validate(data, **kwargs)
     return None
 
 
