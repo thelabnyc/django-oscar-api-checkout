@@ -24,7 +24,7 @@ django-oscar-api = ">=3.0.0"
 drf-recaptcha = "^3.0.0"
 
 [tool.poetry.group.dev.dependencies]
-coverage = ">=4.5.4"
+coverage = ">=7.5.3"
 flake8 = ">=3.2.1"
 psycopg2-binary = ">=2.8.3"
 PyYAML = ">=3.12"
