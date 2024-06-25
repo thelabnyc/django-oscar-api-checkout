@@ -25,7 +25,7 @@ drf-recaptcha = "^3.0.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = ">=4.5.4"
-flake8 = ">=3.2.1"
+flake8 = ">=7.1.0"
 psycopg2-binary = ">=2.8.3"
 PyYAML = ">=3.12"
 sorl-thumbnail = ">=11.04"
