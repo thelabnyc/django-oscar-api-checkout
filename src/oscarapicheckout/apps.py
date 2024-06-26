@@ -1,4 +1,4 @@
-from django.urls import re_path
+from django.urls import path
 from django.views.decorators.cache import never_cache
 from django.utils.translation import gettext_lazy as _
 from oscar.core.application import OscarConfig
@@ -30,22 +30,22 @@ class Config(OscarConfig):
             CompleteDeferredPaymentView.as_view()
         )
         urlpatterns = [
-            re_path(
-                r"^checkout/payment-methods/$",
+            path(
+                "checkout/payment-methods/",
                 view_methods,
                 name="api-checkout-payment-methods",
             ),
-            re_path(r"^checkout/payment-states/$", view_states, name="api-payment"),
-            re_path(
-                r"^checkout/payment-states/(?P<pk>\d+)/$",
+            path("checkout/payment-states/", view_states, name="api-payment"),
+            path(
+                "checkout/payment-states/<int:pk>/",
                 view_states,
                 name="api-payment",
             ),
-            re_path(
-                r"^checkout/complete-deferred-payment/$",
+            path(
+                "checkout/complete-deferred-payment/",
                 view_complete_deferred_payment,
                 name="api-complete-deferred-payment",
             ),
-            re_path(r"^checkout/$", view_checkout, name="api-checkout"),
+            path("checkout/", view_checkout, name="api-checkout"),
         ]
         return self.post_process_urls(urlpatterns)
