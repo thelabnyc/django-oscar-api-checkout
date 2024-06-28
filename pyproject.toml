@@ -1,5 +1,5 @@
 [build-system]
-requires = [ "poetry-core>=1.0.0",]
+requires = [ "poetry-core>=1.9.0",]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
@@ -18,17 +18,17 @@ from = "src"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-Django = ">=3.2"
-django-oscar = ">=3.2.2"
-django-oscar-api = ">=3.0.0"
-drf-recaptcha = "^3.0.0"
+Django = "^4.2"
+django-oscar = "^3.2.4"
+django-oscar-api = "^3.2.4"
+drf-recaptcha = "^3.1.0"
 
 [tool.poetry.group.dev.dependencies]
-coverage = ">=7.5.4"
-flake8 = ">=7.1.0"
-psycopg2-binary = ">=2.9.9"
-PyYAML = ">=6.0.1"
-sorl-thumbnail = ">=12.10.0"
-sphinx = ">=7.3.7"
-tox = ">=4.15.1"
-unittest-xml-reporting = ">=3.2.0"
+coverage = "^7.5.4"
+flake8 = "^7.1.0"
+psycopg2-binary = "^2.9.9"
+PyYAML = "^6.0.1"
+sorl-thumbnail = "^12.10.0"
+sphinx = "^7.3.7"
+tox = "^4.15.1"
+unittest-xml-reporting = "^3.2.0"
