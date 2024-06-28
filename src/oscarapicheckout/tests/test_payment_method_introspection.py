@@ -46,6 +46,8 @@ class PaymentMethodsViewTest(BaseTest):
                             "required": False,
                             "read_only": False,
                             "label": "Amount",
+                            "decimal_places": 2,
+                            "max_digits": 12,
                         },
                         "reference": {
                             "type": "string",
@@ -86,6 +88,8 @@ class PaymentMethodsViewTest(BaseTest):
                             "required": False,
                             "read_only": False,
                             "label": "Amount",
+                            "decimal_places": 2,
+                            "max_digits": 12,
                         },
                         "reference": {
                             "type": "string",
@@ -128,6 +132,8 @@ class PaymentMethodsViewTest(BaseTest):
                             "required": False,
                             "read_only": False,
                             "label": "Amount",
+                            "decimal_places": 2,
+                            "max_digits": 12,
                         },
                         "reference": {
                             "type": "string",
@@ -180,6 +186,8 @@ class PaymentMethodsViewTest(BaseTest):
                             "required": False,
                             "read_only": False,
                             "label": "Amount",
+                            "decimal_places": 2,
+                            "max_digits": 12,
                         },
                         "reference": {
                             "type": "string",
@@ -222,6 +230,8 @@ class PaymentMethodsViewTest(BaseTest):
                             "required": False,
                             "read_only": False,
                             "label": "Amount",
+                            "decimal_places": 2,
+                            "max_digits": 12,
                         },
                         "reference": {
                             "type": "string",
