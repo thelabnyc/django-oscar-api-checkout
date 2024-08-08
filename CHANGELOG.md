@@ -1,5 +1,14 @@
 # Changes
 
+## v3.4.1b0 (2024-08-08)
+
+### Fix
+
+- **deps**: update dependency django to ^4.2.14
+- **deps**: update dependency django to ^4.2.13
+- **deps**: update dependency drf-recaptcha to v3.1.0
+- **deps**: update dependency django to v4.2.13
+
 ## v3.4.0
 
 - Update recaptcha field from v2 to v3.
