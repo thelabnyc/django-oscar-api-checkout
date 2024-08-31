@@ -1,5 +1,11 @@
 # Changes
 
+## v3.4.1 (2024-08-31)
+
+### Fix
+
+- **deps**: update dependency django to ^4.2.15
+
 ## v3.4.1b0 (2024-08-08)
 
 ### Fix

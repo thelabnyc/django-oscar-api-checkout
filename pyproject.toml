@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "django-oscar-api-checkout"
-version = "3.4.1b0"
+version = "3.4.1"
 description = "An extension on top of django-oscar-api providing a more flexible checkout API with a pluggable payment methods interface."
 authors = ["thelab <thelabdev@thelab.co>"]
 readme = "README.rst"
