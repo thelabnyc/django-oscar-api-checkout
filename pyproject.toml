@@ -21,7 +21,7 @@ python = "^3.10"
 Django = "^4.2.16"
 django-oscar = "^3.2.4"
 django-oscar-api = "^3.2.4"
-drf-recaptcha = "^3.1.0"
+drf-recaptcha = "^3.2.0"
 
 [tool.poetry.group.dev.dependencies]
 coverage = "^7.6.1"
