@@ -17,9 +17,9 @@ cache:
     - $HOME/.cache/pip
 
 include:
-  - component: gitlab.com/thelabnyc/thelab-ci-components/precommit@0.0.1
-  - component: gitlab.com/thelabnyc/thelab-ci-components/publish-gitlab-release@0.0.1
-  - component: gitlab.com/thelabnyc/thelab-ci-components/publish-to-pypi@0.0.1
+  - component: gitlab.com/thelabnyc/thelab-ci-components/precommit@0.1.2
+  - component: gitlab.com/thelabnyc/thelab-ci-components/publish-gitlab-release@0.1.2
+  - component: gitlab.com/thelabnyc/thelab-ci-components/publish-to-pypi@0.1.2
 
 test:
   stage: test
