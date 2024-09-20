@@ -30,7 +30,7 @@ psycopg2-binary = "^2.9.9"
 PyYAML = "^6.0.2"
 sorl-thumbnail = "^12.10.0"
 sphinx = "^7.4.7"
-tox = "^4.18.1"
+tox = "^4.19.0"
 unittest-xml-reporting = "^3.2.0"
 
 [tool.commitizen]
