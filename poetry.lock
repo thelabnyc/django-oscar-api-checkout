@@ -378,13 +378,13 @@ test = ["WebTest (>=2.0,<2.1)", "coverage (>=5.4,<5.5)", "django-webtest (>=1.9,
 
 [[package]]
 name = "django-oscar-api"
-version = "3.2.4"
+version = "3.3.0"
 description = "REST API module for django-oscar"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "django-oscar-api-3.2.4.tar.gz", hash = "sha256:cb3e98682084cd622232230fd341f40fd3f11e617b75b20fbb6d2cb8eb27a739"},
-    {file = "django_oscar_api-3.2.4-py3-none-any.whl", hash = "sha256:e886b9b43603fe7dd505dd5938cf2d5d3c5073ec4d7378cfd166202aefa63c9b"},
+    {file = "django-oscar-api-3.3.0.tar.gz", hash = "sha256:b5d6c77def1ddd517c2b52ae4eb6d04ea766283779c0a8ff9e519f1a6c656474"},
+    {file = "django_oscar_api-3.3.0-py3-none-any.whl", hash = "sha256:4a92d7d984dd83ad17a4cc3e8d49c42fc85e85fbdb390a9f123f96f67334bf2e"},
 ]
 
 [package.dependencies]
@@ -394,8 +394,7 @@ djangorestframework = ">=3.9"
 setuptools = "*"
 
 [package.extras]
-dev = ["coverage", "easy-thumbnails", "mock", "twine", "wheel"]
-lint = ["black (>=23.1.0)", "pylint", "pylint-django"]
+dev = ["black (>=23.1.0)", "coverage", "easy-thumbnails", "pylint", "pylint-django", "vdt.versionplugin.wheel", "wheel"]
 
 [[package]]
 name = "django-phonenumber-field"
@@ -1560,4 +1559,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "4e1348a683c46aa0c53fa51769c3643c51b1afa7518959a6a80e145f5d3f1e7c"
+content-hash = "48f88805fb9d91b206b597836e8df0d49b61580d21215dbce2ddda8b8d264778"
