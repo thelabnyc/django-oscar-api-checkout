@@ -1098,7 +1098,7 @@ class Migration(migrations.Migration):
             model_name="lineprice",
             name="order",
             field=models.ForeignKey(
-                verbose_name="Option",
+                verbose_name="Order",
                 related_name="line_prices",
                 to="order.Order",
                 on_delete=models.CASCADE,

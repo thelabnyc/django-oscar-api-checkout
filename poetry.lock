@@ -347,13 +347,13 @@ python-ipware = ">=2.0.3"
 
 [[package]]
 name = "django-oscar"
-version = "3.2.4"
+version = "3.2.5"
 description = "A domain-driven e-commerce framework for Django"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "django-oscar-3.2.4.tar.gz", hash = "sha256:79a48dfd3cd9a6d93636e55bc7cba25abb56c05c200fcd0c0f30face9566a998"},
-    {file = "django_oscar-3.2.4-py3-none-any.whl", hash = "sha256:22d2f2725ba273335f12f28bf7ed79f49a63ee2d16bd842e103c90b2a65bb504"},
+    {file = "django_oscar-3.2.5-py3-none-any.whl", hash = "sha256:61b7d69ccd07a84012dea1154bf82977b39b6434241512d8345a3cabfb919c1a"},
+    {file = "django_oscar-3.2.5.tar.gz", hash = "sha256:c9d679461d79c21889152641d7d1cdf7a7342a21ca7edc747c55f08afddade06"},
 ]
 
 [package.dependencies]
@@ -369,12 +369,13 @@ factory-boy = ">=3.0,<3.3"
 phonenumbers = "*"
 pillow = ">=6.0"
 purl = ">=0.7"
+setuptools = ">=51.3.3"
 
 [package.extras]
 docs = ["Sphinx (>=5.0)", "easy-thumbnails (>=2.7,<2.8.6)", "sorl-thumbnail (>=12.9,<12.10)", "sphinx-issues (==3.0.1)", "sphinx-rtd-theme (==1.0.0)", "sphinxcontrib-spelling (==7.5.1)"]
 easy-thumbnails = ["easy-thumbnails (>=2.7,<2.8.6)"]
 sorl-thumbnail = ["sorl-thumbnail (>=12.9,<12.10)"]
-test = ["WebTest (>=2.0,<2.1)", "coverage (>=5.4,<5.5)", "django-webtest (>=1.9,<1.10)", "easy-thumbnails (>=2.7,<2.8.6)", "freezegun (>=1.1,<2)", "psycopg2-binary (>=2.8,<2.10)", "pytest-django (>=3.7,<3.9)", "pytest-xdist (>=2.2,<3)", "pytz", "sorl-thumbnail (>=12.9,<12.10)", "tox (>=3.21,<4)"]
+test = ["WebTest (>=2.0,<2.1)", "coverage (>=5.4,<5.5)", "django-webtest (>=1.9,<1.10)", "easy-thumbnails (>=2.7,<2.8.6)", "freezegun (>=1.1,<2)", "psycopg2-binary (>=2.8,<2.10)", "pytest-django (>=3.7,<3.9)", "pytest-xdist (>=2.2,<3)", "pytz", "sorl-thumbnail (>=12.9,<12.10)", "tox (>=3.21,<4)", "vdt.versionplugin.wheel"]
 
 [[package]]
 name = "django-oscar-api"
@@ -1564,4 +1565,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "48f88805fb9d91b206b597836e8df0d49b61580d21215dbce2ddda8b8d264778"
+content-hash = "b00bde289cdbdedf9af5b9b26f4d550a808a88e8e090154e7806df5e7b55fb79"

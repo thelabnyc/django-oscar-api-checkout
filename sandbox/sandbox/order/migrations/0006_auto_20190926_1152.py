@@ -67,7 +67,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="status_changes",
                         to="order.Order",
-                        verbose_name="Order Status Changes",
+                        verbose_name="Order",
                     ),
                 ),
             ],
