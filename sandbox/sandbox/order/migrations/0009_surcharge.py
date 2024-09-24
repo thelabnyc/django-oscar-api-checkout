@@ -26,7 +26,7 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("name", models.CharField(max_length=128, verbose_name="Surcharge")),
+                ("name", models.CharField(max_length=128, verbose_name="Name")),
                 (
                     "code",
                     models.CharField(max_length=128, verbose_name="Surcharge code"),
@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="surcharges",
                         to="order.Order",
-                        verbose_name="Surcharges",
+                        verbose_name="Order",
                     ),
                 ),
             ],
