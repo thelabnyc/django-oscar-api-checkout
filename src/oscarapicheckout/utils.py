@@ -165,6 +165,10 @@ def get_order_ownership(request, given_user, guest_email):
     return None, guest_email
 
 
+def get_checkout_captcha_settings(request):
+    return None
+
+
 class OrderUpdater(object):
     def update_order(
         self,
