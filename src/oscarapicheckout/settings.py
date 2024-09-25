@@ -24,7 +24,10 @@ API_ENABLED_PAYMENT_METHODS = overridable(
     ],
 )
 API_MAX_PAYMENT_METHODS = overridable("API_MAX_PAYMENT_METHODS", 0)
-API_CHECKOUT_CAPTCHA = overridable("API_CHECKOUT_CAPTCHA", False)
+API_CHECKOUT_CAPTCHA = overridable(
+    "API_CHECKOUT_CAPTCHA",
+    "oscarapicheckout.utils.get_checkout_captcha_settings",
+)
 API_CHECKOUT_FRAUD_CHECKS = overridable("API_CHECKOUT_FRAUD_CHECKS", [])
 
 ORDER_STATUS_PENDING = overridable("ORDER_STATUS_PENDING", "Pending")
@@ -36,7 +39,8 @@ ORDER_STATUS_SHIPPED = overridable("ORDER_STATUS_SHIPPED", "Shipped")
 ORDER_STATUS_CANCELED = overridable("ORDER_STATUS_CANCELED", "Canceled")
 
 ORDER_OWNERSHIP_CALCULATOR = overridable(
-    "ORDER_OWNERSHIP_CALCULATOR", "oscarapicheckout.utils.get_order_ownership"
+    "ORDER_OWNERSHIP_CALCULATOR",
+    "oscarapicheckout.utils.get_order_ownership",
 )
 
 CHECKOUT_CACHE_SERIALIZERS = overridable("CHECKOUT_CACHE_SERIALIZERS", {})

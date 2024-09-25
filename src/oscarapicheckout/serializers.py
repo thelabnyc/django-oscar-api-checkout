@@ -301,16 +301,6 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         # Build PaymentMethods field
         self.fields["payment"] = PaymentMethodsSerializer(context=self.context)
 
-        # Optionally add a captcha field
-        if settings.API_CHECKOUT_CAPTCHA:
-            kwargs = {
-                "action": "checkout",
-                "required_score": 0.5,
-            }
-            if isinstance(settings.API_CHECKOUT_CAPTCHA, dict):
-                kwargs = settings.API_CHECKOUT_CAPTCHA
-            self.fields["recaptcha"] = ReCaptchaV3Field(**kwargs)
-
         # We require a request because we need to know what accounts are valid for the
         # user to be drafting from. This is derived from the user when authenticated or
         # the session store when anonymous
@@ -320,6 +310,22 @@ class CheckoutSerializer(OscarCheckoutSerializer):
             " context. Add `context={'request': request}` when instantiating "
             "the serializer." % self.__class__.__name__
         )
+
+        # Optionally add a captcha field
+        captcha_kwargs = None
+        if settings.API_CHECKOUT_CAPTCHA:
+            if settings.API_CHECKOUT_CAPTCHA is True:
+                captcha_kwargs = {
+                    "action": "checkout",
+                    "required_score": 0.5,
+                }
+            elif isinstance(settings.API_CHECKOUT_CAPTCHA, dict):
+                captcha_kwargs = settings.API_CHECKOUT_CAPTCHA
+            elif isinstance(settings.API_CHECKOUT_CAPTCHA, str):
+                get_captcha_settings = import_string(settings.API_CHECKOUT_CAPTCHA)
+                captcha_kwargs = get_captcha_settings(request)
+        if captcha_kwargs:
+            self.fields["recaptcha"] = ReCaptchaV3Field(**captcha_kwargs)
 
         # Limit baskets to only the one that is active and owned by the user.
         basket = get_basket(request)
