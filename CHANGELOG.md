@@ -1,5 +1,19 @@
 # Changes
 
+## v3.5.0 (2024-09-25)
+
+### Feat
+
+- allow setting API_CHECKOUT_CAPTCHA to a callable function, thereby allowing captcha config to be configured per-request (#26990)
+
+### Fix
+
+- **deps**: update dependency django-oscar to v3.2.5
+- **deps**: update dependency django-oscar-api to v3.3.0
+- pin django-oscar version due to breaking changes in patch versions
+- **deps**: update dependency drf-recaptcha to ^3.2.0
+- **deps**: update dependency django to ^4.2.16
+
 ## v3.4.1 (2024-08-31)
 
 ### Fix
