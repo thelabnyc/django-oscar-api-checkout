@@ -489,19 +489,19 @@ files = [
 
 [[package]]
 name = "drf-recaptcha"
-version = "3.2.0"
-description = "Django rest framework recaptcha field serializer."
+version = "4.0.2"
+description = "Django rest framework recaptcha field serializer"
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.10"
 files = [
-    {file = "drf_recaptcha-3.2.0-py3-none-any.whl", hash = "sha256:30e9d1612ef447d61a7465850b63512c7032abf0decfb7680f9acdb3753315a1"},
-    {file = "drf_recaptcha-3.2.0.tar.gz", hash = "sha256:856eeba20a48d05188a0882382a1c65d9f8c1e40305d8a2ac62760380041a049"},
+    {file = "drf_recaptcha-4.0.2-py3-none-any.whl", hash = "sha256:72f2f39bca4a1adb897c696381a098b3e5e5e5d111a7ced98aa15a75e37c1df7"},
+    {file = "drf_recaptcha-4.0.2.tar.gz", hash = "sha256:68fb90860f53374b4732a22b6980d7ac1cbb006d444d527d25f39d95392be99e"},
 ]
 
 [package.dependencies]
-django = ">=3.2"
-django-ipware = ">=2.1"
-djangorestframework = ">=3.11"
+django = ">=4.2"
+django-ipware = ">=5.0"
+djangorestframework = ">=3.14"
 
 [[package]]
 name = "factory-boy"
@@ -1573,4 +1573,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "8a7651de2f2a6f51837bd830b42c31ee3d5ebc8c95829fefd7214daa97fde1af"
+content-hash = "7f9eb2b7cd179d4f25610c3c9c71a12055c0e01a99079bc3a4b6cf453346f5f7"
