@@ -1,5 +1,11 @@
 # Changes
 
+## v3.5.1 (2024-11-06)
+
+### Fix
+
+- **deps**: update dependency drf-recaptcha to v4
+
 ## v3.5.0 (2024-09-25)
 
 ### Feat
