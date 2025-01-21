@@ -14,9 +14,17 @@ urlpatterns = [
         {"document_root": settings.MEDIA_ROOT, "show_indexes": True},
     ),
     # Include plugins
-    path("api/", include(apps.get_app_config("oscarapicheckout").urls[0])),
+    path(
+        "api/",
+        include(
+            apps.get_app_config("oscarapicheckout").urls[0]  # type:ignore[attr-defined]
+        ),
+    ),
     path("api/", include("oscarapi.urls")),
     path("creditcards/", include("sandbox.creditcards.urls")),
     # Include stock Oscar
-    path("", include(apps.get_app_config("oscar").urls[0])),
+    path(
+        "",
+        include(apps.get_app_config("oscar").urls[0]),  # type:ignore[attr-defined]
+    ),
 ]

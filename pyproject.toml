@@ -17,7 +17,7 @@ include = "oscarapicheckout"
 from = "src"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.12"
 Django = "^4.2.18"
 django-oscar = "3.2.5"
 django-oscar-api = "3.3.0"
@@ -55,6 +55,51 @@ pre_bump_hooks = [
 post_bump_hooks = [
     "git push origin master $CZ_POST_CURRENT_TAG_VERSION"
 ]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+
+# Strict mode, see mypy --help
+warn_unused_configs = true
+# disallow_subclassing_any = true
+# disallow_any_generics = true
+# disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+# disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+# warn_return_any = true
+no_implicit_reexport = true
+show_error_codes = true
+# Not turned on by strict
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = "drf_recaptcha.*"
+follow_untyped_imports = true
+
+[[tool.mypy.overrides]]
+module = "oscar.*"
+follow_untyped_imports = true
+
+[[tool.mypy.overrides]]
+module = "oscarapi.*"
+follow_untyped_imports = true
+
+[[tool.mypy.overrides]]
+module = "*.migrations.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "*.tests.*"
+ignore_errors = true
+
+[tool.django-stubs]
+django_settings_module = "sandbox.settings"
 
 [tool.isort]
 profile = "black"

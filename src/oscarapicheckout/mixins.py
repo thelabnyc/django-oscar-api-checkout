@@ -1,35 +1,46 @@
 from decimal import Decimal
+from typing import TYPE_CHECKING, Any, Optional
 
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.db import transaction
+from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 from oscar.core.loading import get_class, get_model
 
-Order = get_model("order", "Order")
-order_placed = get_class("order.signals", "order_placed")
+if TYPE_CHECKING:
+    from oscar.apps.basket.models import Basket
+    from oscar.apps.order.models import BillingAddress, Order, ShippingAddress
+    from oscar.apps.order.signals import order_placed
+    from oscar.apps.order.utils import OrderCreator
+    from oscar.apps.shipping.methods import Base as ShippingMethod
+else:
+    Order = get_model("order", "Order")
+    order_placed = get_class("order.signals", "order_placed")
+    OrderCreator = object
 
 
-class OrderCreatorMixin(object):
+class OrderCreatorMixin(OrderCreator):
     """
     Class mixin for oscar.apps.order.utils.OrderCreator. Handles bug that occurs when
     order ownership isn't the same as the user placing the order, but the basket contains
     a voucher which is only available to the user placing the order.
     """
 
-    def place_order(
+    def place_order(  # type:ignore[override]
         self,
-        basket,
-        total,
-        shipping_method,
-        shipping_charge,
-        user=None,
-        shipping_address=None,
-        billing_address=None,
-        order_number=None,
-        status=None,
-        request=None,
-        **kwargs
-    ):
+        basket: "Basket",
+        total: Decimal,
+        shipping_method: "ShippingMethod",
+        shipping_charge: Decimal,
+        user: Optional[User] = None,
+        shipping_address: Optional["ShippingAddress"] = None,
+        billing_address: Optional["BillingAddress"] = None,
+        order_number: Optional[str] = None,
+        status: Optional[str] = None,
+        request: Optional[HttpRequest] = None,
+        **kwargs: Any
+    ) -> Order:
         """
         Placing an order involves creating all the relevant models based on the
         basket and session data.

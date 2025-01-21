@@ -1,62 +1,76 @@
 from decimal import Decimal
+from typing import TYPE_CHECKING, Any, Optional, TypedDict
 import base64
 import pickle
 
+from django.contrib.auth.models import AnonymousUser, User
 from django.db.models import F
 from django.db.models.functions import Greatest
+from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 from oscar.core.loading import get_class, get_model
 from oscarapi.basket import operations
 
 from .settings import ORDER_STATUS_AUTHORIZED, ORDER_STATUS_PAYMENT_DECLINED
 from .signals import order_payment_authorized, order_payment_declined
-from .states import COMPLETE, CONSUMED, DECLINED, Complete, Consumed, Declined
+from .states import Complete, Consumed, Declined, PaymentMethodStatus, PaymentStatus
 
-Order = get_model("order", "Order")
-OrderCreator = get_class("order.utils", "OrderCreator")
+if TYPE_CHECKING:
+    from oscar.apps.basket.models import Basket
+    from oscar.apps.order.models import BillingAddress, Order, ShippingAddress
+    from oscar.apps.order.utils import OrderCreator
+    from oscar.apps.shipping.methods import Base as ShippingMethod
+else:
+    Order = get_model("order", "Order")
+    OrderCreator = get_class("order.utils", "OrderCreator")
 
 CHECKOUT_ORDER_ID = "api_checkout_pending_order_id"
 CHECKOUT_PAYMENT_STEPS = "api_checkout_payment_steps"
 
 
-def _session_pickle(obj):
+def _session_pickle(obj: Any) -> str:
     pickled = pickle.dumps(obj)
     base64ed = base64.standard_b64encode(pickled)
     utfed = base64ed.decode("utf8")
     return utfed
 
 
-def _session_unpickle(utfed):
+def _session_unpickle(utfed: str) -> Any:
     base64ed = utfed.encode("utf8")
     pickled = base64.standard_b64decode(base64ed)
     obj = pickle.loads(pickled)
     return obj
 
 
-def _update_payment_method_state(request, method_key, state):
+def _update_payment_method_state(
+    request: HttpRequest,
+    method_key: str,
+    state: PaymentStatus,
+) -> None:
     states = request.session.get(CHECKOUT_PAYMENT_STEPS, {})
     states[method_key] = _session_pickle(state)
     request.session[CHECKOUT_PAYMENT_STEPS] = states
     request.session.modified = True
 
 
-def _set_order_authorized(order, request):
+def _set_order_authorized(order: "Order", request: HttpRequest) -> None:
     # Set the order status
     order.set_status(ORDER_STATUS_AUTHORIZED)
 
-    # Mark the basket as submitted
-    order.basket.submit()
+    if order.basket is not None:
+        # Mark the basket as submitted
+        order.basket.submit()
 
-    # Update the owner of the basket to match the order
-    if order.user != order.basket.owner:
-        order.basket.owner = order.user
-        order.basket.save()
+        # Update the owner of the basket to match the order
+        if order.user != order.basket.owner:
+            order.basket.owner = order.user
+            order.basket.save()
 
     # Send a signal
     order_payment_authorized.send(sender=order, order=order, request=request)
 
 
-def _set_order_payment_declined(order, request):
+def _set_order_payment_declined(order: "Order", request: HttpRequest) -> None:
     # Set the order status
     order.set_status(ORDER_STATUS_PAYMENT_DECLINED)
 
@@ -78,22 +92,27 @@ def _set_order_payment_declined(order, request):
     order.line_prices.all().delete()
     voucher_applications.delete()
 
-    # Thaw the basket and put it back into the request.session so that it can be retried
-    order.basket.thaw()
-    operations.store_basket_in_session(order.basket, request.session)
+    if order.basket is not None:
+        # Thaw the basket and put it back into the request.session so that it can be retried
+        order.basket.thaw()
+        operations.store_basket_in_session(order.basket, request.session)
 
     # Send a signal
     order_payment_declined.send(sender=order, order=order, request=request)
 
 
-def _update_order_status(order, request):
+def _update_order_status(order: "Order", request: HttpRequest) -> None:
     states = list_payment_method_states(request)
 
-    declined = [s for k, s in states.items() if s.status == DECLINED]
+    declined = [
+        s for k, s in states.items() if s.status == PaymentMethodStatus.DECLINED
+    ]
     if len(declined) > 0:
         _set_order_payment_declined(order, request)
 
-    not_complete = [s for k, s in states.items() if s.status != COMPLETE]
+    not_complete = [
+        s for k, s in states.items() if s.status != PaymentMethodStatus.COMPLETE
+    ]
     if len(not_complete) <= 0:
         # Authorized the order and consume all the payments
         _set_order_authorized(order, request)
@@ -107,86 +126,133 @@ def _update_order_status(order, request):
             )
 
 
-def list_payment_method_states(request):
+def list_payment_method_states(request: HttpRequest) -> dict[str, PaymentStatus]:
     states = request.session.get(CHECKOUT_PAYMENT_STEPS, {})
     return {
         method_key: _session_unpickle(state) for method_key, state in states.items()
     }
 
 
-def clear_payment_method_states(request):
+def clear_payment_method_states(request: HttpRequest) -> None:
     request.session[CHECKOUT_PAYMENT_STEPS] = {}
     request.session.modified = True
 
 
-def clear_consumed_payment_method_states(request):
+def clear_consumed_payment_method_states(request: HttpRequest) -> None:
     curr_states = list_payment_method_states(request)
     new_states = {}
     for key, state in curr_states.items():
-        if state.status != CONSUMED:
+        if state.status != PaymentMethodStatus.CONSUMED:
             new_states[key] = state
     clear_payment_method_states(request)
     for key, state in new_states.items():
         _update_payment_method_state(request, key, state)
 
 
-def update_payment_method_state(order, request, method_key, state):
+def update_payment_method_state(
+    order: "Order",
+    request: HttpRequest,
+    method_key: str,
+    state: PaymentStatus,
+) -> None:
     _update_payment_method_state(request, method_key, state)
     _update_order_status(order, request)
 
 
-def set_payment_method_states(order, request, states):
+def set_payment_method_states(
+    order: "Order",
+    request: HttpRequest,
+    states: dict[str, PaymentStatus],
+) -> None:
     clear_payment_method_states(request)
     for method_key, state in states.items():
         _update_payment_method_state(request, method_key, state)
     _update_order_status(order, request)
 
 
-def mark_payment_method_completed(order, request, method_key, amount, source_id=None):
+def mark_payment_method_completed(
+    order: "Order",
+    request: HttpRequest,
+    method_key: str,
+    amount: Decimal,
+    source_id: Optional[int] = None,
+) -> None:
     update_payment_method_state(
-        order, request, method_key, Complete(amount, source_id=source_id)
+        order,
+        request,
+        method_key,
+        Complete(amount, source_id=source_id),
     )
 
 
-def mark_payment_method_declined(order, request, method_key, amount, source_id=None):
+def mark_payment_method_declined(
+    order: "Order",
+    request: HttpRequest,
+    method_key: str,
+    amount: Decimal,
+    source_id: Optional[int] = None,
+) -> None:
     update_payment_method_state(
-        order, request, method_key, Declined(amount, source_id=source_id)
+        order,
+        request,
+        method_key,
+        Declined(amount, source_id=source_id),
     )
 
 
-def mark_payment_method_consumed(order, request, method_key, amount, source_id=None):
+def mark_payment_method_consumed(
+    order: "Order",
+    request: HttpRequest,
+    method_key: str,
+    amount: Decimal,
+    source_id: Optional[int] = None,
+) -> None:
     update_payment_method_state(
-        order, request, method_key, Consumed(amount, source_id=source_id)
+        order,
+        request,
+        method_key,
+        Consumed(amount, source_id=source_id),
     )
 
 
-def get_order_ownership(request, given_user, guest_email):
+def get_order_ownership(
+    request: HttpRequest,
+    given_user: User | None,
+    guest_email: str | None,
+) -> tuple[User | None, str | None]:
     current_user = request.user
     if current_user and current_user.is_authenticated:
         return current_user, None
     return None, guest_email
 
 
-def get_checkout_captcha_settings(request):
+class CheckoutCaptchaSettings(TypedDict):
+    action: str
+    required_score: float
+
+
+def get_checkout_captcha_settings(
+    request: HttpRequest,
+) -> None | CheckoutCaptchaSettings:
     return None
 
 
 class OrderUpdater(object):
     def update_order(
         self,
-        order,
-        basket,
-        order_total,
-        shipping_method,
-        shipping_charge,
-        user=None,
-        shipping_address=None,
-        billing_address=None,
-        order_number=None,
-        status=None,
-        request=None,
-        **kwargs
-    ):
+        order: "Order",
+        basket: "Basket",
+        order_total: Decimal,
+        shipping_method: "ShippingMethod",
+        shipping_charge: Decimal,
+        user: Optional[User | AnonymousUser] = None,
+        shipping_address: Optional["ShippingAddress"] = None,
+        billing_address: Optional["BillingAddress"] = None,
+        order_number: Optional[str] = None,
+        status: Optional[str] = None,
+        request: Optional[HttpRequest] = None,
+        **kwargs: Any,
+    ) -> "Order":
         """
         Similar to OrderCreator.place_order, except this updates an existing "Payment Declined" order instead
         of creating a new order.
@@ -217,7 +283,11 @@ class OrderUpdater(object):
         # Remove all the order lines and cancel and stock they allocated. We'll make new lines from the
         # basket after this.
         for order_line in order.lines.all():
-            if order_line.product.get_product_class().track_stock:
+            if (
+                order_line.product
+                and order_line.product.get_product_class().track_stock
+                and order_line.stockrecord
+            ):
                 order_line.stockrecord.cancel_allocation(order_line.quantity)
             order_line.delete()
 
@@ -236,7 +306,7 @@ class OrderUpdater(object):
             status,
             id=order.id,
             request=request,
-            **kwargs
+            **kwargs,
         )
 
         # Make new order lines to replace the ones we deleted.

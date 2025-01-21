@@ -1,11 +1,14 @@
 from collections import OrderedDict
+from collections.abc import Callable, Mapping
 from decimal import Decimal
+from typing import TYPE_CHECKING, Any, Optional
 import logging
 
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth.models import AnonymousUser, User
 from django.core.signing import BadSignature, Signer
-from django.db import transaction
+from django.db import models, transaction
+from django.http import HttpRequest
 from django.utils.encoding import force_str, smart_str
 from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
@@ -19,17 +22,35 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.utils import html
 
 from . import fraud, settings, utils
+from .methods import PaymentMethod
 from .signals import pre_calculate_total
-from .states import PENDING
+from .states import PaymentMethodStatus, PaymentStatus, RequiredAction
 
-Basket = get_model("basket", "Basket")
-Order = get_model("order", "Order")
-BillingAddress = get_model("order", "BillingAddress")
-ShippingAddress = get_model("order", "ShippingAddress")
-
-OrderTotalCalculator = get_class("checkout.calculators", "OrderTotalCalculator")
+if TYPE_CHECKING:
+    from oscar.apps.basket.models import Basket
+    from oscar.apps.checkout.calculators import OrderTotalCalculator
+    from oscar.apps.order.models import BillingAddress, Order, ShippingAddress
+else:
+    Basket = get_model("basket", "Basket")
+    Order = get_model("order", "Order")
+    BillingAddress = get_model("order", "BillingAddress")
+    ShippingAddress = get_model("order", "ShippingAddress")
+    OrderTotalCalculator = get_class("checkout.calculators", "OrderTotalCalculator")
 
 logger = logging.getLogger(__name__)
+
+
+type OrderOwnershipCalc = Callable[
+    [
+        HttpRequest,
+        User | None,
+        str | None,
+    ],
+    tuple[
+        User | None,
+        str | None,
+    ],
+]
 
 
 class DiscriminatedUnionSerializer(serializers.Serializer):
@@ -59,7 +80,16 @@ class DiscriminatedUnionSerializer(serializers.Serializer):
 
     """
 
-    def __init__(self, discriminant_field_name, types, *args, **kwargs):
+    discriminant_field_name: str
+    types: Mapping[str, serializers.Serializer[Any]]
+
+    def __init__(
+        self,
+        discriminant_field_name: str,
+        types: Mapping[str, serializers.Serializer[Any]],
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.fields[discriminant_field_name] = serializers.ChoiceField(
             choices=[(t, t) for t in types.keys()]
@@ -67,30 +97,33 @@ class DiscriminatedUnionSerializer(serializers.Serializer):
         self.discriminant_field_name = discriminant_field_name
         self.type_mapping = types
 
-    def to_representation(self, obj):
+    def to_representation(self, obj: dict[str, Any]) -> dict[str, Any]:
         concrete_type = self._get_concrete_type(obj)
         if concrete_type:
             return concrete_type.to_representation(obj)
         return super().to_representation(obj)
 
-    def to_internal_value(self, data):
+    def to_internal_value(self, data: dict[str, Any]) -> dict[str, Any]:
         concrete_type = self._get_concrete_type(data)
         if concrete_type:
             return concrete_type.to_internal_value(data)
         return super().to_internal_value(data)
 
-    def run_validation(self, data):
+    def run_validation(self, data: Any = ...) -> Any:
         concrete_type = self._get_concrete_type(data)
         if concrete_type:
             return concrete_type.run_validation(data)
         return super().run_validation(data)
 
-    def _get_obj_type(self, obj):
+    def _get_obj_type(self, obj: dict[str, Any]) -> Any:
         if hasattr(obj, "get"):
             return obj.get(self.discriminant_field_name)
         return getattr(obj, self.discriminant_field_name)
 
-    def _get_concrete_type(self, obj):
+    def _get_concrete_type(
+        self,
+        obj: dict[str, Any],
+    ) -> serializers.Serializer[Any] | None:
         obj_type = self._get_obj_type(obj)
         return self.type_mapping.get(obj_type)
 
@@ -100,7 +133,15 @@ class PaymentMethodsSerializer(serializers.DictField):
     Dynamic serializer created based on the configured payment methods (settings.API_ENABLED_PAYMENT_METHODS)
     """
 
-    def __init__(self, *args, context={}, **kwargs):
+    child: DiscriminatedUnionSerializer
+    methods: dict[str, PaymentMethod]
+
+    def __init__(
+        self,
+        *args: Any,
+        context: dict[str, Any] = {},
+        **kwargs: Any,
+    ) -> None:
         super().__init__(*args, **kwargs)
 
         request = context.get("request", None)
@@ -133,9 +174,9 @@ class PaymentMethodsSerializer(serializers.DictField):
             )
 
         self.child = DiscriminatedUnionSerializer("method_type", union_types)
-        self.child.bind(field_name="", parent=self)
+        self.child.bind(field_name="", parent=self)  # type:ignore[arg-type]
 
-    def to_internal_value(self, data):
+    def to_internal_value(self, data: dict[str, Any]) -> dict[str, Any]:
         """Dicts of native values <- Dicts of primitive datatypes."""
         if html.is_html_input(data):
             data = html.parse_html_dict(data)
@@ -143,7 +184,7 @@ class PaymentMethodsSerializer(serializers.DictField):
             self.fail("not_a_dict", input_type=type(data).__name__)
         return self.run_child_validation(data)
 
-    def run_child_validation(self, data):
+    def run_child_validation(self, data: dict[str, Any]) -> dict[str, Any]:
         # For API backwards compatibility with versions 0.3.x and earlier, if ``method_type`` isn't
         # set, default it to the given method key.
         tmp_data = {}
@@ -204,7 +245,7 @@ class PaymentMethodsSerializer(serializers.DictField):
         return result
 
 
-class SignedTokenRelatedField(serializers.SlugRelatedField):
+class SignedTokenRelatedField[_MT: models.Model](serializers.SlugRelatedField[_MT]):
     """
     Similar to a SlugRelatedField, but uses a server-signed version of the slug.
     Thus, this can be used to both identify an object and verify the client has
@@ -212,18 +253,17 @@ class SignedTokenRelatedField(serializers.SlugRelatedField):
     """
 
     @classmethod
-    def get_signer(cls):
+    def get_signer(cls) -> Signer:
         signer = Signer(salt=f"oscarapicheckout.{cls.__name__}")
-        print(f"salt == oscarapicheckout.{cls.__name__}")
         return signer
 
     @classmethod
-    def verify_token(cls, token):
+    def verify_token(cls, token: str) -> str:
         return cls.get_signer().unsign(token)
 
-    def get_token(self, model_inst):
+    def get_token(self, model_inst: _MT) -> str:
         """Generate the signed token value for the given model instance"""
-        raw_value = getattr(model_inst, self.slug_field)
+        raw_value = getattr(model_inst, self.slug_field or "pk")
         logger.info(
             "Generating %s token for %s[%s]",
             self.__class__.__name__,
@@ -232,11 +272,11 @@ class SignedTokenRelatedField(serializers.SlugRelatedField):
         )
         return self.get_signer().sign(raw_value)
 
-    def get_choices(self, cutoff=None):
+    def get_choices(self, cutoff: Any = None) -> dict[Any, Any]:
         """Don't include choices in the DRF HTML form"""
         return {}
 
-    def to_internal_value(self, data):
+    def to_internal_value(self, data: Any) -> _MT:
         # Verify the token
         try:
             raw_value = self.verify_token(data)
@@ -248,27 +288,27 @@ class SignedTokenRelatedField(serializers.SlugRelatedField):
             self.fail("invalid")
         return super().to_internal_value(raw_value)
 
-    def to_representation(self, obj):
+    def to_representation(self, obj: _MT) -> str:
         return self.get_token(obj)
 
 
-class OrderTokenField(SignedTokenRelatedField):
+class OrderTokenField(SignedTokenRelatedField[Order]):
     @classmethod
-    def get_order_token(cls, order):
+    def get_order_token(cls, order: Order) -> str:
         return cls().get_token(order)
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         kwargs["queryset"] = Order.objects.all()
         kwargs["slug_field"] = "number"
         super().__init__(**kwargs)
 
 
-class BasketTokenField(SignedTokenRelatedField):
+class BasketTokenField(SignedTokenRelatedField[Basket]):
     @classmethod
-    def get_basket_token(cls, basket):
+    def get_basket_token(cls, basket: Basket) -> str:
         return cls().get_token(basket)
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any) -> None:
         kwargs["queryset"] = Basket.objects.all()
         kwargs["slug_field"] = "pk"
         super().__init__(**kwargs)
@@ -279,8 +319,12 @@ class PaymentStateSerializer(serializers.Serializer):
     amount = serializers.DecimalField(max_digits=12, decimal_places=2)
     required_action = serializers.SerializerMethodField()
 
-    def get_required_action(self, state):
-        return state.get_required_action() if state.status == PENDING else None
+    def get_required_action(self, state: PaymentStatus) -> RequiredAction | None:
+        return (
+            state.get_required_action()
+            if state.status == PaymentMethodStatus.PENDING
+            else None
+        )
 
 
 class OrderSerializer(OscarOrderSerializer):
@@ -294,7 +338,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         queryset=get_user_model().objects.get_queryset(),
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
 
         # Build PaymentMethods field
@@ -311,7 +355,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         )
 
         # Optionally add a captcha field
-        captcha_kwargs = None
+        captcha_kwargs: utils.CheckoutCaptchaSettings | None = None
         if settings.API_CHECKOUT_CAPTCHA:
             if settings.API_CHECKOUT_CAPTCHA is True:
                 captcha_kwargs = {
@@ -328,9 +372,12 @@ class CheckoutSerializer(OscarCheckoutSerializer):
 
         # Limit baskets to only the one that is active and owned by the user.
         basket = get_basket(request)
-        self.fields["basket"].queryset = Basket.objects.filter(pk=basket.pk)
+        basket_qs = Basket.objects.filter(pk=basket.pk)
+        self.fields["basket"].queryset = basket_qs  # type:ignore[attr-defined]
 
-    def get_ownership_calc(self):
+    def get_ownership_calc(
+        self,
+    ) -> OrderOwnershipCalc:
         if hasattr(settings.ORDER_OWNERSHIP_CALCULATOR, "__call__"):
             return settings.ORDER_OWNERSHIP_CALCULATOR
         return import_string(settings.ORDER_OWNERSHIP_CALCULATOR)
@@ -338,20 +385,21 @@ class CheckoutSerializer(OscarCheckoutSerializer):
     def get_recaptcha_score(self) -> float | None:
         recaptcha_score = None
         if "recaptcha" in self.fields:
-            recaptcha_score = self.fields["recaptcha"].score
+            recaptcha_field = self.fields["recaptcha"]
+            recaptcha_score = recaptcha_field.score  # type:ignore[attr-defined]
         return recaptcha_score
 
-    def validate(self, data):
+    def validate(self, data: dict[str, Any]) -> dict[str, Any]:
         # Cache guest email since it might get removed during super validation
-        given_user = data.get("user")
-        guest_email = data.get("guest_email")
+        given_user: User | None = data.get("user")
+        guest_email: str | None = data.get("guest_email")
 
         # Calculate totals and whatnot
         data = super().validate(data)
 
         # Check that the basket is still valid
         basket_errors = []
-        basket = data["basket"]
+        basket: Basket = data["basket"]
         for line in basket.all_lines():
             result = basket.strategy.fetch_for_line(line)
             is_permitted, reason = result.availability.is_purchase_permitted(
@@ -420,8 +468,8 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         return data
 
     @transaction.atomic()
-    def create(self, validated_data):
-        basket = validated_data.get("basket")
+    def create(self, validated_data: dict[str, Any]) -> Order:
+        basket: Basket = validated_data["basket"]
         order_number = self.generate_order_number(basket)
 
         billing_address = None
@@ -452,8 +500,13 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         return order
 
     def _insupd_order(
-        self, basket, user=None, shipping_address=None, billing_address=None, **kwargs
-    ):
+        self,
+        basket: Basket,
+        user: Optional[AnonymousUser | User] = None,
+        shipping_address: Optional[ShippingAddress] = None,
+        billing_address: Optional[BillingAddress] = None,
+        **kwargs: Any,
+    ) -> Order:
         existing_orders = basket.order_set.all()
         if existing_orders.exclude(
             status=settings.ORDER_STATUS_PAYMENT_DECLINED
@@ -476,7 +529,8 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         request = self.context.get("request", None)
 
         # If no orders were pre-existing, make a new one.
-        if existing_count == 0:
+        order = existing_orders.first()
+        if existing_count == 0 or order is None:
             return self.place_order(
                 basket=basket,
                 user=user,
@@ -487,7 +541,6 @@ class CheckoutSerializer(OscarCheckoutSerializer):
             )
 
         # Update this order instead of making a new one.
-        order = existing_orders.first()
         kwargs["order_number"] = order.number
         status = self.get_initial_order_status(basket)
         shipping_address = self.create_shipping_address(
@@ -518,7 +571,7 @@ class CompleteDeferredPaymentSerializer(serializers.Serializer):
         )
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         # Build PaymentMethods field
         self.fields["payment"] = PaymentMethodsSerializer(context=self.context)
