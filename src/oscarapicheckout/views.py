@@ -1,7 +1,9 @@
 from django.shortcuts import get_object_or_404
+from oscar.core.loading import get_model
 from rest_framework import generics, status
 from rest_framework.response import Response
-from oscar.core.loading import get_model
+
+from . import utils
 from .serializers import (
     CheckoutSerializer,
     CompleteDeferredPaymentSerializer,
@@ -10,8 +12,7 @@ from .serializers import (
     PaymentStateSerializer,
 )
 from .signals import order_placed
-from .states import DECLINED, CONSUMED
-from . import utils
+from .states import CONSUMED, DECLINED
 
 Order = get_model("order", "Order")
 

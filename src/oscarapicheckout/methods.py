@@ -1,10 +1,12 @@
 from decimal import Decimal
+import logging
+
 from django.db import transaction
 from django.utils.translation import gettext_lazy as _
-from rest_framework import serializers
 from oscar.core.loading import get_model
+from rest_framework import serializers
+
 from . import states
-import logging
 
 PaymentEventType = get_model("order", "PaymentEventType")
 PaymentEvent = get_model("order", "PaymentEvent")

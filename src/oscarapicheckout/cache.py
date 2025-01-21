@@ -1,7 +1,8 @@
 from django.core.cache import cache
 from django.utils.module_loading import import_string
-from rest_framework import serializers
 from oscar.core.loading import get_model
+from rest_framework import serializers
+
 from . import settings as pkgsettings
 
 Country = get_model("address", "Country")

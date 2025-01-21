@@ -1,8 +1,9 @@
 from django.core.signing import Signer
-from rest_framework.reverse import reverse
 from oscar.core.loading import get_model
+from rest_framework.reverse import reverse
+
 from oscarapicheckout.methods import PaymentMethod, PaymentMethodSerializer
-from oscarapicheckout.states import FormPostRequired, Complete, Declined
+from oscarapicheckout.states import Complete, Declined, FormPostRequired
 
 Transaction = get_model("payment", "Transaction")
 

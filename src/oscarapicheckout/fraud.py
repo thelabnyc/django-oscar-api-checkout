@@ -1,11 +1,13 @@
 from datetime import timedelta
+import logging
+
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 from django.utils.module_loading import import_string
+from django.utils.translation import gettext_lazy as _
 from oscar.core.loading import get_model
 from rest_framework import serializers
+
 from . import settings
-import logging
 
 Order = get_model("order", "Order")
 

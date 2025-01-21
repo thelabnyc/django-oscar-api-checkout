@@ -1,10 +1,12 @@
-from django.dispatch import receiver
+import logging
+
 from django.db import transaction
+from django.dispatch import receiver
 from oscar.core.loading import get_class
+
 from .email import OrderMessageSender
 from .settings import ORDER_STATUS_PAYMENT_DECLINED
 from .signals import order_payment_authorized
-import logging
 
 logger = logging.getLogger(__name__)
 

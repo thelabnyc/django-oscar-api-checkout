@@ -1,6 +1,6 @@
 from django.urls import path
-from django.views.decorators.cache import never_cache
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.cache import never_cache
 from oscar.core.application import OscarConfig
 
 
@@ -17,9 +17,9 @@ class Config(OscarConfig):
 
     def get_urls(self):
         from .views import (
-            PaymentMethodsView,
             CheckoutView,
             CompleteDeferredPaymentView,
+            PaymentMethodsView,
             PaymentStatesView,
         )
 

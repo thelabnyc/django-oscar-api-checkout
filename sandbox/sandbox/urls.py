@@ -1,10 +1,9 @@
 from django.apps import apps
 from django.conf import settings
-from django.conf.urls import include, i18n
-from django.urls import path
+from django.conf.urls import i18n, include
 from django.contrib import admin
+from django.urls import path
 from django.views.static import serve
-
 
 urlpatterns = [
     path("i18n/", include(i18n)),

@@ -1,27 +1,26 @@
 from collections import OrderedDict
 from decimal import Decimal
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AnonymousUser
-from django.core.signing import Signer, BadSignature
-from django.db import transaction
-from django.utils.module_loading import import_string
-from django.utils.translation import gettext_lazy as _
-from django.utils.encoding import force_str, smart_str
-from rest_framework import serializers, exceptions
-from rest_framework.utils import html
-from rest_framework.exceptions import ValidationError
-from oscar.core.loading import get_model, get_class
-from oscarapi.serializers.checkout import (
-    CheckoutSerializer as OscarCheckoutSerializer,
-    OrderSerializer as OscarOrderSerializer,
-)
-from oscarapi.basket.operations import get_basket
-from drf_recaptcha.fields import ReCaptchaV3Field
-from .signals import pre_calculate_total
-from .states import PENDING
-from . import utils, settings, fraud
 import logging
 
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
+from django.core.signing import BadSignature, Signer
+from django.db import transaction
+from django.utils.encoding import force_str, smart_str
+from django.utils.module_loading import import_string
+from django.utils.translation import gettext_lazy as _
+from drf_recaptcha.fields import ReCaptchaV3Field
+from oscar.core.loading import get_class, get_model
+from oscarapi.basket.operations import get_basket
+from oscarapi.serializers.checkout import CheckoutSerializer as OscarCheckoutSerializer
+from oscarapi.serializers.checkout import OrderSerializer as OscarOrderSerializer
+from rest_framework import exceptions, serializers
+from rest_framework.exceptions import ValidationError
+from rest_framework.utils import html
+
+from . import fraud, settings, utils
+from .signals import pre_calculate_total
+from .states import PENDING
 
 Basket = get_model("basket", "Basket")
 Order = get_model("order", "Order")

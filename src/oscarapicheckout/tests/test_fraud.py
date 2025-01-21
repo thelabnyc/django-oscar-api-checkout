@@ -1,8 +1,10 @@
-from oscar.core.loading import get_model, get_class
-from rest_framework import serializers
-from django.utils import timezone
 from datetime import timedelta
 from decimal import Decimal
+
+from django.utils import timezone
+from oscar.core.loading import get_class, get_model
+from rest_framework import serializers
+
 from .. import fraud
 from .base import BaseTest
 

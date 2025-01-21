@@ -1,7 +1,7 @@
 from rest_framework.test import APIRequestFactory
-from .base import BaseTest
 
 from ..permissions import Public, StaffOnly
+from .base import BaseTest
 
 
 class PublicTest(BaseTest):

@@ -1,8 +1,10 @@
-from oscar.apps.order.utils import OrderCreator as BaseOrderCreator
-from oscarapicheckout.mixins import OrderCreatorMixin
 import math
-import time
 import random
+import time
+
+from oscar.apps.order.utils import OrderCreator as BaseOrderCreator
+
+from oscarapicheckout.mixins import OrderCreatorMixin
 
 
 class OrderNumberGenerator(object):

@@ -1,14 +1,16 @@
 from decimal import Decimal
+import base64
+import pickle
+
 from django.db.models import F
 from django.db.models.functions import Greatest
 from django.utils.translation import gettext_lazy as _
 from oscar.core.loading import get_class, get_model
 from oscarapi.basket import operations
+
 from .settings import ORDER_STATUS_AUTHORIZED, ORDER_STATUS_PAYMENT_DECLINED
-from .signals import order_payment_declined, order_payment_authorized
-from .states import COMPLETE, DECLINED, CONSUMED, Complete, Declined, Consumed
-import pickle
-import base64
+from .signals import order_payment_authorized, order_payment_declined
+from .states import COMPLETE, CONSUMED, DECLINED, Complete, Consumed, Declined
 
 Order = get_model("order", "Order")
 OrderCreator = get_class("order.utils", "OrderCreator")
