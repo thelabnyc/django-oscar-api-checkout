@@ -1,5 +1,11 @@
 # Changes
 
+## v3.6.1 (2025-01-23)
+
+### Fix
+
+- python version in publish job
+
 ## v3.6.0 (2025-01-23)
 
 ### Feat
