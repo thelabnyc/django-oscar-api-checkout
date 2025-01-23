@@ -1,17 +1,26 @@
 from decimal import Decimal
-from django.shortcuts import get_object_or_404
+from typing import TYPE_CHECKING
+
 from django.core.signing import Signer
-from rest_framework import generics
-from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from oscar.core.loading import get_model
+from rest_framework import generics
+from rest_framework.request import Request
+from rest_framework.response import Response
+
 from oscarapicheckout import utils
+from oscarapicheckout.states import PaymentStatus
+
 from .methods import CreditCard
 
-Order = get_model("order", "Order")
+if TYPE_CHECKING:
+    from ..order.models import Order
+else:
+    Order = get_model("order", "Order")
 
 
 class GetCardTokenView(generics.GenericAPIView):
-    def post(self, request):
+    def post(self, request: Request) -> Response:
         amount = Decimal(request.data["amount"])
         order_number = request.data["reference_number"]
         order = get_object_or_404(Order, number=order_number)
@@ -41,7 +50,7 @@ class GetCardTokenView(generics.GenericAPIView):
 
 
 class AuthorizeCardView(generics.GenericAPIView):
-    def post(self, request):
+    def post(self, request: Request) -> Response:
         # Mark the payment method as complete or denied
         amount = Decimal(request.data["amount"])
         order_number = request.data["reference_number"]
@@ -53,6 +62,7 @@ class AuthorizeCardView(generics.GenericAPIView):
         # Get transaction UUID
         reference = request.data["uuid"]
 
+        new_state: PaymentStatus
         # Decline the payment
         if request.data.get("deny"):
             new_state = CreditCard().record_declined_authorization(

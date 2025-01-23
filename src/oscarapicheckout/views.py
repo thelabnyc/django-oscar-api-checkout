@@ -1,7 +1,13 @@
+from typing import TYPE_CHECKING, Optional
+
 from django.shortcuts import get_object_or_404
-from rest_framework import generics, status
-from rest_framework.response import Response
 from oscar.core.loading import get_model
+from rest_framework import generics, status
+from rest_framework.request import Request
+from rest_framework.response import Response
+
+from . import utils
+from .methods import PaymentMethod, PaymentMethodData
 from .serializers import (
     CheckoutSerializer,
     CompleteDeferredPaymentSerializer,
@@ -10,20 +16,24 @@ from .serializers import (
     PaymentStateSerializer,
 )
 from .signals import order_placed
-from .states import DECLINED, CONSUMED
-from . import utils
+from .states import CONSUMED, DECLINED, PaymentStatus
 
-Order = get_model("order", "Order")
+if TYPE_CHECKING:
+    from oscar.apps.order.models import Order
+else:
+    Order = get_model("order", "Order")
 
 CHECKOUT_ORDER_ID = "checkout_order_id"
 
 
 class PaymentMethodsView(generics.GenericAPIView):
-    serializer_class = PaymentMethodsSerializer
+    serializer_class = PaymentMethodsSerializer  # type:ignore[assignment]
 
-    def get(self, request):
-        root_serializer = self.get_serializer()
-        meta = self.metadata_class()
+    def get(self, request: Request) -> Response:
+        root_serializer: PaymentMethodsSerializer = (
+            self.get_serializer()  # type:ignore[assignment]
+        )
+        meta = self.metadata_class()  # type:ignore[operator, misc]
         data = {}
         for (
             method_code,
@@ -82,12 +92,14 @@ class CheckoutView(generics.GenericAPIView):
 
     serializer_class = CheckoutSerializer
 
-    def post(self, request, format=None):
+    def post(self, request: Request, format: Optional[str] = None) -> Response:
         # Wipe out any previous state data
         utils.clear_consumed_payment_method_states(request)
 
         # Validate the input
-        c_ser = self.get_serializer(data=request.data)
+        c_ser: CheckoutSerializer = self.get_serializer(  # type:ignore[assignment]
+            data=request.data
+        )
         if not c_ser.is_valid():
             return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
 
@@ -114,7 +126,7 @@ class CheckoutView(generics.GenericAPIView):
             previous_states=previous_states,
             request=request,
             order=order,
-            methods=c_ser.fields["payment"].methods,
+            methods=c_ser.fields["payment"].methods,  # type:ignore[attr-defined]
             data=c_ser.validated_data["payment"],
         )
         utils.set_payment_method_states(order, request, new_states)
@@ -123,11 +135,18 @@ class CheckoutView(generics.GenericAPIView):
         o_ser = OrderSerializer(order, context={"request": request})
         return Response(o_ser.data)
 
-    def _record_payments(self, previous_states, request, order, methods, data):
+    def _record_payments(
+        self,
+        previous_states: dict[str, PaymentStatus],
+        request: Request,
+        order: Order,
+        methods: dict[str, PaymentMethod],
+        data: dict[str, PaymentMethodData],
+    ) -> dict[str, PaymentStatus]:
         order_balance = [order.total_incl_tax]
-        new_states = {}
+        new_states: dict[str, PaymentStatus] = {}
 
-        def record(method_key, method_data):
+        def record(method_key: str, method_data: PaymentMethodData) -> PaymentStatus:
             # If a previous payment method at least partially succeeded, hasn't been consumed by an
             # order, and is for the same amount, recycle it. This requires that the amount hasn't changed.
 
@@ -135,7 +154,7 @@ class CheckoutView(generics.GenericAPIView):
             code = method_data["method_type"]
             method = methods[code]
 
-            state = None
+            state: PaymentStatus | None = None
             if method_key in previous_states:
                 prev = previous_states[method_key]
                 if prev.status not in (DECLINED, CONSUMED):
@@ -146,11 +165,14 @@ class CheckoutView(generics.GenericAPIView):
                         method.void_existing_payment(request, order, method_key, prev)
 
             # Previous payment method doesn't exist or can't be reused. Create it now.
-            if not state:
-                state = method.record_payment(request, order, method_key, **method_data)
+            final_state = (
+                state
+                if state
+                else method.record_payment(request, order, method_key, **method_data)
+            )
             # Subtract amount from pending order balance.
-            order_balance[0] = order_balance[0] - state.amount
-            return state
+            order_balance[0] = order_balance[0] - final_state.amount
+            return final_state
 
         # Loop through each method with a specified amount to charge
         data_amount_specified = {k: v for k, v in data.items() if not v["pay_balance"]}
@@ -172,14 +194,18 @@ class CompleteDeferredPaymentView(CheckoutView):
     deferred payment method.
     """
 
-    serializer_class = CompleteDeferredPaymentSerializer
+    serializer_class = CompleteDeferredPaymentSerializer  # type:ignore[assignment]
 
-    def post(self, request, format=None):
+    def post(self, request: Request, format: Optional[str] = None) -> Response:
         # Wipe out any previous state data
         utils.clear_consumed_payment_method_states(request)
 
         # Validate the input
-        c_ser = self.get_serializer(data=request.data)
+        c_ser: CompleteDeferredPaymentSerializer = (
+            self.get_serializer(  # type:ignore[assignment]
+                data=request.data
+            )
+        )
         if not c_ser.is_valid():
             return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)
 
@@ -193,7 +219,7 @@ class CompleteDeferredPaymentView(CheckoutView):
             previous_states=previous_states,
             request=request,
             order=order,
-            methods=c_ser.fields["payment"].methods,
+            methods=c_ser.fields["payment"].methods,  # type:ignore[attr-defined]
             data=c_ser.validated_data["payment"],
         )
         utils.set_payment_method_states(order, request, new_states)
@@ -204,7 +230,7 @@ class CompleteDeferredPaymentView(CheckoutView):
 
 
 class PaymentStatesView(generics.GenericAPIView):
-    def get(self, request, pk=None):
+    def get(self, request: Request, pk: Optional[int] = None) -> Response:
         # We don't really use the provided pk. It's just there to be compatible with oscarapi
         if pk and int(pk) != request.session.get(CHECKOUT_ORDER_ID):
             return Response(status=status.HTTP_404_NOT_FOUND)

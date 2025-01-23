@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import GetCardTokenView, AuthorizeCardView
 
+from .views import AuthorizeCardView, GetCardTokenView
 
 urlpatterns = [
     path("get-token/", GetCardTokenView.as_view(), name="creditcards-get-token"),

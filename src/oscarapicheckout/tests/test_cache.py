@@ -1,11 +1,12 @@
 from oscar.core.loading import get_model
-from .base import BaseTest
+
 from ..cache import (
+    BillingAddressCache,
     EmailAddressCache,
     ShippingAddressCache,
-    BillingAddressCache,
     ShippingMethodCache,
 )
+from .base import BaseTest
 
 Country = get_model("address", "Country")
 

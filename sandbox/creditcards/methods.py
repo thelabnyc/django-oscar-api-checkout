@@ -1,10 +1,22 @@
-from django.core.signing import Signer
-from rest_framework.reverse import reverse
-from oscar.core.loading import get_model
-from oscarapicheckout.methods import PaymentMethod, PaymentMethodSerializer
-from oscarapicheckout.states import FormPostRequired, Complete, Declined
+from decimal import Decimal
+from typing import TYPE_CHECKING, Any
 
-Transaction = get_model("payment", "Transaction")
+from django.core.signing import Signer
+from django.http import HttpRequest
+from django.utils.translation import gettext_lazy as _
+from oscar.apps.payment.models import Transaction
+from rest_framework.reverse import reverse
+
+from oscarapicheckout.methods import PaymentMethod, PaymentMethodSerializer
+from oscarapicheckout.states import (
+    Complete,
+    Declined,
+    FormPostRequired,
+    FormPostRequiredFormDataField,
+)
+
+if TYPE_CHECKING:
+    from ..order.models import Order
 
 
 class CreditCard(PaymentMethod):
@@ -15,16 +27,24 @@ class CreditCard(PaymentMethod):
     redirects back to us. This is a common pattern in PCI SAQ A-EP ecommerce sites.
     """
 
-    name = "Credit Card"
+    name = _("Credit Card")
     code = "credit-card"
     serializer_class = PaymentMethodSerializer
 
-    def _record_payment(self, request, order, method_key, amount, reference, **kwargs):
+    def _record_payment(
+        self,
+        request: HttpRequest,
+        order: "Order",
+        method_key: str,
+        amount: Decimal,
+        reference: str,
+        **kwargs: Any,
+    ) -> FormPostRequired:
         """Payment Step 1"""
-        fields = [
+        fields: list[FormPostRequiredFormDataField] = [
             {
                 "key": "amount",
-                "value": amount,
+                "value": str(amount),
             },
             {
                 "key": "reference_number",
@@ -44,12 +64,14 @@ class CreditCard(PaymentMethod):
             fields=fields,
         )
 
-    def require_authorization_post(self, order, method_key, amount):
+    def require_authorization_post(
+        self, order: "Order", method_key: str, amount: Decimal
+    ) -> FormPostRequired:
         """Payment Step 2"""
-        fields = [
+        fields: list[FormPostRequiredFormDataField] = [
             {
                 "key": "amount",
-                "value": amount,
+                "value": str(amount),
             },
             {
                 "key": "reference_number",
@@ -67,7 +89,12 @@ class CreditCard(PaymentMethod):
             fields=fields,
         )
 
-    def record_successful_authorization(self, order, amount, reference):
+    def record_successful_authorization(
+        self,
+        order: "Order",
+        amount: Decimal,
+        reference: str,
+    ) -> Complete:
         """Payment Step 3 Succeeded"""
         source = self.get_source(order, reference)
 
@@ -78,7 +105,12 @@ class CreditCard(PaymentMethod):
 
         return Complete(amount, source_id=source.pk)
 
-    def record_declined_authorization(self, order, amount, reference):
+    def record_declined_authorization(
+        self,
+        order: "Order",
+        amount: Decimal,
+        reference: str,
+    ) -> Declined:
         """Payment Step 3 Failed"""
         source = self.get_source(order, reference)
         source._create_transaction(

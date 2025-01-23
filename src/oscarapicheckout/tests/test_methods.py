@@ -1,8 +1,9 @@
 from decimal import Decimal
-from oscar.test.factories import create_order
-from .base import BaseTest
 
-from ..methods import PaymentMethodSerializer, PaymentMethod, Cash
+from oscar.test.factories import create_order
+
+from ..methods import Cash, PaymentMethod, PaymentMethodSerializer
+from .base import BaseTest
 
 
 class PaymentMethodSerializerTest(BaseTest):

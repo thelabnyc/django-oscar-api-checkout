@@ -1,27 +1,46 @@
 from datetime import timedelta
+from typing import Any, Generator, Literal, Optional, Protocol
+import logging
+
+from django.http import HttpRequest
 from django.utils import timezone
-from django.utils.translation import gettext_lazy as _
 from django.utils.module_loading import import_string
+from django.utils.translation import gettext_lazy as _
 from oscar.core.loading import get_model
 from rest_framework import serializers
+
 from . import settings
-import logging
 
 Order = get_model("order", "Order")
 
 logger = logging.getLogger(__name__)
 
+type CheckoutData = dict[str, Any]
 
-def get_enabled_fraud_checks():
+
+class FraudRule(Protocol):
+    def validate(
+        self,
+        data: CheckoutData,
+        recaptcha_score: Optional[float],
+        request: Optional[HttpRequest],
+    ) -> None: ...
+
+
+def get_enabled_fraud_checks() -> Generator[FraudRule, None, None]:
     for config in settings.API_CHECKOUT_FRAUD_CHECKS:
-        RuleClass = import_string(config["rule"])
+        RuleClass: type[FraudRule] = import_string(config["rule"])
         rule = RuleClass(**config.get("kwargs", {}))
         yield rule
 
 
-def run_enabled_fraud_checks(data, **kwargs):
+def run_enabled_fraud_checks(
+    data: CheckoutData,
+    recaptcha_score: Optional[float] = None,
+    request: Optional[HttpRequest] = None,
+) -> None:
     for rule in get_enabled_fraud_checks():
-        rule.validate(data, **kwargs)
+        rule.validate(data, recaptcha_score, request)
     return None
 
 
@@ -35,15 +54,23 @@ class AddressVelocity:
     period: timedelta
     threshold: int
 
-    def __init__(self, period: timedelta | None = None, threshold: int = 10):
+    def __init__(
+        self,
+        period: timedelta | None = None,
+        threshold: int = 10,
+    ) -> None:
         self.period = period or timedelta(hours=24)
         self.threshold = threshold
 
-    def validate(self, data, **kwargs) -> None:
+    def validate(self, data: CheckoutData, *args: Any, **kwargs: Any) -> None:
         self._validate_addr("shipping_address", data)
         self._validate_addr("billing_address", data)
 
-    def _validate_addr(self, addr_type, data) -> None:
+    def _validate_addr(
+        self,
+        addr_type: Literal["shipping_address", "billing_address"],
+        data: CheckoutData,
+    ) -> None:
         timeframe_start = timezone.now() - self.period
         filter_args = {
             "date_placed__gte": timeframe_start,

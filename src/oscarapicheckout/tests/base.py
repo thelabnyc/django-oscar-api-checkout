@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
-from rest_framework.test import APITestCase
 from oscar.core.loading import get_model
+from rest_framework.test import APITestCase
 
 Country = get_model("address", "Country")
 

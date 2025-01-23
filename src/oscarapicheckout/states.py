@@ -1,56 +1,99 @@
-PENDING = "Pending"
-DECLINED = "Declined"
-COMPLETE = "Complete"
-DEFERRED = "Deferred"
-CONSUMED = "Consumed"
+from collections.abc import Sequence
+from decimal import Decimal
+from enum import UNIQUE, StrEnum, verify
+from typing import Literal, Optional, TypedDict
 
 
-class PaymentStatus(object):
-    def __init__(self, amount):
+@verify(UNIQUE)
+class PaymentMethodStatus(StrEnum):
+    PENDING = "Pending"
+    DECLINED = "Declined"
+    COMPLETE = "Complete"
+    DEFERRED = "Deferred"
+    CONSUMED = "Consumed"
+
+
+# For backwards compat
+PENDING = PaymentMethodStatus.PENDING
+DECLINED = PaymentMethodStatus.DECLINED
+COMPLETE = PaymentMethodStatus.COMPLETE
+DEFERRED = PaymentMethodStatus.DEFERRED
+CONSUMED = PaymentMethodStatus.CONSUMED
+
+
+class FormPostRequiredFormDataField(TypedDict):
+    key: str
+    value: str
+
+
+class FormPostRequiredFormData(TypedDict):
+    type: Literal["form"]
+    name: str
+    url: str
+    method: str
+    fields: Sequence[FormPostRequiredFormDataField]
+
+
+type RequiredAction = FormPostRequiredFormData | None
+
+
+class PaymentStatus:
+    status: PaymentMethodStatus
+    amount: Decimal
+
+    def __init__(self, amount: Decimal) -> None:
         self.amount = amount
 
-    @property
-    def status(self):
-        raise NotImplementedError("Subclass must implement status property")
-
-    def get_required_action(self):
+    def get_required_action(self) -> RequiredAction:
         raise NotImplementedError("Subclass does not implement get_required_action()")
 
 
 class SourceBoundPaymentStatus(PaymentStatus):
-    def __init__(self, amount, source_id=None):
+    def __init__(
+        self,
+        amount: Decimal,
+        source_id: Optional[int] = None,
+    ) -> None:
         super().__init__(amount)
         self.source_id = source_id
 
 
 class Complete(SourceBoundPaymentStatus):
-    status = COMPLETE
+    status = PaymentMethodStatus.COMPLETE
 
 
 class Deferred(SourceBoundPaymentStatus):
-    status = DEFERRED
+    status = PaymentMethodStatus.DEFERRED
 
 
 class Declined(SourceBoundPaymentStatus):
-    status = DECLINED
+    status = PaymentMethodStatus.DECLINED
 
 
 class Consumed(SourceBoundPaymentStatus):
-    status = CONSUMED
+    status = PaymentMethodStatus.CONSUMED
 
 
 class FormPostRequired(PaymentStatus):
-    status = PENDING
+    status = PaymentMethodStatus.PENDING
+    form_data: FormPostRequiredFormData
 
-    def __init__(self, amount, name, url, method="POST", fields=[]):
+    def __init__(
+        self,
+        amount: Decimal,
+        name: str,
+        url: str,
+        method: str = "POST",
+        fields: Sequence[FormPostRequiredFormDataField] = [],
+    ) -> None:
         super().__init__(amount)
-        self.form_data = {
-            "type": "form",
-            "name": name,
-            "url": url,
-            "method": method,
-            "fields": fields,
-        }
+        self.form_data = FormPostRequiredFormData(
+            type="form",
+            name=name,
+            url=url,
+            method=method,
+            fields=fields,
+        )
 
-    def get_required_action(self):
+    def get_required_action(self) -> RequiredAction:
         return self.form_data

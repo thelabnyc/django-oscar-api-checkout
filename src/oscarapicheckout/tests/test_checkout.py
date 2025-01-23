@@ -1,14 +1,16 @@
 from decimal import Decimal as D
+from unittest import mock
+
 from django.contrib.auth.models import User
-from oscar.core.loading import get_model, get_class
+from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from rest_framework import status
 from rest_framework.reverse import reverse
-from ..signals import pre_calculate_total, order_placed, order_payment_authorized
-from ..utils import _set_order_payment_declined
+
 from ..serializers import OrderTokenField
+from ..signals import order_payment_authorized, order_placed, pre_calculate_total
+from ..utils import _set_order_payment_declined
 from .base import BaseTest
-from unittest import mock
 
 Order = get_model("order", "Order")
 Basket = get_model("basket", "Basket")

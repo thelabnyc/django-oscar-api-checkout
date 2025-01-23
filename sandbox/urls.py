@@ -1,10 +1,9 @@
 from django.apps import apps
 from django.conf import settings
-from django.conf.urls import include, i18n
-from django.urls import path
+from django.conf.urls import i18n, include
 from django.contrib import admin
+from django.urls import path
 from django.views.static import serve
-
 
 urlpatterns = [
     path("i18n/", include(i18n)),
@@ -15,9 +14,17 @@ urlpatterns = [
         {"document_root": settings.MEDIA_ROOT, "show_indexes": True},
     ),
     # Include plugins
-    path("api/", include(apps.get_app_config("oscarapicheckout").urls[0])),
+    path(
+        "api/",
+        include(
+            apps.get_app_config("oscarapicheckout").urls[0]  # type:ignore[attr-defined]
+        ),
+    ),
     path("api/", include("oscarapi.urls")),
     path("creditcards/", include("sandbox.creditcards.urls")),
     # Include stock Oscar
-    path("", include(apps.get_app_config("oscar").urls[0])),
+    path(
+        "",
+        include(apps.get_app_config("oscar").urls[0]),  # type:ignore[attr-defined]
+    ),
 ]

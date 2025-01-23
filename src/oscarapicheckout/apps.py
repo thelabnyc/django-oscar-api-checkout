@@ -1,6 +1,7 @@
 from django.urls import path
-from django.views.decorators.cache import never_cache
+from django.urls.resolvers import URLPattern, URLResolver
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.cache import never_cache
 from oscar.core.application import OscarConfig
 
 
@@ -11,15 +12,15 @@ class Config(OscarConfig):
     namespace = "oscarapicheckout"
     default = True
 
-    def ready(self):
+    def ready(self) -> None:
         # Register signal handlers
         from . import handlers  # NOQA
 
-    def get_urls(self):
+    def get_urls(self) -> list[URLPattern | URLResolver]:
         from .views import (
-            PaymentMethodsView,
             CheckoutView,
             CompleteDeferredPaymentView,
+            PaymentMethodsView,
             PaymentStatesView,
         )
 
