@@ -1,5 +1,16 @@
 # Changes
 
+## v3.6.0 (2025-01-23)
+
+### Feat
+
+- add type annotations
+
+### Fix
+
+- **deps**: update dependency django to ^4.2.18
+- **deps**: update dependency django to ^4.2.17
+
 ## v3.5.1 (2024-11-06)
 
 ### Fix
