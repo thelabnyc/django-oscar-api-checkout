@@ -7,7 +7,11 @@ from django.utils.translation import gettext_lazy as _
 from oscar.apps.payment.models import Transaction
 from rest_framework.reverse import reverse
 
-from oscarapicheckout.methods import PaymentMethod, PaymentMethodSerializer
+from oscarapicheckout.methods import (
+    PaymentMethod,
+    PaymentMethodData,
+    PaymentMethodSerializer,
+)
 from oscarapicheckout.states import (
     Complete,
     Declined,
@@ -19,7 +23,7 @@ if TYPE_CHECKING:
     from ..order.models import Order
 
 
-class CreditCard(PaymentMethod):
+class CreditCard(PaymentMethod[PaymentMethodData]):
     """
     This is an example of how to implement a payment method that required some off-site
     interaction, like Cybersource Secure Acceptance, for example. It returns a pending
@@ -29,7 +33,7 @@ class CreditCard(PaymentMethod):
 
     name = _("Credit Card")
     code = "credit-card"
-    serializer_class = PaymentMethodSerializer
+    serializer_class = PaymentMethodSerializer[PaymentMethodData]
 
     def _record_payment(
         self,

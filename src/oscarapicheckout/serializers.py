@@ -22,7 +22,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.utils import html
 
 from . import fraud, settings, utils
-from .methods import PaymentMethod
+from .methods import PaymentMethod, PaymentMethodData
 from .signals import pre_calculate_total
 from .states import PaymentMethodStatus, PaymentStatus, RequiredAction
 
@@ -53,7 +53,7 @@ type OrderOwnershipCalc = Callable[
 ]
 
 
-class DiscriminatedUnionSerializer(serializers.Serializer):
+class DiscriminatedUnionSerializer(serializers.Serializer[Any]):
     """
     Serializer for building a discriminated-union of other serializers
 
@@ -106,8 +106,8 @@ class DiscriminatedUnionSerializer(serializers.Serializer):
     def to_internal_value(self, data: dict[str, Any]) -> dict[str, Any]:
         concrete_type = self._get_concrete_type(data)
         if concrete_type:
-            return concrete_type.to_internal_value(data)
-        return super().to_internal_value(data)
+            return concrete_type.to_internal_value(data)  # type:ignore[no-any-return]
+        return super().to_internal_value(data)  # type:ignore[no-any-return]
 
     def run_validation(self, data: Any = ...) -> Any:
         concrete_type = self._get_concrete_type(data)
@@ -134,7 +134,7 @@ class PaymentMethodsSerializer(serializers.DictField):
     """
 
     child: DiscriminatedUnionSerializer
-    methods: dict[str, PaymentMethod]
+    methods: dict[str, PaymentMethod[PaymentMethodData]]
 
     def __init__(
         self,
@@ -314,7 +314,7 @@ class BasketTokenField(SignedTokenRelatedField[Basket]):
         super().__init__(**kwargs)
 
 
-class PaymentStateSerializer(serializers.Serializer):
+class PaymentStateSerializer(serializers.Serializer[Any]):
     status = serializers.CharField()
     amount = serializers.DecimalField(max_digits=12, decimal_places=2)
     required_action = serializers.SerializerMethodField()
@@ -380,7 +380,9 @@ class CheckoutSerializer(OscarCheckoutSerializer):
     ) -> OrderOwnershipCalc:
         if hasattr(settings.ORDER_OWNERSHIP_CALCULATOR, "__call__"):
             return settings.ORDER_OWNERSHIP_CALCULATOR
-        return import_string(settings.ORDER_OWNERSHIP_CALCULATOR)
+        return import_string(  # type:ignore[no-any-return]
+            settings.ORDER_OWNERSHIP_CALCULATOR
+        )
 
     def get_recaptcha_score(self) -> float | None:
         recaptcha_score = None
@@ -531,7 +533,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         # If no orders were pre-existing, make a new one.
         order = existing_orders.first()
         if existing_count == 0 or order is None:
-            return self.place_order(
+            return self.place_order(  # type:ignore[no-any-return]
                 basket=basket,
                 user=user,
                 shipping_address=shipping_address,
@@ -564,7 +566,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         )
 
 
-class CompleteDeferredPaymentSerializer(serializers.Serializer):
+class CompleteDeferredPaymentSerializer(serializers.Serializer[Any]):
     order = OrderTokenField(
         help_text=_(
             "Server-signed order number token used to identify the order and verify the client has permission to modify it."

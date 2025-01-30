@@ -40,7 +40,7 @@ class PaymentMethodData(TypedDict):
     reference: NotRequired[str]
 
 
-class PaymentMethodSerializer[T: PaymentMethodData](serializers.Serializer):
+class PaymentMethodSerializer[T: PaymentMethodData](serializers.Serializer[Any]):
     method_type = serializers.ChoiceField(choices=tuple())
     enabled = serializers.BooleanField(default=False)
     pay_balance = serializers.BooleanField(default=True)
@@ -75,11 +75,11 @@ class PaymentMethodSerializer[T: PaymentMethodData](serializers.Serializer):
         return data
 
 
-class PaymentMethod:
+class PaymentMethod[T: PaymentMethodData]:
     # Translators: Description of payment method in checkout
     name: StrOrPromise = gettext_noop("Abstract Payment Method")
     code: str = "abstract-payment-method"
-    serializer_class = PaymentMethodSerializer
+    serializer_class: type[PaymentMethodSerializer[T]] = PaymentMethodSerializer
 
     def _make_payment_event(
         self,
@@ -228,7 +228,7 @@ class PaymentMethod:
         )
 
 
-class Cash(PaymentMethod):
+class Cash(PaymentMethod[PaymentMethodData]):
     """
     Cash payments are an example of how to implement a payment method plug-in. It
     doesn't do anything more than record a transaction and payment source.
@@ -262,7 +262,7 @@ class Cash(PaymentMethod):
         return states.Complete(source.amount_debited, source_id=source.pk)
 
 
-class PayLater(PaymentMethod):
+class PayLater(PaymentMethod[PaymentMethodData]):
     """
     The PayLater method method is similar to the Cash payment method—it doesn't
     actually authorize any payment. This method exists to differentiate two

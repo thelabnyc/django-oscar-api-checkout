@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from django.core.signing import Signer
 from django.shortcuts import get_object_or_404
@@ -19,7 +19,7 @@ else:
     Order = get_model("order", "Order")
 
 
-class GetCardTokenView(generics.GenericAPIView):
+class GetCardTokenView(generics.GenericAPIView[Any]):
     def post(self, request: Request) -> Response:
         amount = Decimal(request.data["amount"])
         order_number = request.data["reference_number"]
@@ -49,7 +49,7 @@ class GetCardTokenView(generics.GenericAPIView):
         )
 
 
-class AuthorizeCardView(generics.GenericAPIView):
+class AuthorizeCardView(generics.GenericAPIView[Any]):
     def post(self, request: Request) -> Response:
         # Mark the payment method as complete or denied
         amount = Decimal(request.data["amount"])
