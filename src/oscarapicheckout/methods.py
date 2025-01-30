@@ -5,6 +5,8 @@ import logging
 from django.db import transaction
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_noop
+from django_stubs_ext import StrOrPromise
 from oscar.core.loading import get_model
 from rest_framework import serializers
 
@@ -38,7 +40,7 @@ class PaymentMethodData(TypedDict):
     reference: NotRequired[str]
 
 
-class PaymentMethodSerializer(serializers.Serializer):
+class PaymentMethodSerializer[T: PaymentMethodData](serializers.Serializer):
     method_type = serializers.ChoiceField(choices=tuple())
     enabled = serializers.BooleanField(default=False)
     pay_balance = serializers.BooleanField(default=True)
@@ -56,11 +58,11 @@ class PaymentMethodSerializer(serializers.Serializer):
             choices=method_type_choices
         )
 
-    def validate(self, data: PaymentMethodData) -> PaymentMethodData:
+    def validate(self, data: T) -> T:
         if not data["enabled"]:
             return data
         if data["pay_balance"]:
-            data.pop("amount", None)
+            data.pop("amount", None)  # type:ignore[arg-type]
         elif (
             "amount" not in data
             or not data["amount"]
@@ -75,8 +77,8 @@ class PaymentMethodSerializer(serializers.Serializer):
 
 class PaymentMethod:
     # Translators: Description of payment method in checkout
-    name = _("Abstract Payment Method")
-    code = "abstract-payment-method"
+    name: StrOrPromise = gettext_noop("Abstract Payment Method")
+    code: str = "abstract-payment-method"
     serializer_class = PaymentMethodSerializer
 
     def _make_payment_event(
@@ -233,7 +235,7 @@ class Cash(PaymentMethod):
     """
 
     # Translators: Description of payment method in checkout
-    name = _("Cash")
+    name = gettext_noop("Cash")
     code = "cash"
 
     def _record_payment(
@@ -275,7 +277,7 @@ class PayLater(PaymentMethod):
     """
 
     # Translators: Description of payment method in checkout
-    name = _("Pay Later")
+    name = gettext_noop("Pay Later")
     code = "pay-later"
 
     def _record_payment(
