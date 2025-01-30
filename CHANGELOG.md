@@ -1,5 +1,11 @@
 # Changes
 
+## v3.6.3 (2025-01-30)
+
+### Fix
+
+- increase typing strictness
+
 ## v3.6.2 (2025-01-30)
 
 ### Fix
