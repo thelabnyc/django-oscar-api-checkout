@@ -15,7 +15,7 @@ else:
     Country = get_model("address", "Country")
 
 
-class EmailAddressSerializer(serializers.Serializer):
+class EmailAddressSerializer(serializers.Serializer[Any]):
     email = serializers.EmailField()
 
 
@@ -23,7 +23,7 @@ class EmailAddressCacheValue(TypedDict):
     email: str
 
 
-class ShippingMethodSerializer(serializers.Serializer):
+class ShippingMethodSerializer(serializers.Serializer[Any]):
     code = serializers.CharField(max_length=128)
     name = serializers.CharField(max_length=128)
     price = serializers.DecimalField(decimal_places=2, max_digits=12)
@@ -97,15 +97,19 @@ class AbstractCheckoutCache[
     def _transform_outgoing_data(self, sdata: StoredData) -> ExternalData:
         return sdata  # type:ignore[return-value]
 
-    def _get_serializer(self, edata: ExternalData) -> serializers.Serializer | None:
+    def _get_serializer(
+        self, edata: ExternalData
+    ) -> serializers.Serializer[Any] | None:
         serializer_class = self._get_serializer_class()
         if serializer_class:
             return serializer_class(data=edata)
         return None
 
-    def _get_serializer_class(self) -> type[serializers.Serializer] | None:
+    def _get_serializer_class(self) -> type[serializers.Serializer[Any]] | None:
         if self.serializer_class_path:
-            return import_string(self.serializer_class_path)
+            return import_string(  # type:ignore[no-any-return]
+                self.serializer_class_path
+            )
         return None
 
 

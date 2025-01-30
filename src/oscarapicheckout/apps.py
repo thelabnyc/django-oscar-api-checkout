@@ -49,4 +49,4 @@ class Config(OscarConfig):
             ),
             path("checkout/", view_checkout, name="api-checkout"),
         ]
-        return self.post_process_urls(urlpatterns)
+        return self.post_process_urls(urlpatterns)  # type:ignore[no-any-return]

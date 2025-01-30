@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any, Optional, cast
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -71,18 +71,21 @@ class OrderCreatorMixin(OrderCreator):
         # Open a transaction so that order creation is atomic.
         with transaction.atomic():
             # Create the actual order.Order and order.Line models
-            order = self.create_order_model(
-                user,
-                basket,
-                shipping_address,
-                shipping_method,
-                shipping_charge,
-                billing_address,
-                total,
-                order_number,
-                status,
-                request=request,
-                **kwargs
+            order = cast(
+                Order,
+                self.create_order_model(
+                    user,
+                    basket,
+                    shipping_address,
+                    shipping_method,
+                    shipping_charge,
+                    billing_address,
+                    total,
+                    order_number,
+                    status,
+                    request=request,
+                    **kwargs
+                ),
             )
             for line in basket.all_lines():
                 self.create_line_models(order, line)

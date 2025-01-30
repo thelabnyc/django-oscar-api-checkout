@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from django.shortcuts import get_object_or_404
 from oscar.core.loading import get_model
@@ -26,7 +26,7 @@ else:
 CHECKOUT_ORDER_ID = "checkout_order_id"
 
 
-class PaymentMethodsView(generics.GenericAPIView):
+class PaymentMethodsView(generics.GenericAPIView[Any]):
     serializer_class = PaymentMethodsSerializer  # type:ignore[assignment]
 
     def get(self, request: Request) -> Response:
@@ -50,7 +50,7 @@ class PaymentMethodsView(generics.GenericAPIView):
         return Response(data)
 
 
-class CheckoutView(generics.GenericAPIView):
+class CheckoutView(generics.GenericAPIView[Any]):
     """
     Checkout and begin collecting payment.
 
@@ -140,7 +140,7 @@ class CheckoutView(generics.GenericAPIView):
         previous_states: dict[str, PaymentStatus],
         request: Request,
         order: Order,
-        methods: dict[str, PaymentMethod],
+        methods: dict[str, PaymentMethod[PaymentMethodData]],
         data: dict[str, PaymentMethodData],
     ) -> dict[str, PaymentStatus]:
         order_balance = [order.total_incl_tax]
@@ -229,7 +229,7 @@ class CompleteDeferredPaymentView(CheckoutView):
         return Response(o_ser.data)
 
 
-class PaymentStatesView(generics.GenericAPIView):
+class PaymentStatesView(generics.GenericAPIView[Any]):
     def get(self, request: Request, pk: Optional[int] = None) -> Response:
         # We don't really use the provided pk. It's just there to be compatible with oscarapi
         if pk and int(pk) != request.session.get(CHECKOUT_ORDER_ID):
