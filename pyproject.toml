@@ -18,7 +18,7 @@ from = "src"
 
 [tool.poetry.dependencies]
 python = "^3.12"
-Django = "^4.2.18"
+Django = "^4.2.19"
 django-oscar = "3.2.5"
 django-oscar-api = "3.3.0"
 drf-recaptcha = "^4.0.2"
