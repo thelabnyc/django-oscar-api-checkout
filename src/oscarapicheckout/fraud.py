@@ -1,5 +1,6 @@
+from collections.abc import Generator
 from datetime import timedelta
-from typing import Any, Generator, Literal, Optional, Protocol
+from typing import Any, Literal, Protocol
 import logging
 
 from django.http import HttpRequest
@@ -22,8 +23,8 @@ class FraudRule(Protocol):
     def validate(
         self,
         data: CheckoutData,
-        recaptcha_score: Optional[float],
-        request: Optional[HttpRequest],
+        recaptcha_score: float | None,
+        request: HttpRequest | None,
     ) -> None: ...
 
 
@@ -36,8 +37,8 @@ def get_enabled_fraud_checks() -> Generator[FraudRule, None, None]:
 
 def run_enabled_fraud_checks(
     data: CheckoutData,
-    recaptcha_score: Optional[float] = None,
-    request: Optional[HttpRequest] = None,
+    recaptcha_score: float | None = None,
+    request: HttpRequest | None = None,
 ) -> None:
     for rule in get_enabled_fraud_checks():
         rule.validate(data, recaptcha_score, request)

@@ -1,9 +1,9 @@
-from typing import Any, Optional, TypedDict
+from typing import Any, TypedDict
 
 from django.conf import settings
 
 
-def overridable(name: str, default: Optional[Any] = None) -> Any:
+def overridable(name: str, default: Any | None = None) -> Any:
     return getattr(settings, name, default)
 
 

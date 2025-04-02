@@ -175,7 +175,7 @@ def mark_payment_method_completed(
     request: HttpRequest,
     method_key: str,
     amount: Decimal,
-    source_id: Optional[int] = None,
+    source_id: int | None = None,
 ) -> None:
     update_payment_method_state(
         order,
@@ -190,7 +190,7 @@ def mark_payment_method_declined(
     request: HttpRequest,
     method_key: str,
     amount: Decimal,
-    source_id: Optional[int] = None,
+    source_id: int | None = None,
 ) -> None:
     update_payment_method_state(
         order,
@@ -205,7 +205,7 @@ def mark_payment_method_consumed(
     request: HttpRequest,
     method_key: str,
     amount: Decimal,
-    source_id: Optional[int] = None,
+    source_id: int | None = None,
 ) -> None:
     update_payment_method_state(
         order,
@@ -237,7 +237,7 @@ def get_checkout_captcha_settings(
     return None
 
 
-class OrderUpdater(object):
+class OrderUpdater:
     def update_order(
         self,
         order: "Order",
@@ -245,12 +245,12 @@ class OrderUpdater(object):
         order_total: Decimal,
         shipping_method: "ShippingMethod",
         shipping_charge: Decimal,
-        user: Optional[User | AnonymousUser] = None,
+        user: User | AnonymousUser | None = None,
         shipping_address: Optional["ShippingAddress"] = None,
         billing_address: Optional["BillingAddress"] = None,
-        order_number: Optional[str] = None,
-        status: Optional[str] = None,
-        request: Optional[HttpRequest] = None,
+        order_number: str | None = None,
+        status: str | None = None,
+        request: HttpRequest | None = None,
         **kwargs: Any,
     ) -> "Order":
         """
