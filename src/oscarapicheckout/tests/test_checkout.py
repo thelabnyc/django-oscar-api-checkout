@@ -38,9 +38,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["cash"])
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"cash"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
         )
@@ -82,7 +80,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["pay-later"])
+            states_resp.data["payment_method_states"].keys(), {"pay-later"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["pay-later"]["status"], "Deferred"
@@ -124,9 +122,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["cash"])
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"cash"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
         )
@@ -245,9 +241,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["cash"])
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"cash"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
         )
@@ -314,9 +308,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["cash"])
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"cash"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
         )
@@ -489,9 +481,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["cash"])
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"cash"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
         )
@@ -527,7 +517,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
@@ -555,7 +545,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
@@ -598,7 +588,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
@@ -703,7 +693,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["cash", "credit-card"]),
+            {"cash", "credit-card"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["cash"]["status"], "Complete"
@@ -763,7 +753,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["cash", "credit-card"]),
+            {"cash", "credit-card"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["cash"]["status"], "Complete"
@@ -833,7 +823,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Authorized")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["cash", "credit-card"]),
+            {"cash", "credit-card"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
@@ -899,7 +889,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -941,7 +931,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -998,7 +988,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1050,7 +1040,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1112,7 +1102,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Authorized")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1169,7 +1159,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1212,7 +1202,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1270,7 +1260,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1322,7 +1312,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1385,7 +1375,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Payment Declined")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1439,7 +1429,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1481,7 +1471,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1548,7 +1538,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Authorized")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1602,7 +1592,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1659,7 +1649,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1702,7 +1692,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1760,7 +1750,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1812,7 +1802,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1875,7 +1865,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Payment Declined")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1930,7 +1920,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -1987,7 +1977,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -2069,7 +2059,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -2131,7 +2121,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -2203,7 +2193,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Authorized")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -2257,7 +2247,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -2314,7 +2304,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -2357,7 +2347,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -2415,7 +2405,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -2467,7 +2457,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -2530,7 +2520,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Payment Declined")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["credit-card-1", "credit-card-2"]),
+            {"credit-card-1", "credit-card-2"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -2578,7 +2568,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card-1"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card-1"}
         )  # credit-card-2 should no longer exist
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -2622,7 +2612,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card-1"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card-1"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -2691,7 +2681,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card-1"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card-1"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -2746,7 +2736,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card-1"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card-1"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
@@ -2792,7 +2782,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["cash", "credit-card"]),
+            {"cash", "credit-card"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["cash"]["status"], "Complete"
@@ -2853,7 +2843,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Payment Declined")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["cash", "credit-card"]),
+            {"cash", "credit-card"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["cash"]["status"], "Complete"
@@ -2919,7 +2909,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["cash", "credit-card"]),
+            {"cash", "credit-card"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["cash"]["status"], "Complete"
@@ -2979,7 +2969,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["cash", "credit-card"]),
+            {"cash", "credit-card"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["cash"]["status"], "Complete"
@@ -3049,7 +3039,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["order_status"], "Authorized")
         self.assertEqual(
             states_resp.data["payment_method_states"].keys(),
-            set(["cash", "credit-card"]),
+            {"cash", "credit-card"},
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
@@ -3119,7 +3109,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
@@ -3148,7 +3138,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Payment Declined")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
@@ -3182,9 +3172,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp2.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["cash"])
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"cash"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
         )
@@ -3245,9 +3233,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp1.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["cash"])
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"cash"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
         )
@@ -3310,7 +3296,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
@@ -3339,7 +3325,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Payment Declined")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
@@ -3518,7 +3504,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
@@ -3553,7 +3539,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
@@ -3593,7 +3579,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
@@ -3670,7 +3656,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
@@ -3704,7 +3690,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
@@ -3744,7 +3730,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Payment Declined")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
@@ -3794,7 +3780,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
@@ -3828,7 +3814,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
@@ -3867,7 +3853,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
         self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), set(["credit-card"])
+            states_resp.data["payment_method_states"].keys(), {"credit-card"}
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],

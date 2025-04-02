@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from django.shortcuts import get_object_or_404
 from oscar.core.loading import get_model
@@ -92,7 +92,7 @@ class CheckoutView(generics.GenericAPIView[Any]):
 
     serializer_class = CheckoutSerializer
 
-    def post(self, request: Request, format: Optional[str] = None) -> Response:
+    def post(self, request: Request, format: str | None = None) -> Response:
         # Wipe out any previous state data
         utils.clear_consumed_payment_method_states(request)
 
@@ -196,7 +196,7 @@ class CompleteDeferredPaymentView(CheckoutView):
 
     serializer_class = CompleteDeferredPaymentSerializer  # type:ignore[assignment]
 
-    def post(self, request: Request, format: Optional[str] = None) -> Response:
+    def post(self, request: Request, format: str | None = None) -> Response:
         # Wipe out any previous state data
         utils.clear_consumed_payment_method_states(request)
 
@@ -230,7 +230,7 @@ class CompleteDeferredPaymentView(CheckoutView):
 
 
 class PaymentStatesView(generics.GenericAPIView[Any]):
-    def get(self, request: Request, pk: Optional[int] = None) -> Response:
+    def get(self, request: Request, pk: int | None = None) -> Response:
         # We don't really use the provided pk. It's just there to be compatible with oscarapi
         if pk and int(pk) != request.session.get(CHECKOUT_ORDER_ID):
             return Response(status=status.HTTP_404_NOT_FOUND)

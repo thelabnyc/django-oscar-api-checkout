@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from collections.abc import Callable, Mapping
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 import logging
 
 from django.contrib.auth import get_user_model
@@ -504,9 +504,9 @@ class CheckoutSerializer(OscarCheckoutSerializer):
     def _insupd_order(
         self,
         basket: Basket,
-        user: Optional[AnonymousUser | User] = None,
-        shipping_address: Optional[ShippingAddress] = None,
-        billing_address: Optional[BillingAddress] = None,
+        user: AnonymousUser | User | None = None,
+        shipping_address: ShippingAddress | None = None,
+        billing_address: BillingAddress | None = None,
         **kwargs: Any,
     ) -> Order:
         existing_orders = basket.order_set.all()

@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from decimal import Decimal
 from enum import UNIQUE, StrEnum, verify
-from typing import Literal, Optional, TypedDict
+from typing import Literal, TypedDict
 
 
 @verify(UNIQUE)
@@ -52,7 +52,7 @@ class SourceBoundPaymentStatus(PaymentStatus):
     def __init__(
         self,
         amount: Decimal,
-        source_id: Optional[int] = None,
+        source_id: int | None = None,
     ) -> None:
         super().__init__(amount)
         self.source_id = source_id

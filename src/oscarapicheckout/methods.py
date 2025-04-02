@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, NotRequired, Optional, TypedDict
+from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
 import logging
 
 from django.db import transaction
@@ -199,7 +199,7 @@ class PaymentMethod[T: PaymentMethodData]:
         request: HttpRequest,
         order: "Order",
         method_key: str,
-        amount: Optional[Decimal] = None,
+        amount: Decimal | None = None,
         reference: str = "",
         **kwargs: Any,
     ) -> states.PaymentStatus:

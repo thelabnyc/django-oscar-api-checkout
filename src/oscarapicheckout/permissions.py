@@ -1,14 +1,12 @@
-from typing import Optional
-
 from django.contrib.auth.models import User
 from django.http import HttpRequest
 
 
-class PaymentMethodPermission(object):
+class PaymentMethodPermission:
     def is_permitted(
         self,
-        request: Optional[HttpRequest] = None,
-        user: Optional[User] = None,
+        request: HttpRequest | None = None,
+        user: User | None = None,
     ) -> bool:
         raise NotImplementedError(
             "Class must implement is_method_permitted(request=None, user=None)"
@@ -18,8 +16,8 @@ class PaymentMethodPermission(object):
 class Public(PaymentMethodPermission):
     def is_permitted(
         self,
-        request: Optional[HttpRequest] = None,
-        user: Optional[User] = None,
+        request: HttpRequest | None = None,
+        user: User | None = None,
     ) -> bool:
         return True
 
@@ -27,8 +25,8 @@ class Public(PaymentMethodPermission):
 class StaffOnly(PaymentMethodPermission):
     def is_permitted(
         self,
-        request: Optional[HttpRequest] = None,
-        user: Optional[User] = None,
+        request: HttpRequest | None = None,
+        user: User | None = None,
     ) -> bool:
         return user is not None and user.is_authenticated and user.is_staff
 
@@ -36,8 +34,8 @@ class StaffOnly(PaymentMethodPermission):
 class CustomerOnly(PaymentMethodPermission):
     def is_permitted(
         self,
-        request: Optional[HttpRequest] = None,
-        user: Optional[User] = None,
+        request: HttpRequest | None = None,
+        user: User | None = None,
     ) -> bool:
         return (
             user is None

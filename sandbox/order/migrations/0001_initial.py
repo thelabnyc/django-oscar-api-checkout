@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
@@ -979,7 +976,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name="shippingeventquantity",
-            unique_together=set([("event", "line")]),
+            unique_together={("event", "line")},
         ),
         migrations.AddField(
             model_name="shippingevent",
@@ -1015,7 +1012,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterUniqueTogether(
             name="paymenteventquantity",
-            unique_together=set([("event", "line")]),
+            unique_together={("event", "line")},
         ),
         migrations.AddField(
             model_name="paymentevent",

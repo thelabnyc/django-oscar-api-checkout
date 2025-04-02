@@ -33,12 +33,12 @@ class OrderCreatorMixin(OrderCreator):
         total: Decimal,
         shipping_method: "ShippingMethod",
         shipping_charge: Decimal,
-        user: Optional[User] = None,
+        user: User | None = None,
         shipping_address: Optional["ShippingAddress"] = None,
         billing_address: Optional["BillingAddress"] = None,
-        order_number: Optional[str] = None,
-        status: Optional[str] = None,
-        request: Optional[HttpRequest] = None,
+        order_number: str | None = None,
+        status: str | None = None,
+        request: HttpRequest | None = None,
         **kwargs: Any
     ) -> Order:
         """
