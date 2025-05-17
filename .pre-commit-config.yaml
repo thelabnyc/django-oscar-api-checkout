@@ -22,7 +22,7 @@ repos:
         args: [--py312-plus]
 
   - repo: https://github.com/adamchainz/django-upgrade
-    rev: "1.24.0"
+    rev: "1.25.0"
     hooks:
     -   id: django-upgrade
 
