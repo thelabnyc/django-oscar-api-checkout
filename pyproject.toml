@@ -1,41 +1,48 @@
 [build-system]
-requires = [ "poetry-core>=2.1.2",]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry]
+[project]
 name = "django-oscar-api-checkout"
 version = "3.7.0"
 description = "An extension on top of django-oscar-api providing a more flexible checkout API with a pluggable payment methods interface."
-authors = ["thelab <thelabdev@thelab.co>"]
 readme = "README.rst"
-homepage = "https://gitlab.com/thelabnyc/django-oscar/django-oscar-api-checkout"
-repository = "https://gitlab.com/thelabnyc/django-oscar/django-oscar-api-checkout"
-license = "ISC"
+license = { text = "ISC" }
+dependencies = [
+    "Django (>=4.2)",
+    "django-oscar (>=4.0,<4.1)",
+    "django-oscar-api (==3.3.0)",
+    "drf-recaptcha (>=4.0.2,<5)",
+]
+requires-python = ">=3.12"
 
-[[tool.poetry.packages]]
-include = "oscarapicheckout"
-from = "src"
+[[project.authors]]
+name = "thelab"
+email = "thelabdev@thelab.co"
 
-[tool.poetry.dependencies]
-python = "^3.12"
-Django = ">=4.2"
-django-oscar = ">=4.0,<4.1"
-django-oscar-api = "3.3.0"
-drf-recaptcha = "^4.0.2"
+[project.urls]
+Homepage = "https://gitlab.com/thelabnyc/django-oscar/django-oscar-api-checkout"
+Repository = "https://gitlab.com/thelabnyc/django-oscar/django-oscar-api-checkout"
 
-[tool.poetry.group.dev.dependencies]
-coverage = "7.9.1"
-flake8 = "7.3.0"
-psycopg2-binary = "2.9.10"
-PyYAML = "6.0.2"
-sorl-thumbnail = "12.11.0"
-sphinx = "8.2.3"
-tox = "4.27.0"
-unittest-xml-reporting = "3.2.0"
-django-stubs = "5.2.1"
-mypy = "1.16.1"
-types-psycopg2 = "^2.9.21.20241019"
-djangorestframework-stubs = "3.16.0"
+[dependency-groups]
+dev = [
+    "coverage (==7.9.1)",
+    "flake8 (==7.3.0)",
+    "psycopg2-binary (==2.9.10)",
+    "PyYAML (==6.0.2)",
+    "sorl-thumbnail (==12.11.0)",
+    "sphinx (==8.2.3)",
+    "tox (==4.27.0)",
+    "unittest-xml-reporting (==3.2.0)",
+    "django-stubs (==5.2.1)",
+    "mypy (==1.16.1)",
+    "types-psycopg2 (>=2.9.21.20241019,<3)",
+    "djangorestframework-stubs (==3.16.0)",
+    "tox-uv>=1.26.1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["oscarapicheckout"]
 
 [tool.commitizen]
 name = "cz_conventional_commits"
@@ -44,17 +51,11 @@ gpg_sign = true
 tag_format = "v$version"
 update_changelog_on_bump = true
 changelog_merge_prerelease = true
-version_provider = "poetry"
+version_provider = "pep621"
 version_scheme = "pep440"
-version_files = [
-    "pyproject.toml:version",
-]
-pre_bump_hooks = [
-    "pre-commit run --all-files || true",
-]
-post_bump_hooks = [
-    "git push origin master $CZ_POST_CURRENT_TAG_VERSION"
-]
+version_files = ["pyproject.toml:version"]
+pre_bump_hooks = ["pre-commit run --all-files || true", "uv build"]
+post_bump_hooks = ["git push origin master $CZ_POST_CURRENT_TAG_VERSION"]
 
 [tool.mypy]
 python_version = "3.12"
@@ -97,6 +98,7 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 module = "*.tests.*"
 ignore_errors = true
+
 
 [tool.django-stubs]
 django_settings_module = "sandbox.settings"

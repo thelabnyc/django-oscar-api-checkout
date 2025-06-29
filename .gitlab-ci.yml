@@ -25,8 +25,8 @@ test:
   stage: test
   image: "registry.gitlab.com/thelabnyc/python:${IMAGE}"
   script:
-    - pip install tox
-    - tox
+    - uv sync
+    - uv run tox
   coverage: '/^TOTAL.+?(\d+\%)$/'
   parallel:
     matrix:
