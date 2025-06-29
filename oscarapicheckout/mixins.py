@@ -39,7 +39,7 @@ class OrderCreatorMixin(OrderCreator):
         order_number: str | None = None,
         status: str | None = None,
         request: HttpRequest | None = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Order:
         """
         Placing an order involves creating all the relevant models based on the
@@ -84,7 +84,7 @@ class OrderCreatorMixin(OrderCreator):
                     order_number,
                     status,
                     request=request,
-                    **kwargs
+                    **kwargs,
                 ),
             )
             for line in basket.all_lines():
