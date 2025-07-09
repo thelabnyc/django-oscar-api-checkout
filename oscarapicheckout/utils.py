@@ -104,15 +104,11 @@ def _set_order_payment_declined(order: "Order", request: HttpRequest) -> None:
 def _update_order_status(order: "Order", request: HttpRequest) -> None:
     states = list_payment_method_states(request)
 
-    declined = [
-        s for k, s in states.items() if s.status == PaymentMethodStatus.DECLINED
-    ]
+    declined = [s for k, s in states.items() if s.status == PaymentMethodStatus.DECLINED]
     if len(declined) > 0:
         _set_order_payment_declined(order, request)
 
-    not_complete = [
-        s for k, s in states.items() if s.status != PaymentMethodStatus.COMPLETE
-    ]
+    not_complete = [s for k, s in states.items() if s.status != PaymentMethodStatus.COMPLETE]
     if len(not_complete) <= 0:
         # Authorized the order and consume all the payments
         _set_order_authorized(order, request)
@@ -128,9 +124,7 @@ def _update_order_status(order: "Order", request: HttpRequest) -> None:
 
 def list_payment_method_states(request: HttpRequest) -> dict[str, PaymentStatus]:
     states = request.session.get(CHECKOUT_PAYMENT_STEPS, {})
-    return {
-        method_key: _session_unpickle(state) for method_key, state in states.items()
-    }
+    return {method_key: _session_unpickle(state) for method_key, state in states.items()}
 
 
 def clear_payment_method_states(request: HttpRequest) -> None:
@@ -263,9 +257,7 @@ class OrderUpdater:
 
         if order.status != ORDER_STATUS_PAYMENT_DECLINED:
             # Translators: Error message in checkout
-            raise ValueError(
-                _("Can not update an order that isn't in payment declined state.")
-            )
+            raise ValueError(_("Can not update an order that isn't in payment declined state."))
 
         # Make sure there isn't another order with this number already, besides of course the
         # order we're trying to update.
@@ -275,19 +267,13 @@ class OrderUpdater:
             pass
         else:
             # Translators: Error message in checkout
-            msg = _("There is already an order with number %(order_number)s") % dict(
-                order_number=order_number
-            )
+            msg = _("There is already an order with number %(order_number)s") % dict(order_number=order_number)
             raise ValueError(msg)
 
         # Remove all the order lines and cancel and stock they allocated. We'll make new lines from the
         # basket after this.
         for order_line in order.lines.all():
-            if (
-                order_line.product
-                and order_line.product.get_product_class().track_stock
-                and order_line.stockrecord
-            ):
+            if order_line.product and order_line.product.get_product_class().track_stock and order_line.stockrecord:
                 order_line.stockrecord.cancel_allocation(order_line.quantity)
             order_line.delete()
 
@@ -326,9 +312,7 @@ class OrderUpdater:
         for application in basket.offer_applications:
             # Trigger any deferred benefits from offers and capture the
             # resulting message
-            application["message"] = application["offer"].apply_deferred_benefit(
-                basket, order, application
-            )
+            application["message"] = application["offer"].apply_deferred_benefit(basket, order, application)
 
             # Record offer application results
             if application["result"].affects_shipping:

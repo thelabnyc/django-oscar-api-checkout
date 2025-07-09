@@ -41,9 +41,7 @@ API_CHECKOUT_FRAUD_CHECKS: list[FraudRuleConfig] = overridable(
 )
 
 ORDER_STATUS_PENDING: str = overridable("ORDER_STATUS_PENDING", "Pending")
-ORDER_STATUS_PAYMENT_DECLINED: str = overridable(
-    "ORDER_STATUS_PAYMENT_DECLINED", "Payment Declined"
-)
+ORDER_STATUS_PAYMENT_DECLINED: str = overridable("ORDER_STATUS_PAYMENT_DECLINED", "Payment Declined")
 ORDER_STATUS_AUTHORIZED: str = overridable("ORDER_STATUS_AUTHORIZED", "Authorized")
 ORDER_STATUS_SHIPPED: str = overridable("ORDER_STATUS_SHIPPED", "Shipped")
 ORDER_STATUS_CANCELED: str = overridable("ORDER_STATUS_CANCELED", "Canceled")

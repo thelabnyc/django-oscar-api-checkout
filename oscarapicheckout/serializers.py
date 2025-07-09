@@ -91,9 +91,7 @@ class DiscriminatedUnionSerializer(serializers.Serializer[Any]):
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
-        self.fields[discriminant_field_name] = serializers.ChoiceField(
-            choices=[(t, t) for t in types.keys()]
-        )
+        self.fields[discriminant_field_name] = serializers.ChoiceField(choices=[(t, t) for t in types.keys()])
         self.discriminant_field_name = discriminant_field_name
         self.type_mapping = types
 
@@ -161,9 +159,7 @@ class PaymentMethodsSerializer(serializers.DictField):
                 self.methods[method.code] = method
 
         if not any(self.methods):
-            raise RuntimeError(
-                "No payment methods were permitted for user %s" % request.user
-            )
+            raise RuntimeError("No payment methods were permitted for user %s" % request.user)
 
         union_types = {}
         for code, method in self.methods.items():
@@ -214,33 +210,22 @@ class PaymentMethodsSerializer(serializers.DictField):
         enabled_methods = {k: v for k, v in result.items() if v["enabled"]}
         if len(enabled_methods) <= 0:
             # Translators: User facing error message in checkout
-            raise serializers.ValidationError(
-                _("At least one payment method must be enabled.")
-            )
+            raise serializers.ValidationError(_("At least one payment method must be enabled."))
 
         # Respect payment method limit
-        if (
-            settings.API_MAX_PAYMENT_METHODS > 0
-            and len(enabled_methods) > settings.API_MAX_PAYMENT_METHODS
-        ):
+        if settings.API_MAX_PAYMENT_METHODS > 0 and len(enabled_methods) > settings.API_MAX_PAYMENT_METHODS:
             # Translators: User facing error message in checkout
-            msg = _("No more than %(num)s payment method can be enabled.") % dict(
-                num=settings.API_MAX_PAYMENT_METHODS
-            )
+            msg = _("No more than %(num)s payment method can be enabled.") % dict(num=settings.API_MAX_PAYMENT_METHODS)
             raise serializers.ValidationError(msg)
 
         # Must set pay_balance flag on exactly one payment method
         balance_methods = {k: v for k, v in enabled_methods.items() if v["pay_balance"]}
         if len(balance_methods) > 1:
             # Translators: User facing error message in checkout
-            raise serializers.ValidationError(
-                _("Can not set pay_balance flag on multiple payment methods.")
-            )
+            raise serializers.ValidationError(_("Can not set pay_balance flag on multiple payment methods."))
         elif len(balance_methods) < 1:
             # Translators: User facing error message in checkout
-            raise serializers.ValidationError(
-                _("Must set pay_balance flag on at least one payment method.")
-            )
+            raise serializers.ValidationError(_("Must set pay_balance flag on at least one payment method."))
 
         return result
 
@@ -281,9 +266,7 @@ class SignedTokenRelatedField[_MT: models.Model](serializers.SlugRelatedField[_M
         try:
             raw_value = self.verify_token(data)
         except BadSignature:
-            self.fail(
-                "does_not_exist", slug_name=self.slug_field, value=smart_str(data)
-            )
+            self.fail("does_not_exist", slug_name=self.slug_field, value=smart_str(data))
         except (TypeError, ValueError):
             self.fail("invalid")
         return super().to_internal_value(raw_value)
@@ -320,11 +303,7 @@ class PaymentStateSerializer(serializers.Serializer[Any]):
     required_action = serializers.SerializerMethodField()
 
     def get_required_action(self, state: PaymentStatus) -> RequiredAction | None:
-        return (
-            state.get_required_action()
-            if state.status == PaymentMethodStatus.PENDING
-            else None
-        )
+        return state.get_required_action() if state.status == PaymentMethodStatus.PENDING else None
 
 
 class OrderSerializer(OscarOrderSerializer):
@@ -404,15 +383,11 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         basket: Basket = data["basket"]
         for line in basket.all_lines():
             result = basket.strategy.fetch_for_line(line)
-            is_permitted, reason = result.availability.is_purchase_permitted(
-                line.quantity
-            )
+            is_permitted, reason = result.availability.is_purchase_permitted(line.quantity)
             if not is_permitted:
                 # Create a meaningful message to return in the error response
                 # Translators: User facing error message in checkout
-                msg = _(
-                    "'%(title)s' is no longer available to buy (%(reason)s). Please adjust your basket to continue."
-                ) % {
+                msg = _("'%(title)s' is no longer available to buy (%(reason)s). Please adjust your basket to continue.") % {
                     "title": line.product.get_title(),
                     "reason": reason,
                 }
@@ -447,25 +422,17 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         )
 
         # Figure out the final total order price
-        data["total"] = OrderTotalCalculator().calculate(
-            data["basket"], data["shipping_charge"]
-        )
+        data["total"] = OrderTotalCalculator().calculate(data["basket"], data["shipping_charge"])
 
         # Payment amounts specified must not be more than the order total
         posted_total = Decimal("0.00")
-        methods = {
-            k: v
-            for k, v in data["payment"].items()
-            if v["enabled"] and not v["pay_balance"]
-        }
+        methods = {k: v for k, v in data["payment"].items() if v["enabled"] and not v["pay_balance"]}
         for code, method in methods.items():
             posted_total += method["amount"]
 
         if posted_total > data["total"].incl_tax:
             # Translators: User facing error message in checkout
-            raise serializers.ValidationError(
-                _("Specified payment amounts exceed order total.")
-            )
+            raise serializers.ValidationError(_("Specified payment amounts exceed order total."))
 
         return data
 
@@ -510,22 +477,14 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         **kwargs: Any,
     ) -> Order:
         existing_orders = basket.order_set.all()
-        if existing_orders.exclude(
-            status=settings.ORDER_STATUS_PAYMENT_DECLINED
-        ).exists():
+        if existing_orders.exclude(status=settings.ORDER_STATUS_PAYMENT_DECLINED).exists():
             # Translators: User facing error message in checkout
-            raise exceptions.NotAcceptable(
-                _("An non-declined order already exists for this basket.")
-            )
+            raise exceptions.NotAcceptable(_("An non-declined order already exists for this basket."))
 
         existing_count = existing_orders.count()
         if existing_count > 1:
             # Translators: User facing error message in checkout
-            raise exceptions.NotAcceptable(
-                _(
-                    "Multiple order exist for this basket! This should never happen and we don't know what to do."
-                )
-            )
+            raise exceptions.NotAcceptable(_("Multiple order exist for this basket! This should never happen and we don't know what to do."))
 
         # Get request object from context
         request = self.context.get("request", None)
@@ -545,9 +504,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         # Update this order instead of making a new one.
         kwargs["order_number"] = order.number
         status = self.get_initial_order_status(basket)
-        shipping_address = self.create_shipping_address(
-            user=user, shipping_address=shipping_address
-        )
+        shipping_address = self.create_shipping_address(user=user, shipping_address=shipping_address)
         billing_address = self.create_billing_address(
             user=user,
             billing_address=billing_address,
@@ -567,11 +524,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
 
 
 class CompleteDeferredPaymentSerializer(serializers.Serializer[Any]):
-    order = OrderTokenField(
-        help_text=_(
-            "Server-signed order number token used to identify the order and verify the client has permission to modify it."
-        )
-    )
+    order = OrderTokenField(help_text=_("Server-signed order number token used to identify the order and verify the client has permission to modify it."))
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)

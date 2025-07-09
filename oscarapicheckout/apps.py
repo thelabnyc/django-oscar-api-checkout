@@ -27,9 +27,7 @@ class Config(OscarConfig):
         view_methods = never_cache(PaymentMethodsView.as_view())
         view_states = never_cache(PaymentStatesView.as_view())
         view_checkout = never_cache(CheckoutView.as_view())
-        view_complete_deferred_payment = never_cache(
-            CompleteDeferredPaymentView.as_view()
-        )
+        view_complete_deferred_payment = never_cache(CompleteDeferredPaymentView.as_view())
         urlpatterns = [
             path(
                 "checkout/payment-methods/",

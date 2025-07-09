@@ -8,9 +8,7 @@ class PaymentMethodPermission:
         request: HttpRequest | None = None,
         user: User | None = None,
     ) -> bool:
-        raise NotImplementedError(
-            "Class must implement is_method_permitted(request=None, user=None)"
-        )
+        raise NotImplementedError("Class must implement is_method_permitted(request=None, user=None)")
 
 
 class Public(PaymentMethodPermission):
@@ -37,8 +35,4 @@ class CustomerOnly(PaymentMethodPermission):
         request: HttpRequest | None = None,
         user: User | None = None,
     ) -> bool:
-        return (
-            user is None
-            or not user.is_authenticated
-            or (user.is_authenticated and not user.is_staff)
-        )
+        return user is None or not user.is_authenticated or (user.is_authenticated and not user.is_staff)

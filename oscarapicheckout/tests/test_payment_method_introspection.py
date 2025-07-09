@@ -26,9 +26,7 @@ class PaymentMethodsViewTest(BaseTest):
                             "required": True,
                             "read_only": False,
                             "label": "Method type",
-                            "choices": [
-                                {"value": "credit-card", "display_name": "Credit Card"}
-                            ],
+                            "choices": [{"value": "credit-card", "display_name": "Credit Card"}],
                         },
                         "enabled": {
                             "type": "boolean",
@@ -112,9 +110,7 @@ class PaymentMethodsViewTest(BaseTest):
                             "required": True,
                             "read_only": False,
                             "label": "Method type",
-                            "choices": [
-                                {"value": "pay-later", "display_name": "Pay Later"}
-                            ],
+                            "choices": [{"value": "pay-later", "display_name": "Pay Later"}],
                         },
                         "enabled": {
                             "type": "boolean",
@@ -166,9 +162,7 @@ class PaymentMethodsViewTest(BaseTest):
                             "required": True,
                             "read_only": False,
                             "label": "Method type",
-                            "choices": [
-                                {"value": "credit-card", "display_name": "Credit Card"}
-                            ],
+                            "choices": [{"value": "credit-card", "display_name": "Credit Card"}],
                         },
                         "enabled": {
                             "type": "boolean",
@@ -210,9 +204,7 @@ class PaymentMethodsViewTest(BaseTest):
                             "required": True,
                             "read_only": False,
                             "label": "Method type",
-                            "choices": [
-                                {"value": "pay-later", "display_name": "Pay Later"}
-                            ],
+                            "choices": [{"value": "pay-later", "display_name": "Pay Later"}],
                         },
                         "enabled": {
                             "type": "boolean",

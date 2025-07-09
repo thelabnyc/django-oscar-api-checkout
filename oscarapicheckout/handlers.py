@@ -25,9 +25,7 @@ def send_order_confirmation_message(
     request: HttpRequest,
     **kwargs: Any,
 ) -> None:
-    transaction.on_commit(
-        lambda: OrderMessageSender(request).send_order_placed_email(order)
-    )
+    transaction.on_commit(lambda: OrderMessageSender(request).send_order_placed_email(order))
 
 
 @receiver(order_status_changed)

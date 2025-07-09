@@ -54,24 +54,16 @@ class PaymentMethodSerializer[T: PaymentMethodData](serializers.Serializer[Any])
         **kwargs: Any,
     ):
         super().__init__(*args, **kwargs)
-        self.fields["method_type"] = serializers.ChoiceField(
-            choices=method_type_choices
-        )
+        self.fields["method_type"] = serializers.ChoiceField(choices=method_type_choices)
 
     def validate(self, data: T) -> T:
         if not data["enabled"]:
             return data
         if data["pay_balance"]:
             data.pop("amount", None)  # type:ignore[arg-type]
-        elif (
-            "amount" not in data
-            or not data["amount"]
-            or data["amount"] <= Decimal("0.00")
-        ):
+        elif "amount" not in data or not data["amount"] or data["amount"] <= Decimal("0.00"):
             # Translators: User facing error message in checkout
-            raise serializers.ValidationError(
-                _("Amount must be greater then 0.00 or pay_balance must be enabled.")
-            )
+            raise serializers.ValidationError(_("Amount must be greater then 0.00 or pay_balance must be enabled."))
         return data
 
 
@@ -142,9 +134,7 @@ class PaymentMethod[T: PaymentMethodData]:
         line: "OrderLine",
         quantity: int,
     ) -> PaymentEventQuantity:
-        return PaymentEventQuantity.objects.create(
-            event=event, line=line, quantity=quantity
-        )
+        return PaymentEventQuantity.objects.create(event=event, line=line, quantity=quantity)
 
     def get_source(
         self,
@@ -152,9 +142,7 @@ class PaymentMethod[T: PaymentMethodData]:
         reference: str = "",
     ) -> Source:
         stype, created = SourceType.objects.get_or_create(name=self.name)
-        source, created = Source.objects.get_or_create(
-            order=order, source_type=stype, reference=reference
-        )
+        source, created = Source.objects.get_or_create(order=order, source_type=stype, reference=reference)
         source.currency = order.currency
         source.save()
         return source
@@ -168,11 +156,7 @@ class PaymentMethod[T: PaymentMethodData]:
         state_to_void: states.PaymentStatus,
     ) -> None:
         source_id: int | None = getattr(state_to_void, "source_id", None)
-        source = (
-            Source.objects.filter(pk=source_id).first()
-            if source_id is not None
-            else None
-        )
+        source = Source.objects.filter(pk=source_id).first() if source_id is not None else None
         if not source:
             logger.warning(
                 "Attempted to void PaymentSource for Order[%s], MethodKey[%s], but no source was found.",
@@ -223,9 +207,7 @@ class PaymentMethod[T: PaymentMethodData]:
         reference: str,
         **kwargs: Any,
     ) -> states.PaymentStatus:
-        raise NotImplementedError(
-            "Subclass must implement _record_payment(request, order, method_key, amount, reference, **kwargs) method."
-        )
+        raise NotImplementedError("Subclass must implement _record_payment(request, order, method_key, amount, reference, **kwargs) method.")
 
 
 class Cash(PaymentMethod[PaymentMethodData]):
