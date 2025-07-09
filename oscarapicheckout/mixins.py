@@ -63,10 +63,7 @@ class OrderCreatorMixin(OrderCreator):
         # Make sure there isn't already an order with this order number
         if Order._default_manager.filter(number=order_number).exists():
             # Translators: User facing error message in checkout
-            raise ValueError(
-                _("There is already an order with number %(order_number)s")
-                % dict(order_number=order_number)
-            )
+            raise ValueError(_("There is already an order with number %(order_number)s") % dict(order_number=order_number))
 
         # Open a transaction so that order creation is atomic.
         with transaction.atomic():
@@ -101,9 +98,7 @@ class OrderCreatorMixin(OrderCreator):
             # Record any discounts associated with this order
             for application in basket.offer_applications:
                 # Trigger any deferred benefits from offers and capture the resulting message
-                application["message"] = application["offer"].apply_deferred_benefit(
-                    basket, order, application
-                )
+                application["message"] = application["offer"].apply_deferred_benefit(basket, order, application)
                 # Record offer application results
                 if application["result"].affects_shipping:
                     # Skip zero shipping discounts

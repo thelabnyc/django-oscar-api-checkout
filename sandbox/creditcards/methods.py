@@ -68,9 +68,7 @@ class CreditCard(PaymentMethod[PaymentMethodData]):
             fields=fields,
         )
 
-    def require_authorization_post(
-        self, order: "Order", method_key: str, amount: Decimal
-    ) -> FormPostRequired:
+    def require_authorization_post(self, order: "Order", method_key: str, amount: Decimal) -> FormPostRequired:
         """Payment Step 2"""
         fields: list[FormPostRequiredFormDataField] = [
             {
@@ -117,7 +115,5 @@ class CreditCard(PaymentMethod[PaymentMethodData]):
     ) -> Declined:
         """Payment Step 3 Failed"""
         source = self.get_source(order, reference)
-        source._create_transaction(
-            Transaction.AUTHORISE, amount, reference=reference, status="DECLINED"
-        )
+        source._create_transaction(Transaction.AUTHORISE, amount, reference=reference, status="DECLINED")
         return Declined(amount, source_id=source.pk)

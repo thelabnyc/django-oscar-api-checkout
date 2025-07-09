@@ -165,11 +165,7 @@ class CheckoutView(generics.GenericAPIView[Any]):
                         method.void_existing_payment(request, order, method_key, prev)
 
             # Previous payment method doesn't exist or can't be reused. Create it now.
-            final_state = (
-                state
-                if state
-                else method.record_payment(request, order, method_key, **method_data)
-            )
+            final_state = state if state else method.record_payment(request, order, method_key, **method_data)
             # Subtract amount from pending order balance.
             order_balance[0] = order_balance[0] - final_state.amount
             return final_state
@@ -201,10 +197,8 @@ class CompleteDeferredPaymentView(CheckoutView):
         utils.clear_consumed_payment_method_states(request)
 
         # Validate the input
-        c_ser: CompleteDeferredPaymentSerializer = (
-            self.get_serializer(  # type:ignore[assignment]
-                data=request.data
-            )
+        c_ser: CompleteDeferredPaymentSerializer = self.get_serializer(  # type:ignore[assignment]
+            data=request.data
         )
         if not c_ser.is_valid():
             return Response(c_ser.errors, status.HTTP_406_NOT_ACCEPTABLE)

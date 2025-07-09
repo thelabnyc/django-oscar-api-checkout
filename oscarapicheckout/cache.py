@@ -70,9 +70,7 @@ class AbstractCheckoutCache[
 
     @property
     def cache_key(self) -> str:
-        return "oscarapicheckout.cache.{}.{}".format(
-            self.__class__.__name__, self.basket_id
-        )
+        return f"oscarapicheckout.cache.{self.__class__.__name__}.{self.basket_id}"
 
     def set(self, edata: ExternalData) -> None:
         sdata = self._transform_incoming_data(edata)
@@ -97,9 +95,7 @@ class AbstractCheckoutCache[
     def _transform_outgoing_data(self, sdata: StoredData) -> ExternalData:
         return sdata  # type:ignore[return-value]
 
-    def _get_serializer(
-        self, edata: ExternalData
-    ) -> serializers.Serializer[Any] | None:
+    def _get_serializer(self, edata: ExternalData) -> serializers.Serializer[Any] | None:
         serializer_class = self._get_serializer_class()
         if serializer_class:
             return serializer_class(data=edata)
@@ -113,9 +109,7 @@ class AbstractCheckoutCache[
         return None
 
 
-class AbstractCheckoutAddressCache[ExternalData: BaseAddressCacheValue](
-    AbstractCheckoutCache[ExternalData, dict[str, Any]]
-):
+class AbstractCheckoutAddressCache[ExternalData: BaseAddressCacheValue](AbstractCheckoutCache[ExternalData, dict[str, Any]]):
     def _transform_incoming_data(self, edata: ExternalData) -> dict[str, Any]:
         sdata: dict[str, Any] = super()._transform_incoming_data(edata)
         if sdata and "country" in sdata and hasattr(sdata["country"], "pk"):
@@ -138,21 +132,15 @@ class EmailAddressCache(
         dict[str, Any],
     ],
 ):
-    serializer_class_path = pkgsettings.CHECKOUT_CACHE_SERIALIZERS.get(
-        "email_address", "oscarapicheckout.cache.EmailAddressSerializer"
-    )
+    serializer_class_path = pkgsettings.CHECKOUT_CACHE_SERIALIZERS.get("email_address", "oscarapicheckout.cache.EmailAddressSerializer")
 
 
 class ShippingAddressCache(AbstractCheckoutAddressCache[ShippingAddressCacheValue]):
-    serializer_class_path = pkgsettings.CHECKOUT_CACHE_SERIALIZERS.get(
-        "shipping_address", "oscarapi.serializers.checkout.ShippingAddressSerializer"
-    )
+    serializer_class_path = pkgsettings.CHECKOUT_CACHE_SERIALIZERS.get("shipping_address", "oscarapi.serializers.checkout.ShippingAddressSerializer")
 
 
 class BillingAddressCache(AbstractCheckoutAddressCache[BillingAddressCacheValue]):
-    serializer_class_path = pkgsettings.CHECKOUT_CACHE_SERIALIZERS.get(
-        "billing_address", "oscarapi.serializers.checkout.BillingAddressSerializer"
-    )
+    serializer_class_path = pkgsettings.CHECKOUT_CACHE_SERIALIZERS.get("billing_address", "oscarapi.serializers.checkout.BillingAddressSerializer")
 
 
 class ShippingMethodCache(
@@ -161,6 +149,4 @@ class ShippingMethodCache(
         dict[str, Any],
     ],
 ):
-    serializer_class_path = pkgsettings.CHECKOUT_CACHE_SERIALIZERS.get(
-        "shipping_method", "oscarapicheckout.cache.ShippingMethodSerializer"
-    )
+    serializer_class_path = pkgsettings.CHECKOUT_CACHE_SERIALIZERS.get("shipping_method", "oscarapicheckout.cache.ShippingMethodSerializer")

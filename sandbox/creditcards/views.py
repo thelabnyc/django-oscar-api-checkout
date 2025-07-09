@@ -30,9 +30,7 @@ class GetCardTokenView(generics.GenericAPIView[Any]):
 
         # Decline the payment
         if request.data.get("deny"):
-            utils.mark_payment_method_declined(
-                order, request, method_key, request.data["amount"]
-            )
+            utils.mark_payment_method_declined(order, request, method_key, request.data["amount"])
             return Response(
                 {
                     "status": "Declined",
@@ -65,9 +63,7 @@ class AuthorizeCardView(generics.GenericAPIView[Any]):
         new_state: PaymentStatus
         # Decline the payment
         if request.data.get("deny"):
-            new_state = CreditCard().record_declined_authorization(
-                order, amount, reference
-            )
+            new_state = CreditCard().record_declined_authorization(order, amount, reference)
             utils.update_payment_method_state(order, request, method_key, new_state)
             return Response(
                 {
@@ -76,9 +72,7 @@ class AuthorizeCardView(generics.GenericAPIView[Any]):
             )
 
         # Record the funds allocation
-        new_state = CreditCard().record_successful_authorization(
-            order, amount, reference
-        )
+        new_state = CreditCard().record_successful_authorization(order, amount, reference)
         utils.update_payment_method_state(order, request, method_key, new_state)
         return Response(
             {

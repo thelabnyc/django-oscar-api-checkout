@@ -39,15 +39,9 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
         self.assertEqual(states_resp.data["payment_method_states"].keys(), {"cash"})
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["amount"], "10.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["cash"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Consumed")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["amount"], "10.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["cash"]["required_action"])
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
@@ -79,18 +73,10 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"pay-later"}
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["pay-later"]["status"], "Deferred"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["pay-later"]["amount"], "0.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["pay-later"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"pay-later"})
+        self.assertEqual(states_resp.data["payment_method_states"]["pay-later"]["status"], "Deferred")
+        self.assertEqual(states_resp.data["payment_method_states"]["pay-later"]["amount"], "0.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["pay-later"]["required_action"])
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
@@ -123,15 +109,9 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
         self.assertEqual(states_resp.data["payment_method_states"].keys(), {"cash"})
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["amount"], "10.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["cash"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Consumed")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["amount"], "10.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["cash"]["required_action"])
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
@@ -242,15 +222,9 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
         self.assertEqual(states_resp.data["payment_method_states"].keys(), {"cash"})
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["amount"], "10.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["cash"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Consumed")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["amount"], "10.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["cash"]["required_action"])
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
@@ -309,15 +283,9 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
         self.assertEqual(states_resp.data["payment_method_states"].keys(), {"cash"})
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["amount"], "5.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["cash"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Consumed")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["amount"], "5.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["cash"]["required_action"])
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
@@ -374,9 +342,7 @@ class CheckoutAPITest(BaseTest):
         data = self._get_checkout_data(basket_id + 1)
         resp = self._checkout(data)
         self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
-        self.assertEqual(
-            resp.data["basket"][0], "Invalid hyperlink - Object does not exist."
-        )
+        self.assertEqual(resp.data["basket"][0], "Invalid hyperlink - Object does not exist.")
 
     def test_no_payment_methods_provided(self):
         self.login(is_staff=True)
@@ -396,9 +362,7 @@ class CheckoutAPITest(BaseTest):
         data["payment"] = {}
         resp = self._checkout(data)
         self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
-        self.assertEqual(
-            resp.data["payment"][0], "At least one payment method must be enabled."
-        )
+        self.assertEqual(resp.data["payment"][0], "At least one payment method must be enabled.")
 
     def test_no_payment_methods_enabled(self):
         self.login(is_staff=True)
@@ -408,9 +372,7 @@ class CheckoutAPITest(BaseTest):
         data["payment"] = {"cash": {"enabled": False}}
         resp = self._checkout(data)
         self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
-        self.assertEqual(
-            resp.data["payment"][0], "At least one payment method must be enabled."
-        )
+        self.assertEqual(resp.data["payment"][0], "At least one payment method must be enabled.")
 
     def test_no_payment_amount_provided(self):
         self.login(is_staff=True)
@@ -431,9 +393,7 @@ class CheckoutAPITest(BaseTest):
         )
 
         data = self._get_checkout_data(basket_id)
-        data["payment"] = {
-            "cash": {"enabled": True, "pay_balance": False, "amount": "0.00"}
-        }
+        data["payment"] = {"cash": {"enabled": True, "pay_balance": False, "amount": "0.00"}}
         resp = self._checkout(data)
         self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
         self.assertEqual(
@@ -454,9 +414,7 @@ class CheckoutAPITest(BaseTest):
         }
         resp = self._checkout(data)
         self.assertEqual(resp.status_code, status.HTTP_406_NOT_ACCEPTABLE)
-        self.assertEqual(
-            resp.data["payment"][0], "At least one payment method must be enabled."
-        )
+        self.assertEqual(resp.data["payment"][0], "At least one payment method must be enabled.")
 
     def test_free_product(self):
         self.login(is_staff=True)
@@ -482,15 +440,9 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
         self.assertEqual(states_resp.data["payment_method_states"].keys(), {"cash"})
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["amount"], "0.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["cash"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Consumed")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["amount"], "0.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["cash"]["required_action"])
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
@@ -516,27 +468,19 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "10.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "10.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"][
-                "name"
-            ],
+            states_resp.data["payment_method_states"]["credit-card"]["required_action"]["name"],
             "get-token",
         )
 
         # Perform the get-token step
-        required_action = states_resp.data["payment_method_states"]["credit-card"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
 
@@ -544,27 +488,19 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "10.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "10.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"][
-                "name"
-            ],
+            states_resp.data["payment_method_states"]["credit-card"]["required_action"]["name"],
             "authorize",
         )
 
         # Perform the authorize step
-        required_action = states_resp.data["payment_method_states"]["credit-card"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -587,19 +523,13 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Consumed",
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "10.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "10.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["credit-card"]["required_action"])
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
@@ -695,26 +625,16 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"].keys(),
             {"cash", "credit-card"},
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["status"], "Complete"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["amount"], "2.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["cash"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Complete")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["amount"], "2.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["cash"]["required_action"])
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "8.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "8.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"][
-                "name"
-            ],
+            states_resp.data["payment_method_states"]["credit-card"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(
@@ -730,9 +650,7 @@ class CheckoutAPITest(BaseTest):
         )
 
         # Perform the get-token step
-        required_action = states_resp.data["payment_method_states"]["credit-card"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
         self.assertPaymentSources(
@@ -755,26 +673,16 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"].keys(),
             {"cash", "credit-card"},
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["status"], "Complete"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["amount"], "2.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["cash"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Complete")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["amount"], "2.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["cash"]["required_action"])
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "8.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "8.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"][
-                "name"
-            ],
+            states_resp.data["payment_method_states"]["credit-card"]["required_action"]["name"],
             "authorize",
         )
         self.assertPaymentSources(
@@ -790,9 +698,7 @@ class CheckoutAPITest(BaseTest):
         )
 
         # Perform the authorize step
-        required_action = states_resp.data["payment_method_states"]["credit-card"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -825,25 +731,15 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"].keys(),
             {"cash", "credit-card"},
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["amount"], "2.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["cash"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Consumed")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["amount"], "2.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["cash"]["required_action"])
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Consumed",
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "8.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "8.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["credit-card"]["required_action"])
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
@@ -895,33 +791,23 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]["name"],
             "get-token",
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
 
         # Perform the get-token step for credit-card-1
-        required_action = states_resp.data["payment_method_states"]["credit-card-1"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
 
@@ -937,33 +823,23 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]["name"],
             "authorize",
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
 
         # Perform the authorize step for credit-card-1
-        required_action = states_resp.data["payment_method_states"]["credit-card-1"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -994,26 +870,18 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Complete",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(
@@ -1028,9 +896,7 @@ class CheckoutAPITest(BaseTest):
         )
 
         # Perform the get-token step for credit-card-2
-        required_action = states_resp.data["payment_method_states"]["credit-card-2"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
 
@@ -1046,33 +912,23 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Complete",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "authorize",
         )
 
         # Perform the authorize step for credit-card-2
-        required_action = states_resp.data["payment_method_states"]["credit-card-2"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -1108,26 +964,18 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Consumed",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Consumed",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"],
             None,
         )
 
@@ -1165,34 +1013,24 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]["name"],
             "get-token",
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(order_resp.data["number"], sources=[])
 
         # Perform the get-token step for credit-card-1
-        required_action = states_resp.data["payment_method_states"]["credit-card-1"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
 
@@ -1208,34 +1046,24 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]["name"],
             "authorize",
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(order_resp.data["number"], sources=[])
 
         # Perform the authorize step for credit-card-1
-        required_action = states_resp.data["payment_method_states"]["credit-card-1"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -1266,26 +1094,18 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Complete",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(
@@ -1300,9 +1120,7 @@ class CheckoutAPITest(BaseTest):
         )
 
         # Perform the get-token step for credit-card-2
-        required_action = states_resp.data["payment_method_states"]["credit-card-2"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
 
@@ -1318,33 +1136,23 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Complete",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "authorize",
         )
 
         # Perform the authorize step for credit-card-2 BUT FORCE A PAYMENT DECLINE
-        required_action = states_resp.data["payment_method_states"]["credit-card-2"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -1381,26 +1189,18 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Complete",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Declined",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"],
             None,
         )
 
@@ -1435,33 +1235,23 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Complete",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
 
         # Perform the get-token step for credit-card-2 again
-        required_action = states_resp.data["payment_method_states"]["credit-card-2"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
 
@@ -1477,33 +1267,23 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Complete",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "authorize",
         )
 
         # Perform the authorize step for credit-card-2 and allow it to succeed this time
-        required_action = states_resp.data["payment_method_states"]["credit-card-2"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -1544,26 +1324,18 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Consumed",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Consumed",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"],
             None,
         )
 
@@ -1598,26 +1370,18 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]["name"],
             "get-token",
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
 
@@ -1655,34 +1419,24 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]["name"],
             "get-token",
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(order_resp.data["number"], sources=[])
 
         # Perform the get-token step for credit-card-1
-        required_action = states_resp.data["payment_method_states"]["credit-card-1"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
 
@@ -1698,34 +1452,24 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]["name"],
             "authorize",
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(order_resp.data["number"], sources=[])
 
         # Perform the authorize step for credit-card-1
-        required_action = states_resp.data["payment_method_states"]["credit-card-1"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -1756,26 +1500,18 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Complete",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(
@@ -1790,9 +1526,7 @@ class CheckoutAPITest(BaseTest):
         )
 
         # Perform the get-token step for credit-card-2
-        required_action = states_resp.data["payment_method_states"]["credit-card-2"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
 
@@ -1808,33 +1542,23 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Complete",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "authorize",
         )
 
         # Perform the authorize step for credit-card-2 BUT FORCE A PAYMENT DECLINE
-        required_action = states_resp.data["payment_method_states"]["credit-card-2"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -1871,26 +1595,18 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Complete",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Declined",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"],
             None,
         )
 
@@ -1926,26 +1642,18 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "4.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "4.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]["name"],
             "get-token",
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "6.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "6.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(
@@ -1965,9 +1673,7 @@ class CheckoutAPITest(BaseTest):
         )
 
         # Perform the get-token step for credit-card-1
-        required_action = states_resp.data["payment_method_states"]["credit-card-1"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
 
@@ -1983,26 +1689,18 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "4.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "4.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]["name"],
             "authorize",
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "6.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "6.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(
@@ -2022,9 +1720,7 @@ class CheckoutAPITest(BaseTest):
         )
 
         # Perform the authorize step for credit-card-1
-        required_action = states_resp.data["payment_method_states"]["credit-card-1"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -2065,26 +1761,18 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Complete",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "4.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "4.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "6.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "6.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(
@@ -2109,9 +1797,7 @@ class CheckoutAPITest(BaseTest):
         )
 
         # Perform the get-token step for credit-card-2 again
-        required_action = states_resp.data["payment_method_states"]["credit-card-2"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
 
@@ -2127,33 +1813,23 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Complete",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "4.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "4.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "6.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "6.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "authorize",
         )
 
         # Perform the authorize step for credit-card-2 and allow it to succeed this time
-        required_action = states_resp.data["payment_method_states"]["credit-card-2"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -2199,26 +1875,18 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Consumed",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "4.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "4.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Consumed",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "6.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "6.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"],
             None,
         )
 
@@ -2253,26 +1921,18 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]["name"],
             "get-token",
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
 
@@ -2310,34 +1970,24 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]["name"],
             "get-token",
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(order_resp.data["number"], sources=[])
 
         # Perform the get-token step for credit-card-1
-        required_action = states_resp.data["payment_method_states"]["credit-card-1"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
 
@@ -2353,34 +2003,24 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]["name"],
             "authorize",
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(order_resp.data["number"], sources=[])
 
         # Perform the authorize step for credit-card-1
-        required_action = states_resp.data["payment_method_states"]["credit-card-1"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -2411,26 +2051,18 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Complete",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(
@@ -2445,9 +2077,7 @@ class CheckoutAPITest(BaseTest):
         )
 
         # Perform the get-token step for credit-card-2
-        required_action = states_resp.data["payment_method_states"]["credit-card-2"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
 
@@ -2463,33 +2093,23 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Complete",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]["name"],
             "authorize",
         )
 
         # Perform the authorize step for credit-card-2 BUT FORCE A PAYMENT DECLINE
-        required_action = states_resp.data["payment_method_states"]["credit-card-2"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-2"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -2526,26 +2146,18 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Complete",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"]["amount"], "3.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-2"]["status"],
             "Declined",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"]["amount"], "7.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-2"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"],
             None,
         )
 
@@ -2567,9 +2179,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card-1"}
-        )  # credit-card-2 should no longer exist
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card-1"})  # credit-card-2 should no longer exist
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Pending",
@@ -2579,9 +2189,7 @@ class CheckoutAPITest(BaseTest):
             "10.00",
         )
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(
@@ -2601,9 +2209,7 @@ class CheckoutAPITest(BaseTest):
         )
 
         # Perform the get-token step for credit-card-1
-        required_action = states_resp.data["payment_method_states"]["credit-card-1"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
 
@@ -2611,9 +2217,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card-1"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card-1"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Pending",
@@ -2623,9 +2227,7 @@ class CheckoutAPITest(BaseTest):
             "10.00",
         )
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]["name"],
             "authorize",
         )
         self.assertPaymentSources(
@@ -2645,9 +2247,7 @@ class CheckoutAPITest(BaseTest):
         )
 
         # Perform the authorize step for credit-card-1
-        required_action = states_resp.data["payment_method_states"]["credit-card-1"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -2680,9 +2280,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card-1"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card-1"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Consumed",
@@ -2692,9 +2290,7 @@ class CheckoutAPITest(BaseTest):
             "10.00",
         )
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
             None,
         )
         self.assertPaymentSources(
@@ -2735,9 +2331,7 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card-1"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card-1"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card-1"]["status"],
             "Pending",
@@ -2747,9 +2341,7 @@ class CheckoutAPITest(BaseTest):
             "10.00",
         )
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card-1"][
-                "required_action"
-            ]["name"],
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"]["name"],
             "get-token",
         )
 
@@ -2784,26 +2376,16 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"].keys(),
             {"cash", "credit-card"},
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["status"], "Complete"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["amount"], "10.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["cash"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Complete")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["amount"], "10.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["cash"]["required_action"])
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "10.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "10.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"][
-                "name"
-            ],
+            states_resp.data["payment_method_states"]["credit-card"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(
@@ -2819,9 +2401,7 @@ class CheckoutAPITest(BaseTest):
         )
 
         # Perform the get-token step, but make it decline the request
-        required_action = states_resp.data["payment_method_states"]["credit-card"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card"]["required_action"]
         required_action["fields"].append({"key": "deny", "value": True})
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Declined")
@@ -2845,25 +2425,15 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"].keys(),
             {"cash", "credit-card"},
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["status"], "Complete"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["amount"], "10.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["cash"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Complete")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["amount"], "10.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["cash"]["required_action"])
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Declined",
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "10.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "10.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["credit-card"]["required_action"])
         self.assertPaymentSources(
             order_resp1.data["number"],
             sources=[
@@ -2911,26 +2481,16 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"].keys(),
             {"cash", "credit-card"},
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["status"], "Complete"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["amount"], "12.75"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["cash"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Complete")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["amount"], "12.75")
+        self.assertIsNone(states_resp.data["payment_method_states"]["cash"]["required_action"])
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "17.25")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "17.25"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"][
-                "name"
-            ],
+            states_resp.data["payment_method_states"]["credit-card"]["required_action"]["name"],
             "get-token",
         )
         self.assertPaymentSources(
@@ -2946,9 +2506,7 @@ class CheckoutAPITest(BaseTest):
         )
 
         # Perform the get-token step, but make it decline the request
-        required_action = states_resp.data["payment_method_states"]["credit-card"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
         self.assertPaymentSources(
@@ -2971,26 +2529,16 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"].keys(),
             {"cash", "credit-card"},
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["status"], "Complete"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["amount"], "12.75"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["cash"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Complete")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["amount"], "12.75")
+        self.assertIsNone(states_resp.data["payment_method_states"]["cash"]["required_action"])
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "17.25")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "17.25"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"][
-                "name"
-            ],
+            states_resp.data["payment_method_states"]["credit-card"]["required_action"]["name"],
             "authorize",
         )
         self.assertPaymentSources(
@@ -3006,9 +2554,7 @@ class CheckoutAPITest(BaseTest):
         )
 
         # Perform the authorize step
-        required_action = states_resp.data["payment_method_states"]["credit-card"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -3041,25 +2587,15 @@ class CheckoutAPITest(BaseTest):
             states_resp.data["payment_method_states"].keys(),
             {"cash", "credit-card"},
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["amount"], "12.75"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["cash"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Consumed")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["amount"], "12.75")
+        self.assertIsNone(states_resp.data["payment_method_states"]["cash"]["required_action"])
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Consumed",
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "17.25"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "17.25")
+        self.assertIsNone(states_resp.data["payment_method_states"]["credit-card"]["required_action"])
         self.assertPaymentSources(
             order_resp2.data["number"],
             sources=[
@@ -3108,27 +2644,19 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp1.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "20.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "20.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"][
-                "name"
-            ],
+            states_resp.data["payment_method_states"]["credit-card"]["required_action"]["name"],
             "get-token",
         )
 
         # Perform the get-token step, but make it decline the request
-        required_action = states_resp.data["payment_method_states"]["credit-card"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card"]["required_action"]
         required_action["fields"].append({"key": "deny", "value": True})
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Declined")
@@ -3137,19 +2665,13 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp1.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Payment Declined")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Declined",
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "20.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "20.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["credit-card"]["required_action"])
 
         # Make sure we have access to the same basket
         self.assertEqual(self._get_basket_id(), basket_id)
@@ -3173,15 +2695,9 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
         self.assertEqual(states_resp.data["payment_method_states"].keys(), {"cash"})
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["amount"], "20.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["cash"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Consumed")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["amount"], "20.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["cash"]["required_action"])
         self.assertPaymentSources(
             order_resp1.data["number"],
             sources=[
@@ -3234,15 +2750,9 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
         self.assertEqual(states_resp.data["payment_method_states"].keys(), {"cash"})
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["status"], "Consumed"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["cash"]["amount"], "10.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["cash"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Consumed")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["amount"], "10.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["cash"]["required_action"])
 
         # Make sure the API made a new basket for us
         self.assertNotEqual(self._get_basket_id(), basket_id)
@@ -3295,27 +2805,19 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp1.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "20.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "20.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"][
-                "name"
-            ],
+            states_resp.data["payment_method_states"]["credit-card"]["required_action"]["name"],
             "get-token",
         )
 
         # Perform the get-token step, but make it decline the request
-        required_action = states_resp.data["payment_method_states"]["credit-card"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card"]["required_action"]
         required_action["fields"].append({"key": "deny", "value": True})
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Declined")
@@ -3324,19 +2826,13 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp1.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Payment Declined")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Declined",
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "20.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "20.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["credit-card"]["required_action"])
 
         # Make sure the Basket status is still Open
         basket = Basket.objects.get(pk=basket_id)
@@ -3431,9 +2927,7 @@ class CheckoutAPITest(BaseTest):
 
         # Configure get_order_ownership so that the order becomes property of a different user. This is
         # conceivable for situations like a salesperson placing an order for someone else.
-        some_other_user = User.objects.create_user(
-            username="jim", password="doe", email="jim@example.cpom"
-        )
+        some_other_user = User.objects.create_user(username="jim", password="doe", email="jim@example.cpom")
 
         def get_order_ownership(request, given_user, guest_email):
             return some_other_user, None
@@ -3477,9 +2971,7 @@ class CheckoutAPITest(BaseTest):
 
         # Configure get_order_ownership so that the order becomes property of a different user. This is
         # conceivable for situations like a salesperson placing an order for someone else.
-        some_other_user = User.objects.create_user(
-            username="jim", password="doe", email="jim@example.cpom"
-        )
+        some_other_user = User.objects.create_user(username="jim", password="doe", email="jim@example.cpom")
 
         def get_order_ownership(request, given_user, guest_email):
             return some_other_user, None
@@ -3503,20 +2995,14 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"][
-                "name"
-            ],
+            states_resp.data["payment_method_states"]["credit-card"]["required_action"]["name"],
             "get-token",
         )
 
@@ -3528,9 +3014,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, request_user.pk)
 
         # Perform the get-token step
-        required_action = states_resp.data["payment_method_states"]["credit-card"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
 
@@ -3538,20 +3022,14 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"][
-                "name"
-            ],
+            states_resp.data["payment_method_states"]["credit-card"]["required_action"]["name"],
             "authorize",
         )
 
@@ -3563,9 +3041,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, request_user.pk)
 
         # Perform the authorize step
-        required_action = states_resp.data["payment_method_states"]["credit-card"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -3578,19 +3054,13 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Consumed",
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["credit-card"]["required_action"])
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
@@ -3628,9 +3098,7 @@ class CheckoutAPITest(BaseTest):
 
         # Configure get_order_ownership so that the order becomes property of a different user. This is
         # conceivable for situations like a salesperson placing an order for someone else.
-        some_other_user = User.objects.create_user(
-            username="jim", password="doe", email="jim@example.cpom"
-        )
+        some_other_user = User.objects.create_user(username="jim", password="doe", email="jim@example.cpom")
 
         def get_order_ownership(request, given_user, guest_email):
             return some_other_user, None
@@ -3655,33 +3123,23 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"][
-                "name"
-            ],
+            states_resp.data["payment_method_states"]["credit-card"]["required_action"]["name"],
             "get-token",
         )
 
         # Order should belong to the user returned by get_order_ownership, but basket should still belong to the request user
-        self.assertEqual(
-            Order.objects.get(number=order_number1).user_id, some_other_user.pk
-        )
+        self.assertEqual(Order.objects.get(number=order_number1).user_id, some_other_user.pk)
         self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, request_user.pk)
 
         # Perform the get-token step
-        required_action = states_resp.data["payment_method_states"]["credit-card"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
 
@@ -3689,33 +3147,23 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"][
-                "name"
-            ],
+            states_resp.data["payment_method_states"]["credit-card"]["required_action"]["name"],
             "authorize",
         )
 
         # Order should belong to the user returned by get_order_ownership, but basket should still belong to the request user
-        self.assertEqual(
-            Order.objects.get(number=order_number1).user_id, some_other_user.pk
-        )
+        self.assertEqual(Order.objects.get(number=order_number1).user_id, some_other_user.pk)
         self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, request_user.pk)
 
         # Perform the authorize step, but make the payment method decline payment
-        required_action = states_resp.data["payment_method_states"]["credit-card"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -3729,28 +3177,20 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Payment Declined")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Declined",
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["credit-card"]["required_action"])
 
         # Check order integrity
         order = Order.objects.get(number=order_number1)
         self.assertEqual(order.status, "Payment Declined")
 
         # Order should belong to the user returned by get_order_ownership, but basket should still belong to the request user
-        self.assertEqual(
-            Order.objects.get(number=order_number1).user_id, some_other_user.pk
-        )
+        self.assertEqual(Order.objects.get(number=order_number1).user_id, some_other_user.pk)
         self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, request_user.pk)
 
         # API should return the same basket we've been working with
@@ -3779,33 +3219,23 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"][
-                "name"
-            ],
+            states_resp.data["payment_method_states"]["credit-card"]["required_action"]["name"],
             "get-token",
         )
 
         # Order should belong to the user returned by get_order_ownership, but basket should still belong to the request user
-        self.assertEqual(
-            Order.objects.get(number=order_number2).user_id, some_other_user.pk
-        )
+        self.assertEqual(Order.objects.get(number=order_number2).user_id, some_other_user.pk)
         self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, request_user.pk)
 
         # Perform the get-token step
-        required_action = states_resp.data["payment_method_states"]["credit-card"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card"]["required_action"]
         get_token_resp = self._do_payment_step_form_post(required_action)
         self.assertEqual(get_token_resp.data["status"], "Success")
 
@@ -3813,33 +3243,23 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Pending")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Pending",
         )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00")
         self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00"
-        )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"][
-                "name"
-            ],
+            states_resp.data["payment_method_states"]["credit-card"]["required_action"]["name"],
             "authorize",
         )
 
         # Order should belong to the user returned by get_order_ownership, but basket should still belong to the request user
-        self.assertEqual(
-            Order.objects.get(number=order_number2).user_id, some_other_user.pk
-        )
+        self.assertEqual(Order.objects.get(number=order_number2).user_id, some_other_user.pk)
         self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, request_user.pk)
 
         # Perform the authorize step, this time make it accept the transaction
-        required_action = states_resp.data["payment_method_states"]["credit-card"][
-            "required_action"
-        ]
+        required_action = states_resp.data["payment_method_states"]["credit-card"]["required_action"]
         authorize_resp = self._do_payment_step_form_post(
             required_action,
             extra={
@@ -3852,19 +3272,13 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(states_resp.data["order_status"], "Authorized")
-        self.assertEqual(
-            states_resp.data["payment_method_states"].keys(), {"credit-card"}
-        )
+        self.assertEqual(states_resp.data["payment_method_states"].keys(), {"credit-card"})
         self.assertEqual(
             states_resp.data["payment_method_states"]["credit-card"]["status"],
             "Consumed",
         )
-        self.assertEqual(
-            states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00"
-        )
-        self.assertIsNone(
-            states_resp.data["payment_method_states"]["credit-card"]["required_action"]
-        )
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["amount"], "5.00")
+        self.assertIsNone(states_resp.data["payment_method_states"]["credit-card"]["required_action"])
         self.assertPaymentSources(
             order_number2,
             sources=[
@@ -3886,9 +3300,7 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(order.status, "Authorized")
 
         # Order and Basket should now both have been transfered from the request user to the get_order_ownership user
-        self.assertEqual(
-            Order.objects.get(number=order_number2).user_id, some_other_user.pk
-        )
+        self.assertEqual(Order.objects.get(number=order_number2).user_id, some_other_user.pk)
         self.assertEqual(Basket.objects.get(pk=basket_id).owner_id, some_other_user.pk)
 
         # API should return a new Basket now
@@ -3929,9 +3341,7 @@ class CheckoutAPITest(BaseTest):
     def assertPaymentSources(self, order_number, sources):
         order = Order.objects.get(number=order_number)
         # Check source names
-        order_source_types_names = sorted(
-            [s.source_type.name for s in order.sources.all()]
-        )
+        order_source_types_names = sorted([s.source_type.name for s in order.sources.all()])
         given_names = sorted([s["source_name"] for s in sources])
         self.assertEqual(order_source_types_names, given_names)
         # Check source reference numbers
@@ -3983,12 +3393,8 @@ class CheckoutAPITest(BaseTest):
         return resp.data["id"]
 
     def _create_product(self, price=D("10.00")):
-        product = factories.create_product(
-            title="My Product", product_class="My Product Class"
-        )
-        record = factories.create_stockrecord(
-            currency="USD", product=product, num_in_stock=10, price=price
-        )
+        product = factories.create_product(title="My Product", product_class="My Product Class")
+        record = factories.create_stockrecord(currency="USD", product=product, num_in_stock=10, price=price)
         factories.create_purchase_info(record)
         return product
 
