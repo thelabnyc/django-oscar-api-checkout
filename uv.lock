@@ -313,7 +313,7 @@ dev = [
     { name = "sorl-thumbnail", specifier = "==12.11.0" },
     { name = "sphinx", specifier = "==8.2.3" },
     { name = "tox", specifier = "==4.29.0" },
-    { name = "tox-uv", specifier = ">=1.26.1" },
+    { name = "tox-uv", specifier = ">=1.28.0" },
     { name = "types-psycopg2", specifier = ">=2.9.21.20241019,<3" },
     { name = "unittest-xml-reporting", specifier = "==3.2.0" },
 ]
