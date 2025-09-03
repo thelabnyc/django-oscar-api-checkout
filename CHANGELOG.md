@@ -1,5 +1,22 @@
 # Changes
 
+## v3.8.0 (2025-09-03)
+
+### Feat
+
+- test against django 5.2
+
+### Fix
+
+- update docker image tag format
+- **deps**: update dependency django-oscar to >=4.0,<4.1
+- **deps**: update dependency django-oscar to >=3.2.6,<4.1
+
+### Refactor
+
+- migrate black/flake8 -> ruff
+- migrate from poetry -> uv
+
 ## v3.7.0 (2025-04-03)
 
 ### Feat
