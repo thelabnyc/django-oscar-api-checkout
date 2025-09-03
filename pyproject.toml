@@ -44,6 +44,11 @@ dev = [
 [tool.hatch.build.targets.wheel]
 packages = ["oscarapicheckout"]
 
+[[tool.uv.index]]
+name = "thelabnyc"
+url = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple"
+explicit = true
+
 [tool.commitizen]
 name = "cz_conventional_commits"
 annotated_tag = true
