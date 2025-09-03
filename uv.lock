@@ -267,7 +267,7 @@ wheels = [
 
 [[package]]
 name = "django-oscar-api-checkout"
-version = "3.7.0"
+version = "3.8.0"
 source = { editable = "." }
 dependencies = [
     { name = "django" },
@@ -309,7 +309,7 @@ dev = [
     { name = "mypy", specifier = "==1.17.1" },
     { name = "psycopg2-binary", specifier = "==2.9.10" },
     { name = "pyyaml", specifier = "==6.0.2" },
-    { name = "ruff", specifier = ">=0.11.6" },
+    { name = "ruff", specifier = ">=0.12.11" },
     { name = "sorl-thumbnail", specifier = "==12.11.0" },
     { name = "sphinx", specifier = "==8.2.3" },
     { name = "tox", specifier = "==4.29.0" },
