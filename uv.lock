@@ -298,7 +298,7 @@ requires-dist = [
     { name = "django", specifier = ">=4.2" },
     { name = "django-oscar", specifier = ">=4.0,<4.1" },
     { name = "django-oscar-api", specifier = "==3.3.0" },
-    { name = "drf-recaptcha", specifier = ">=4.0.2,<5" },
+    { name = "drf-recaptcha", specifier = ">=4.0.3,<5" },
 ]
 
 [package.metadata.requires-dev]
