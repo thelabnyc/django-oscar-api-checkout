@@ -9,7 +9,7 @@ class Config(OscarConfig):
     name = "oscarapicheckout"
     label = "oscarapicheckout"
     verbose_name = _("Oscar API-Checkout")
-    namespace = "oscarapicheckout"
+    namespace = "oscarapicheckout"  # type:ignore[assignment]
     default = True
 
     def ready(self) -> None:
