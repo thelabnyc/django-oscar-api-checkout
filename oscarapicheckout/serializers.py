@@ -19,6 +19,7 @@ from oscarapi.serializers.checkout import CheckoutSerializer as OscarCheckoutSer
 from oscarapi.serializers.checkout import OrderSerializer as OscarOrderSerializer
 from rest_framework import exceptions, serializers
 from rest_framework.exceptions import ValidationError
+from rest_framework.relations import PKOnlyObject
 from rest_framework.utils import html
 
 from . import fraud, settings, utils
@@ -246,7 +247,7 @@ class SignedTokenRelatedField[_MT: models.Model](serializers.SlugRelatedField[_M
     def verify_token(cls, token: str) -> str:
         return cls.get_signer().unsign(token)
 
-    def get_token(self, model_inst: _MT) -> str:
+    def get_token(self, model_inst: _MT | PKOnlyObject) -> str:
         """Generate the signed token value for the given model instance"""
         raw_value = getattr(model_inst, self.slug_field or "pk")
         logger.info(
@@ -271,7 +272,7 @@ class SignedTokenRelatedField[_MT: models.Model](serializers.SlugRelatedField[_M
             self.fail("invalid")
         return super().to_internal_value(raw_value)
 
-    def to_representation(self, obj: _MT) -> str:
+    def to_representation(self, obj: _MT | PKOnlyObject) -> str:
         return self.get_token(obj)
 
 
