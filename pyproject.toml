@@ -26,7 +26,7 @@ Repository = "https://gitlab.com/thelabnyc/django-oscar/django-oscar-api-checkou
 
 [dependency-groups]
 dev = [
-    "coverage (==7.11.0)",
+    "coverage (==7.11.1)",
     "ruff (>=0.14.3)",
     "psycopg2-binary (==2.9.11)",
     "PyYAML (==6.0.3)",
