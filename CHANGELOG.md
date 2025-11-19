@@ -1,5 +1,13 @@
 # Changes
 
+## v3.8.1 (2025-11-19)
+
+### Fix
+
+- **deps**: update dependency django-oscar to >=4.1,<4.2
+- **deps**: update dependency drf-recaptcha to >=4.0.3,<5
+- prevent renovate from pointing all URLs at gitlab
+
 ## v3.8.0 (2025-09-03)
 
 ### Feat
