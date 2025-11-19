@@ -254,7 +254,7 @@ wheels = [
 
 [[package]]
 name = "django-oscar"
-version = "4.0"
+version = "4.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "babel" },
@@ -270,9 +270,9 @@ dependencies = [
     { name = "pillow" },
     { name = "purl" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c6/8f/9963f34ddd7cda50583da351af3d828af23ce680ad4c3bdcbc09f230fe5f/django_oscar-4.0.tar.gz", hash = "sha256:750eb5e4c3ba4c0984f40a3d028012f807d167d2f7c36899c9aecb5e68d3b47f", size = 8804169, upload-time = "2025-04-14T08:43:00.213Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/9b/66/597e7404b1f205c0c53632b10c7e49f4971a690856cda929e85513b42eb9/django_oscar-4.1.tar.gz", hash = "sha256:b240584d147364064852fa254a4c76707a023feb25334af97574dac7f874b2bd", size = 8804339, upload-time = "2025-10-29T11:52:16.389Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/49/d3/92512ea4276dd8ac9282dcb308159d433f1fed98fb93b94e9746d185ef79/django_oscar-4.0-py3-none-any.whl", hash = "sha256:71e5f6bcd28ca2cc58765003dc2fe8a74839c9cf58e8a4933c8dd905ea167a9e", size = 9340552, upload-time = "2025-04-14T08:42:54.475Z" },
+    { url = "https://files.pythonhosted.org/packages/eb/dd/de1e3e241d6e94d43234158e8470d82154a50a458e52f0c977d67eb91578/django_oscar-4.1-py3-none-any.whl", hash = "sha256:2bcec90f17e8b208d6e9f11dd021884c26bf3db112c7de17adacb7be3265cab6", size = 9346095, upload-time = "2025-10-29T11:52:12.072Z" },
 ]
 
 [[package]]
@@ -321,7 +321,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "django", specifier = ">=4.2" },
-    { name = "django-oscar", specifier = ">=4.0,<4.1" },
+    { name = "django-oscar", specifier = ">=4.0,<4.2" },
     { name = "django-oscar-api", specifier = "==3.3.0" },
     { name = "drf-recaptcha", specifier = ">=4.0.3,<5" },
 ]
