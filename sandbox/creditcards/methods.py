@@ -5,8 +5,6 @@ from django.core.signing import Signer
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 from oscar.apps.payment.models import Transaction
-from rest_framework.reverse import reverse
-
 from oscarapicheckout.methods import (
     PaymentMethod,
     PaymentMethodData,
@@ -18,6 +16,7 @@ from oscarapicheckout.states import (
     FormPostRequired,
     FormPostRequiredFormDataField,
 )
+from rest_framework.reverse import reverse
 
 if TYPE_CHECKING:
     from ..order.models import Order
