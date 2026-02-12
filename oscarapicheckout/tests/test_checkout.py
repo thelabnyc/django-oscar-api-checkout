@@ -3446,6 +3446,271 @@ class CheckoutAPITest(BaseTest):
         url = reverse("api-complete-deferred-payment")
         return self.client.post(url, data, format="json")
 
+    def _do_client_side_payment_complete(self, required_action, extra={}):
+        data = dict(required_action["data"])
+        data.update(extra)
+        url = reverse("clientside-complete")
+        resp = self.client.post(url, data)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        return resp
+
     def _add_voucher(self, voucher):
         url = reverse("api-basket-add-voucher")
         self.client.post(url, data={"vouchercode": voucher.code}, format="json")
+
+    def test_client_side_payment_happy_path(self):
+        basket_id = self._prepare_basket()
+
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {
+            "client-side-card": {
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Fetch payment states — should be Pending with client-side-payment action
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data["order_status"], "Pending")
+        self.assertEqual(
+            states_resp.data["payment_method_states"].keys(),
+            {"client-side-card"},
+        )
+        cs_state = states_resp.data["payment_method_states"]["client-side-card"]
+        self.assertEqual(cs_state["status"], "Pending")
+        self.assertEqual(cs_state["amount"], "10.00")
+        self.assertEqual(cs_state["required_action"]["type"], "client-side-payment")
+        self.assertEqual(cs_state["required_action"]["payment_processor"], "sandbox-processor")
+
+        # Complete the payment via the client-side callback endpoint
+        required_action = cs_state["required_action"]
+        complete_resp = self._do_client_side_payment_complete(
+            required_action,
+            extra={"result_token": "tok_success_abc123"},
+        )
+        self.assertEqual(complete_resp.data["status"], "Success")
+
+        # Verify final state is Consumed / Authorized
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data["order_status"], "Authorized")
+        cs_state = states_resp.data["payment_method_states"]["client-side-card"]
+        self.assertEqual(cs_state["status"], "Consumed")
+        self.assertEqual(cs_state["amount"], "10.00")
+        self.assertIsNone(cs_state["required_action"])
+        self.assertPaymentSources(
+            order_resp.data["number"],
+            sources=[
+                dict(
+                    source_name="Client-Side Card",
+                    reference="tok_success_abc123",
+                    allocated=D("10.00"),
+                ),
+            ],
+        )
+
+    def test_client_side_payment_declined(self):
+        basket_id = self._prepare_basket()
+
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {
+            "client-side-card": {
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Fetch the pending state
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        cs_state = states_resp.data["payment_method_states"]["client-side-card"]
+        self.assertEqual(cs_state["status"], "Pending")
+
+        # Decline via the callback endpoint
+        required_action = cs_state["required_action"]
+        decline_resp = self._do_client_side_payment_complete(
+            required_action,
+            extra={"deny": True},
+        )
+        self.assertEqual(decline_resp.data["status"], "Declined")
+
+        # Verify order is Payment Declined
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data["order_status"], "Payment Declined")
+        cs_state = states_resp.data["payment_method_states"]["client-side-card"]
+        self.assertEqual(cs_state["status"], "Declined")
+        self.assertEqual(cs_state["amount"], "10.00")
+        self.assertIsNone(cs_state["required_action"])
+
+    def test_split_payment_client_side_plus_cash(self):
+        self.login(is_staff=True)
+        basket_id = self._prepare_basket()
+
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {
+            "cash": {"enabled": True, "pay_balance": False, "amount": "2.00"},
+            "client-side-card": {
+                "enabled": True,
+                "pay_balance": True,
+            },
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Verify mixed states: Cash Complete, client-side-card Pending
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data["order_status"], "Pending")
+        self.assertEqual(
+            states_resp.data["payment_method_states"].keys(),
+            {"cash", "client-side-card"},
+        )
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Complete")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["amount"], "2.00")
+        cs_state = states_resp.data["payment_method_states"]["client-side-card"]
+        self.assertEqual(cs_state["status"], "Pending")
+        self.assertEqual(cs_state["amount"], "8.00")
+        self.assertEqual(cs_state["required_action"]["type"], "client-side-payment")
+
+        # Complete the client-side payment
+        complete_resp = self._do_client_side_payment_complete(
+            cs_state["required_action"],
+            extra={"result_token": "tok_split_abc"},
+        )
+        self.assertEqual(complete_resp.data["status"], "Success")
+
+        # Verify Authorized
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self.assertEqual(states_resp.data["order_status"], "Authorized")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Consumed")
+        self.assertEqual(
+            states_resp.data["payment_method_states"]["client-side-card"]["status"],
+            "Consumed",
+        )
+        self.assertPaymentSources(
+            order_resp.data["number"],
+            sources=[
+                dict(
+                    source_name="Cash",
+                    reference="",
+                    allocated=D("2.00"),
+                    debited=D("2.00"),
+                ),
+                dict(
+                    source_name="Client-Side Card",
+                    reference="tok_split_abc",
+                    allocated=D("8.00"),
+                ),
+            ],
+        )
+
+    def test_split_payment_client_side_plus_form_post(self):
+        basket_id = self._prepare_basket()
+
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {
+            "credit-card": {
+                "enabled": True,
+                "pay_balance": False,
+                "amount": "5.00",
+            },
+            "client-side-card": {
+                "enabled": True,
+                "pay_balance": True,
+            },
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Both should be Pending with different action types
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self.assertEqual(states_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(states_resp.data["order_status"], "Pending")
+
+        cc_state = states_resp.data["payment_method_states"]["credit-card"]
+        cs_state = states_resp.data["payment_method_states"]["client-side-card"]
+        self.assertEqual(cc_state["status"], "Pending")
+        self.assertEqual(cc_state["required_action"]["type"], "form")
+        self.assertEqual(cs_state["status"], "Pending")
+        self.assertEqual(cs_state["required_action"]["type"], "client-side-payment")
+        self.assertEqual(cc_state["amount"], "5.00")
+        self.assertEqual(cs_state["amount"], "5.00")
+
+        # Complete the credit-card flow (get-token then authorize)
+        get_token_resp = self._do_payment_step_form_post(cc_state["required_action"])
+        self.assertEqual(get_token_resp.data["status"], "Success")
+
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        cc_state = states_resp.data["payment_method_states"]["credit-card"]
+        authorize_resp = self._do_payment_step_form_post(
+            cc_state["required_action"],
+            extra={"uuid": "cc-uuid-12345"},
+        )
+        self.assertEqual(authorize_resp.data["status"], "Success")
+
+        # Complete the client-side flow
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        cs_state = states_resp.data["payment_method_states"]["client-side-card"]
+        complete_resp = self._do_client_side_payment_complete(
+            cs_state["required_action"],
+            extra={"result_token": "tok_mixed_456"},
+        )
+        self.assertEqual(complete_resp.data["status"], "Success")
+
+        # Verify Authorized
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self.assertEqual(states_resp.data["order_status"], "Authorized")
+        self.assertPaymentSources(
+            order_resp.data["number"],
+            sources=[
+                dict(
+                    source_name="Credit Card",
+                    reference="cc-uuid-12345",
+                    allocated=D("5.00"),
+                ),
+                dict(
+                    source_name="Client-Side Card",
+                    reference="tok_mixed_456",
+                    allocated=D("5.00"),
+                ),
+            ],
+        )
+
+    def test_client_side_payment_state_recycled_on_resubmit(self):
+        # First checkout — creates a Pending client-side-payment state in the session
+        basket_id1 = self._prepare_basket()
+        data1 = self._get_checkout_data(basket_id1)
+        data1["payment"] = {
+            "client-side-card": {
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+        order_resp1 = self._checkout(data1)
+        self.assertEqual(order_resp1.status_code, status.HTTP_200_OK)
+        states_resp1 = self.client.get(order_resp1.data["payment_url"])
+        action1 = states_resp1.data["payment_method_states"]["client-side-card"]["required_action"]
+
+        # Second checkout with a new basket of the same total — the Pending state
+        # from the first checkout should be recycled because the method_key and
+        # amount match.
+        basket_id2 = self._prepare_basket()
+        data2 = self._get_checkout_data(basket_id2)
+        data2["payment"] = {
+            "client-side-card": {
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+        order_resp2 = self._checkout(data2)
+        self.assertEqual(order_resp2.status_code, status.HTTP_200_OK)
+        states_resp2 = self.client.get(order_resp2.data["payment_url"])
+        action2 = states_resp2.data["payment_method_states"]["client-side-card"]["required_action"]
+
+        # The recycled state should have the same action data (including token)
+        self.assertEqual(action1, action2)

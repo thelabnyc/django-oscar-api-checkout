@@ -22,6 +22,7 @@ urlpatterns = [
     ),
     path("api/", include("oscarapi.urls")),
     path("creditcards/", include("sandbox.creditcards.urls")),
+    path("clientside/", include("sandbox.clientside.urls")),
     # Include stock Oscar
     path(
         "",

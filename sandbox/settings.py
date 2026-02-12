@@ -224,6 +224,10 @@ API_ENABLED_PAYMENT_METHODS = [
         "permission": "oscarapicheckout.permissions.Public",
     },
     {
+        "method": "sandbox.clientside.methods.ClientSideCard",
+        "permission": "oscarapicheckout.permissions.Public",
+    },
+    {
         "method": "oscarapicheckout.methods.PayLater",
         "permission": "oscarapicheckout.permissions.Public",
     },

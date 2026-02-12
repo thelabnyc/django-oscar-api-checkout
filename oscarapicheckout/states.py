@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from decimal import Decimal
 from enum import UNIQUE, StrEnum, verify
-from typing import Literal, TypedDict
+from typing import Any, Literal, TypedDict
 
 
 @verify(UNIQUE)
@@ -34,7 +34,13 @@ class FormPostRequiredFormData(TypedDict):
     fields: Sequence[FormPostRequiredFormDataField]
 
 
-type RequiredAction = FormPostRequiredFormData | None
+class ClientSidePaymentData(TypedDict):
+    type: Literal["client-side-payment"]
+    payment_processor: str
+    data: dict[str, Any]
+
+
+type RequiredAction = FormPostRequiredFormData | ClientSidePaymentData | None
 
 
 class PaymentStatus:
@@ -97,3 +103,24 @@ class FormPostRequired(PaymentStatus):
 
     def get_required_action(self) -> RequiredAction:
         return self.form_data
+
+
+class ClientSidePaymentRequired(PaymentStatus):
+    status = PaymentMethodStatus.PENDING
+    action_data: ClientSidePaymentData
+
+    def __init__(
+        self,
+        amount: Decimal,
+        payment_processor: str,
+        data: dict[str, Any],
+    ) -> None:
+        super().__init__(amount)
+        self.action_data = ClientSidePaymentData(
+            type="client-side-payment",
+            payment_processor=payment_processor,
+            data=data,
+        )
+
+    def get_required_action(self) -> RequiredAction:
+        return self.action_data
