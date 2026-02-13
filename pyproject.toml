@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-oscar-api-checkout"
-version = "3.8.1"
+version = "3.9.0b0"
 description = "An extension on top of django-oscar-api providing a more flexible checkout API with a pluggable payment methods interface."
 readme = "README.rst"
 license = { text = "ISC" }

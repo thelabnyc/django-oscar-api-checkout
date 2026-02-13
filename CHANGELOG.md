@@ -1,5 +1,17 @@
 # Changes
 
+## v3.9.0b0 (2026-02-13)
+
+### Feat
+
+- add ClientSidePaymentRequired payment state
+- support Python 3.14
+
+### Fix
+
+- **deps**: update dependency django to >=5.2
+- **deps**: update dependency django to >=4.2.27
+
 ## v3.8.1 (2025-11-19)
 
 ### Fix
