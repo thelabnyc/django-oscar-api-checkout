@@ -26,15 +26,10 @@ repos:
     hooks:
       - id: django-upgrade
 
-  - repo: https://github.com/pycqa/isort
-    rev: "7.0.0"
-    hooks:
-      - id: isort
-
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.0
     hooks:
-      - id: ruff
+      - id: ruff-check
       - id: ruff-format
 
   - repo: https://github.com/commitizen-tools/commitizen
