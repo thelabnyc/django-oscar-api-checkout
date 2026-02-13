@@ -7,10 +7,12 @@ translations:
 	django-admin compilemessages
 
 install_precommit:
-	pre-commit install
+	prek install -t pre-commit && \
+	prek install -t commit-msg && \
+	prek install -t pre-push
 
 test_precommit: install_precommit
-	pre-commit run --all-files
+	prek run --all-files
 
 fmt:
 	ruff format .

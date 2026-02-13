@@ -59,7 +59,7 @@ changelog_merge_prerelease = true
 version_provider = "pep621"
 version_scheme = "pep440"
 version_files = ["pyproject.toml:version"]
-pre_bump_hooks = ["pre-commit run --all-files || true", "uv build"]
+pre_bump_hooks = ["prek run --all-files || true", "uv build"]
 post_bump_hooks = ["git push origin master $CZ_POST_CURRENT_TAG_VERSION"]
 
 [tool.mypy]

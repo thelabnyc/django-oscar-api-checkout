@@ -5,7 +5,6 @@ from django.core.signing import Signer
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 from oscar.apps.payment.models import Transaction
-
 from oscarapicheckout.methods import (
     PaymentMethod,
     PaymentMethodData,

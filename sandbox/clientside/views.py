@@ -4,12 +4,12 @@ from typing import TYPE_CHECKING, Any
 from django.core.signing import Signer
 from django.shortcuts import get_object_or_404
 from oscar.core.loading import get_model
+from oscarapicheckout.states import PaymentStatus
 from rest_framework import generics
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from oscarapicheckout import utils
-from oscarapicheckout.states import PaymentStatus
 
 from .methods import ClientSideCard
 
