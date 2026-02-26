@@ -350,7 +350,7 @@ dev = [
     { name = "sphinx", specifier = "==8.2.3" },
     { name = "tox", specifier = "==4.44.0" },
     { name = "tox-uv", specifier = ">=1.29.0" },
-    { name = "types-psycopg2", specifier = ">=2.9.21.20251012,<3" },
+    { name = "types-psycopg2", specifier = ">=2.9.21.20260223,<3" },
     { name = "unittest-xml-reporting", specifier = "==3.2.0" },
 ]
 
