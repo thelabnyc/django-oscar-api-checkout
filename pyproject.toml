@@ -38,7 +38,7 @@ dev = [
     "mypy (==1.19.1)",
     "types-psycopg2 (>=2.9.21.20260223,<3)",
     "djangorestframework-stubs (==3.16.8)",
-    "tox-uv>=1.31.0",
+    "tox-uv>=1.32.0",
 ]
 
 [tool.hatch.build.targets.wheel]
