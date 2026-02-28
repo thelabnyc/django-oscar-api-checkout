@@ -32,13 +32,13 @@ dev = [
     "PyYAML (==6.0.3)",
     "sorl-thumbnail (==12.11.0)",
     "sphinx (==8.2.3)",
-    "tox (==4.45.0)",
+    "tox (==4.46.3)",
     "unittest-xml-reporting (==3.2.0)",
     "django-stubs (==5.2.9)",
     "mypy (==1.19.1)",
     "types-psycopg2 (>=2.9.21.20260223,<3)",
     "djangorestframework-stubs (==3.16.8)",
-    "tox-uv>=1.32.0",
+    "tox-uv>=1.33.0",
 ]
 
 [tool.hatch.build.targets.wheel]
