@@ -3,6 +3,10 @@ workflow:
     - if: $CI_COMMIT_REF_PROTECTED == "true"
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
 
+default:
+  tags:
+    - thelab-arm64
+
 variables:
   POSTGRES_DB: postgres
   POSTGRES_USER: postgres
