@@ -1,5 +1,11 @@
 # Changes
 
+## v3.9.0b3 (2026-03-20)
+
+### Feat
+
+- add django-oscar-stubs for type checking
+
 ## v3.9.0b2 (2026-02-13)
 
 ## v3.9.0b1 (2026-02-13)
