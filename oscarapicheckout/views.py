@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 from django.shortcuts import get_object_or_404
 from oscar.core.loading import get_model
@@ -18,10 +18,7 @@ from .serializers import (
 from .signals import order_placed
 from .states import CONSUMED, DECLINED, PaymentStatus
 
-if TYPE_CHECKING:
-    from oscar.apps.order.models import Order
-else:
-    Order = get_model("order", "Order")
+Order = get_model("order", "Order")
 
 CHECKOUT_ORDER_ID = "checkout_order_id"
 

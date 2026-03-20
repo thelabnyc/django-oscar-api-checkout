@@ -322,6 +322,7 @@ dependencies = [
 [package.dev-dependencies]
 dev = [
     { name = "coverage" },
+    { name = "django-oscar-stubs" },
     { name = "django-stubs" },
     { name = "djangorestframework-stubs" },
     { name = "mypy" },
@@ -347,6 +348,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "coverage", specifier = "==7.13.5" },
+    { name = "django-oscar-stubs", specifier = ">=4.1.0b2" },
     { name = "django-stubs", specifier = "==5.2.9" },
     { name = "djangorestframework-stubs", specifier = "==3.16.8" },
     { name = "mypy", specifier = "==1.19.1" },
@@ -359,6 +361,20 @@ dev = [
     { name = "tox-uv", specifier = ">=1.33.4" },
     { name = "types-psycopg2", specifier = ">=2.9.21.20260223,<3" },
     { name = "unittest-xml-reporting", specifier = "==3.2.0" },
+]
+
+[[package]]
+name = "django-oscar-stubs"
+version = "4.1.0b2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django-oscar" },
+    { name = "django-stubs" },
+    { name = "django-treebeard-stubs" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b7/c0/ad1e8bd36bdff657cf0304e0a00d396e7935ff07d1e00d238de64dc670a1/django_oscar_stubs-4.1.0b2.tar.gz", hash = "sha256:5f9bf4d5bb3ab1637a14359cd142ef26a4400f59e1119ed3b97611f35f6c8e71", size = 122637, upload-time = "2026-03-20T15:32:39.269Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/eb/c9/392dab444f03c7b78ba5e07a799a49aa8578655e07023e2265a27bccc69a/django_oscar_stubs-4.1.0b2-py3-none-any.whl", hash = "sha256:801be33f828c92e4489caec9673e0f5ff20fc4aa1ab1906507307a893d5eb55f", size = 124230, upload-time = "2026-03-20T15:32:37.664Z" },
 ]
 
 [[package]]
@@ -423,6 +439,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/19/31/d9380569d2e185458240497c948591d9183bd5c77d11800441b1ccee6933/django_treebeard-5.0.5.tar.gz", hash = "sha256:edca8ef8f92a92d607a1310838fe02806414d0678187316b43b48677aff2f51c", size = 299223, upload-time = "2026-02-19T13:47:17.211Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/21/27/fac0bc188340e39b35ec916b6da2919c387df2e512d622af665e59600f97/django_treebeard-5.0.5-py3-none-any.whl", hash = "sha256:879b3103c2d25fb98750e3b61d9bcda58c18e4617f5e1156bbc50a79104c9f1f", size = 76185, upload-time = "2026-02-19T13:47:15.636Z" },
+]
+
+[[package]]
+name = "django-treebeard-stubs"
+version = "5.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django-stubs" },
+    { name = "django-treebeard" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e3/a0/e28780d9a850dcf91ae41b7ccec8a701deebe6189b1f0300e3d506f8099a/django_treebeard_stubs-5.0.0.tar.gz", hash = "sha256:83251fb6400109866ec81d9db4c9a0a4dcc0194d235687e6e4fd32945fc9db91", size = 53781, upload-time = "2026-03-15T17:29:01.76Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c3/4f/2e011206a95bcd4bb4c259792167a18d61a9cf766a6ec029c98bbc81f775/django_treebeard_stubs-5.0.0-py3-none-any.whl", hash = "sha256:aa15813e5200187d956cc7dd6d1ab74ada80289da0cfa670ae05b540478a813c", size = 11135, upload-time = "2026-03-15T17:29:00.358Z" },
 ]
 
 [[package]]

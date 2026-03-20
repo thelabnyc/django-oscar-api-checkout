@@ -1,23 +1,24 @@
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import Any, cast
 
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.models import AnonymousUser
 from django.db import transaction
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
+from oscar.apps.order.signals import order_placed
 from oscar.core.loading import get_class, get_model
+from oscar.core.prices import Price
 
-if TYPE_CHECKING:
-    from oscar.apps.basket.models import Basket
-    from oscar.apps.order.models import BillingAddress, Order, ShippingAddress
-    from oscar.apps.order.signals import order_placed
-    from oscar.apps.order.utils import OrderCreator
-    from oscar.apps.shipping.methods import Base as ShippingMethod
-else:
-    Order = get_model("order", "Order")
-    order_placed = get_class("order.signals", "order_placed")
-    OrderCreator = object
+Basket = get_model("basket", "Basket")
+Order = get_model("order", "Order")
+ShippingAddress = get_model("order", "ShippingAddress")
+BillingAddress = get_model("order", "BillingAddress")
+
+OrderCreator = get_class("order.utils", "OrderCreator")
+OrderNumberGenerator = get_class("order.utils", "OrderNumberGenerator")
+ShippingMethod = get_class("shipping.methods", "Base")
 
 
 class OrderCreatorMixin(OrderCreator):
@@ -27,18 +28,19 @@ class OrderCreatorMixin(OrderCreator):
     a voucher which is only available to the user placing the order.
     """
 
-    def place_order(  # type:ignore[override]
+    def place_order(
         self,
-        basket: "Basket",
-        total: Decimal,
-        shipping_method: "ShippingMethod",
-        shipping_charge: Decimal,
-        user: User | None = None,
-        shipping_address: Optional["ShippingAddress"] = None,
-        billing_address: Optional["BillingAddress"] = None,
-        order_number: str | None = None,
+        basket: Basket,
+        total: Price,
+        shipping_method: ShippingMethod,
+        shipping_charge: Price,
+        user: AbstractBaseUser | AnonymousUser | None = None,
+        shipping_address: ShippingAddress | None = None,
+        billing_address: BillingAddress | None = None,
+        order_number: str | int | None = None,
         status: str | None = None,
         request: HttpRequest | None = None,
+        surcharges: list[Any] | None = None,
         **kwargs: Any,
     ) -> Order:
         """
@@ -52,7 +54,6 @@ class OrderCreatorMixin(OrderCreator):
 
         # Allocate an order number
         if not order_number:
-            OrderNumberGenerator = get_class("order.utils", "OrderNumberGenerator")
             generator = OrderNumberGenerator()
             order_number = generator.order_number(basket)
 

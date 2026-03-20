@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from collections.abc import Callable, Mapping
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any
+from typing import Any
 import logging
 
 from django.contrib.auth import get_user_model
@@ -27,16 +27,12 @@ from .methods import PaymentMethod, PaymentMethodData
 from .signals import pre_calculate_total
 from .states import PaymentMethodStatus, PaymentStatus, RequiredAction
 
-if TYPE_CHECKING:
-    from oscar.apps.basket.models import Basket
-    from oscar.apps.checkout.calculators import OrderTotalCalculator
-    from oscar.apps.order.models import BillingAddress, Order, ShippingAddress
-else:
-    Basket = get_model("basket", "Basket")
-    Order = get_model("order", "Order")
-    BillingAddress = get_model("order", "BillingAddress")
-    ShippingAddress = get_model("order", "ShippingAddress")
-    OrderTotalCalculator = get_class("checkout.calculators", "OrderTotalCalculator")
+Basket = get_model("basket", "Basket")
+Order = get_model("order", "Order")
+BillingAddress = get_model("order", "BillingAddress")
+ShippingAddress = get_model("order", "ShippingAddress")
+
+OrderTotalCalculator = get_class("checkout.calculators", "OrderTotalCalculator")
 
 logger = logging.getLogger(__name__)
 
