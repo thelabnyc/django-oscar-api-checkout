@@ -1,28 +1,29 @@
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Optional, TypedDict
+from typing import Any, TypedDict
 import base64
 import pickle
 
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser, User
 from django.db.models import F
 from django.db.models.functions import Greatest
 from django.http import HttpRequest
 from django.utils.translation import gettext_lazy as _
 from oscar.core.loading import get_class, get_model
+from oscar.core.prices import Price
 from oscarapi.basket import operations
 
 from .settings import ORDER_STATUS_AUTHORIZED, ORDER_STATUS_PAYMENT_DECLINED
 from .signals import order_payment_authorized, order_payment_declined
 from .states import Complete, Consumed, Declined, PaymentMethodStatus, PaymentStatus
 
-if TYPE_CHECKING:
-    from oscar.apps.basket.models import Basket
-    from oscar.apps.order.models import BillingAddress, Order, ShippingAddress
-    from oscar.apps.order.utils import OrderCreator
-    from oscar.apps.shipping.methods import Base as ShippingMethod
-else:
-    Order = get_model("order", "Order")
-    OrderCreator = get_class("order.utils", "OrderCreator")
+Basket = get_model("basket", "Basket")
+Order = get_model("order", "Order")
+ShippingAddress = get_model("order", "ShippingAddress")
+BillingAddress = get_model("order", "BillingAddress")
+
+OrderCreator = get_class("order.utils", "OrderCreator")
+ShippingMethod = get_class("shipping.methods", "Base")
 
 CHECKOUT_ORDER_ID = "api_checkout_pending_order_id"
 CHECKOUT_PAYMENT_STEPS = "api_checkout_payment_steps"
@@ -53,7 +54,7 @@ def _update_payment_method_state(
     request.session.modified = True
 
 
-def _set_order_authorized(order: "Order", request: HttpRequest) -> None:
+def _set_order_authorized(order: Order, request: HttpRequest) -> None:
     # Set the order status
     order.set_status(ORDER_STATUS_AUTHORIZED)
 
@@ -70,7 +71,7 @@ def _set_order_authorized(order: "Order", request: HttpRequest) -> None:
     order_payment_authorized.send(sender=order, order=order, request=request)
 
 
-def _set_order_payment_declined(order: "Order", request: HttpRequest) -> None:
+def _set_order_payment_declined(order: Order, request: HttpRequest) -> None:
     # Set the order status
     order.set_status(ORDER_STATUS_PAYMENT_DECLINED)
 
@@ -101,7 +102,7 @@ def _set_order_payment_declined(order: "Order", request: HttpRequest) -> None:
     order_payment_declined.send(sender=order, order=order, request=request)
 
 
-def _update_order_status(order: "Order", request: HttpRequest) -> None:
+def _update_order_status(order: Order, request: HttpRequest) -> None:
     states = list_payment_method_states(request)
 
     declined = [s for k, s in states.items() if s.status == PaymentMethodStatus.DECLINED]
@@ -144,7 +145,7 @@ def clear_consumed_payment_method_states(request: HttpRequest) -> None:
 
 
 def update_payment_method_state(
-    order: "Order",
+    order: Order,
     request: HttpRequest,
     method_key: str,
     state: PaymentStatus,
@@ -154,7 +155,7 @@ def update_payment_method_state(
 
 
 def set_payment_method_states(
-    order: "Order",
+    order: Order,
     request: HttpRequest,
     states: dict[str, PaymentStatus],
 ) -> None:
@@ -165,7 +166,7 @@ def set_payment_method_states(
 
 
 def mark_payment_method_completed(
-    order: "Order",
+    order: Order,
     request: HttpRequest,
     method_key: str,
     amount: Decimal,
@@ -180,7 +181,7 @@ def mark_payment_method_completed(
 
 
 def mark_payment_method_declined(
-    order: "Order",
+    order: Order,
     request: HttpRequest,
     method_key: str,
     amount: Decimal,
@@ -195,7 +196,7 @@ def mark_payment_method_declined(
 
 
 def mark_payment_method_consumed(
-    order: "Order",
+    order: Order,
     request: HttpRequest,
     method_key: str,
     amount: Decimal,
@@ -234,19 +235,19 @@ def get_checkout_captcha_settings(
 class OrderUpdater:
     def update_order(
         self,
-        order: "Order",
-        basket: "Basket",
-        order_total: Decimal,
-        shipping_method: "ShippingMethod",
-        shipping_charge: Decimal,
+        order: Order,
+        basket: Basket,
+        order_total: Price,
+        shipping_method: ShippingMethod,
+        shipping_charge: Price,
         user: User | AnonymousUser | None = None,
-        shipping_address: Optional["ShippingAddress"] = None,
-        billing_address: Optional["BillingAddress"] = None,
+        shipping_address: ShippingAddress | None = None,
+        billing_address: BillingAddress | None = None,
         order_number: str | None = None,
         status: str | None = None,
         request: HttpRequest | None = None,
         **kwargs: Any,
-    ) -> "Order":
+    ) -> Order:
         """
         Similar to OrderCreator.place_order, except this updates an existing "Payment Declined" order instead
         of creating a new order.
@@ -273,15 +274,19 @@ class OrderUpdater:
         # Remove all the order lines and cancel and stock they allocated. We'll make new lines from the
         # basket after this.
         for order_line in order.lines.all():
-            if order_line.product and order_line.product.get_product_class().track_stock and order_line.stockrecord:
+            product_class = order_line.product.get_product_class() if order_line.product else None
+            if product_class and product_class.track_stock and order_line.stockrecord:
                 order_line.stockrecord.cancel_allocation(order_line.quantity)
             order_line.delete()
 
         # Use the built in OrderCreator, but specify a pk so that Django actually does an update instead
         # Create the actual order.Order and order.Line models
+        if order_number is None:
+            raise ValueError("order_number is required")
+        order_user: AbstractBaseUser | None = user if isinstance(user, AbstractBaseUser) else None
         creator = OrderCreator()
         order = creator.create_order_model(
-            user,
+            order_user,
             basket,
             shipping_address,
             shipping_method,

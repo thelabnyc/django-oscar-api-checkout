@@ -39,6 +39,7 @@ dev = [
     "types-psycopg2 (>=2.9.21.20260223,<3)",
     "djangorestframework-stubs (==3.16.8)",
     "tox-uv>=1.33.4",
+    "django-oscar-stubs>=4.1.0b2",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -64,7 +65,7 @@ post_bump_hooks = ["git push origin master $CZ_POST_CURRENT_TAG_VERSION"]
 
 [tool.mypy]
 python_version = "3.12"
-plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main", "mypy_oscar_plugin"]
 
 # Strict mode, see mypy --help
 warn_unused_configs = true
@@ -86,10 +87,6 @@ strict_equality = true
 
 [[tool.mypy.overrides]]
 module = "drf_recaptcha.*"
-follow_untyped_imports = true
-
-[[tool.mypy.overrides]]
-module = "oscar.*"
 follow_untyped_imports = true
 
 [[tool.mypy.overrides]]

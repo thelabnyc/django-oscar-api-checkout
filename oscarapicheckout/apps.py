@@ -9,7 +9,7 @@ class Config(OscarConfig):
     name = "oscarapicheckout"
     label = "oscarapicheckout"
     verbose_name = _("Oscar API-Checkout")
-    namespace = "oscarapicheckout"  # type:ignore[assignment]
+    namespace = "oscarapicheckout"
     default = True
 
     def ready(self) -> None:
@@ -28,7 +28,7 @@ class Config(OscarConfig):
         view_states = never_cache(PaymentStatesView.as_view())
         view_checkout = never_cache(CheckoutView.as_view())
         view_complete_deferred_payment = never_cache(CompleteDeferredPaymentView.as_view())
-        urlpatterns = [
+        urlpatterns: list[URLPattern | URLResolver] = [
             path(
                 "checkout/payment-methods/",
                 view_methods,
@@ -47,4 +47,4 @@ class Config(OscarConfig):
             ),
             path("checkout/", view_checkout, name="api-checkout"),
         ]
-        return self.post_process_urls(urlpatterns)  # type:ignore[no-any-return]
+        return self.post_process_urls(urlpatterns)

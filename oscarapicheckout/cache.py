@@ -1,6 +1,6 @@
 from collections.abc import Mapping
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, TypedDict
+from typing import Any, TypedDict
 
 from django.core.cache import cache
 from django.utils.module_loading import import_string
@@ -9,10 +9,7 @@ from rest_framework import serializers
 
 from . import settings as pkgsettings
 
-if TYPE_CHECKING:
-    from oscar.apps.address.models import Country
-else:
-    Country = get_model("address", "Country")
+Country = get_model("address", "Country")
 
 
 class EmailAddressSerializer(serializers.Serializer[Any]):

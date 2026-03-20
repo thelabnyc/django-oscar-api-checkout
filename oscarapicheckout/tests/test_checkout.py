@@ -3338,6 +3338,66 @@ class CheckoutAPITest(BaseTest):
         voucher.refresh_from_db()
         self.assertEqual(voucher.num_orders, 0)
 
+    def test_guest_checkout_retry_with_voucher(self):
+        """
+        Regression test: ensure guest checkout (anonymous user) with vouchers
+        works correctly when retrying after a payment decline. The OrderUpdater
+        must not convert AnonymousUser to None, since voucher.record_usage()
+        calls user.is_authenticated which would crash on None.
+        """
+        # Don't login — this is an anonymous checkout
+        basket_id = self._prepare_basket()
+        voucher = factories.create_voucher()
+        self._add_voucher(voucher)
+
+        self.assertEqual(voucher.num_orders, 0)
+
+        data = self._get_checkout_data(basket_id)
+        data["guest_email"] = "guest@example.com"
+        data["payment"] = {
+            "credit-card": {
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+
+        # Place the order
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+        order_number = order_resp.data["number"]
+
+        voucher.refresh_from_db()
+        self.assertEqual(voucher.num_orders, 1)
+
+        # Decline the credit card payment
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        required_action = states_resp.data["payment_method_states"]["credit-card"]["required_action"]
+        required_action["fields"].append({"key": "deny", "value": True})
+        self._do_payment_step_form_post(required_action)
+
+        # Verify order is declined and voucher usage was reversed
+        order = Order.objects.get(number=order_number)
+        self.assertEqual(order.status, "Payment Declined")
+        voucher.refresh_from_db()
+        self.assertEqual(voucher.num_orders, 0)
+
+        # Retry the checkout as an anonymous user — this exercises OrderUpdater
+        # with an AnonymousUser, which must not crash in record_voucher_usage
+        data = self._get_checkout_data(basket_id)
+        data["guest_email"] = "guest@example.com"
+        data["payment"] = {
+            "credit-card": {
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+        order_resp2 = self._checkout(data)
+        self.assertEqual(order_resp2.status_code, status.HTTP_200_OK)
+        self.assertEqual(order_resp2.data["number"], order_number)
+
+        voucher.refresh_from_db()
+        self.assertEqual(voucher.num_orders, 1)
+
     def assertPaymentSources(self, order_number, sources):
         order = Order.objects.get(number=order_number)
         # Check source names

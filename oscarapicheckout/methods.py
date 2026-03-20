@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, NotRequired, TypedDict
+from typing import Any, NotRequired, TypedDict
 import logging
 
 from django.db import transaction
@@ -12,22 +12,14 @@ from rest_framework import serializers
 
 from . import states
 
-if TYPE_CHECKING:
-    from oscar.apps.order.models import Line as OrderLine
-    from oscar.apps.order.models import (
-        Order,
-        PaymentEvent,
-        PaymentEventQuantity,
-        PaymentEventType,
-    )
-    from oscar.apps.payment.models import Source, SourceType, Transaction
-else:
-    PaymentEventType = get_model("order", "PaymentEventType")
-    PaymentEvent = get_model("order", "PaymentEvent")
-    PaymentEventQuantity = get_model("order", "PaymentEventQuantity")
-    SourceType = get_model("payment", "SourceType")
-    Source = get_model("payment", "Source")
-    Transaction = get_model("payment", "Transaction")
+Order = get_model("order", "Order")
+OrderLine = get_model("order", "Line")
+PaymentEventType = get_model("order", "PaymentEventType")
+PaymentEvent = get_model("order", "PaymentEvent")
+PaymentEventQuantity = get_model("order", "PaymentEventQuantity")
+SourceType = get_model("payment", "SourceType")
+Source = get_model("payment", "Source")
+Transaction = get_model("payment", "Transaction")
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +68,7 @@ class PaymentMethod[T: PaymentMethodData]:
     def _make_payment_event(
         self,
         type_name: str,
-        order: "Order",
+        order: Order,
         amount: Decimal,
         reference: str = "",
     ) -> PaymentEvent:
@@ -91,7 +83,7 @@ class PaymentMethod[T: PaymentMethodData]:
 
     def make_authorize_event(
         self,
-        order: "Order",
+        order: Order,
         amount: Decimal,
         reference: str = "",
     ) -> PaymentEvent:
@@ -104,7 +96,7 @@ class PaymentMethod[T: PaymentMethodData]:
 
     def make_debit_event(
         self,
-        order: "Order",
+        order: Order,
         amount: Decimal,
         reference: str = "",
     ) -> PaymentEvent:
@@ -117,7 +109,7 @@ class PaymentMethod[T: PaymentMethodData]:
 
     def make_refund_event(
         self,
-        order: "Order",
+        order: Order,
         amount: Decimal,
         reference: str = "",
     ) -> PaymentEvent:
@@ -131,14 +123,14 @@ class PaymentMethod[T: PaymentMethodData]:
     def make_event_quantity(
         self,
         event: PaymentEvent,
-        line: "OrderLine",
+        line: OrderLine,
         quantity: int,
     ) -> PaymentEventQuantity:
         return PaymentEventQuantity.objects.create(event=event, line=line, quantity=quantity)
 
     def get_source(
         self,
-        order: "Order",
+        order: Order,
         reference: str = "",
     ) -> Source:
         stype, created = SourceType.objects.get_or_create(name=self.name)
@@ -151,7 +143,7 @@ class PaymentMethod[T: PaymentMethodData]:
     def void_existing_payment(
         self,
         request: HttpRequest,
-        order: "Order",
+        order: Order,
         method_key: str,
         state_to_void: states.PaymentStatus,
     ) -> None:
@@ -181,7 +173,7 @@ class PaymentMethod[T: PaymentMethodData]:
     def record_payment(
         self,
         request: HttpRequest,
-        order: "Order",
+        order: Order,
         method_key: str,
         amount: Decimal | None = None,
         reference: str = "",
@@ -201,7 +193,7 @@ class PaymentMethod[T: PaymentMethodData]:
     def _record_payment(
         self,
         request: HttpRequest,
-        order: "Order",
+        order: Order,
         method_key: str,
         amount: Decimal,
         reference: str,
@@ -223,7 +215,7 @@ class Cash(PaymentMethod[PaymentMethodData]):
     def _record_payment(
         self,
         request: HttpRequest,
-        order: "Order",
+        order: Order,
         method_key: str,
         amount: Decimal,
         reference: str,
@@ -265,7 +257,7 @@ class PayLater(PaymentMethod[PaymentMethodData]):
     def _record_payment(
         self,
         request: HttpRequest,
-        order: "Order",
+        order: Order,
         method_key: str,
         amount: Decimal,
         reference: str,
