@@ -310,7 +310,7 @@ wheels = [
 
 [[package]]
 name = "django-oscar-api-checkout"
-version = "3.9.0b2"
+version = "3.9.0b3"
 source = { editable = "." }
 dependencies = [
     { name = "django" },
@@ -348,7 +348,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "coverage", specifier = "==7.13.5" },
-    { name = "django-oscar-stubs", specifier = ">=4.1.0b2" },
+    { name = "django-oscar-stubs", specifier = ">=4.1.0b4" },
     { name = "django-stubs", specifier = "==5.2.9" },
     { name = "djangorestframework-stubs", specifier = "==3.16.8" },
     { name = "mypy", specifier = "==1.19.1" },
@@ -365,16 +365,16 @@ dev = [
 
 [[package]]
 name = "django-oscar-stubs"
-version = "4.1.0b2"
+version = "4.1.0b4"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django-oscar" },
     { name = "django-stubs" },
     { name = "django-treebeard-stubs" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b7/c0/ad1e8bd36bdff657cf0304e0a00d396e7935ff07d1e00d238de64dc670a1/django_oscar_stubs-4.1.0b2.tar.gz", hash = "sha256:5f9bf4d5bb3ab1637a14359cd142ef26a4400f59e1119ed3b97611f35f6c8e71", size = 122637, upload-time = "2026-03-20T15:32:39.269Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c6/e5/48a2182e67ee067b6ee9ad90ac6b13a9bd34bd513d67fdccd2f83f3038aa/django_oscar_stubs-4.1.0b4.tar.gz", hash = "sha256:c841a3b84bdf90f44ac8fbeec8af86a5b840fc94946157f329d11e98fa5d0781", size = 130308, upload-time = "2026-03-21T04:41:31.325Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/eb/c9/392dab444f03c7b78ba5e07a799a49aa8578655e07023e2265a27bccc69a/django_oscar_stubs-4.1.0b2-py3-none-any.whl", hash = "sha256:801be33f828c92e4489caec9673e0f5ff20fc4aa1ab1906507307a893d5eb55f", size = 124230, upload-time = "2026-03-20T15:32:37.664Z" },
+    { url = "https://files.pythonhosted.org/packages/fd/88/cf3ad75fb0eba74a56da26a5bc657217e8e08557936abf65dab656691df2/django_oscar_stubs-4.1.0b4-py3-none-any.whl", hash = "sha256:f7dc960ac63fabeeab55bc02fb644a44a336ddf0dad2d7196357dc1f8ad9bd8d", size = 130852, upload-time = "2026-03-21T04:41:29.905Z" },
 ]
 
 [[package]]
