@@ -17,7 +17,6 @@ ShippingAddress = get_model("order", "ShippingAddress")
 BillingAddress = get_model("order", "BillingAddress")
 
 OrderCreator = get_class("order.utils", "OrderCreator")
-OrderNumberGenerator = get_class("order.utils", "OrderNumberGenerator")
 ShippingMethod = get_class("shipping.methods", "Base")
 
 
@@ -54,7 +53,8 @@ class OrderCreatorMixin(OrderCreator):
 
         # Allocate an order number
         if not order_number:
-            generator = OrderNumberGenerator()
+            _OrderNumberGenerator = get_class("order.utils", "OrderNumberGenerator")
+            generator = _OrderNumberGenerator()
             order_number = generator.order_number(basket)
 
         # Figure out what status the new order should be
