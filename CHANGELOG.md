@@ -1,5 +1,11 @@
 # Changes
 
+## v3.9.0b5 (2026-03-22)
+
+### Fix
+
+- resolve OrderNumberGenerator lazily in place_order()
+
 ## v3.9.0b4 (2026-03-21)
 
 ### Fix
