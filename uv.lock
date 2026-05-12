@@ -363,7 +363,7 @@ dev = [
     { name = "sphinx", specifier = "==9.1.0" },
     { name = "tox", specifier = "==4.53.1" },
     { name = "tox-uv", specifier = ">=1.35.2" },
-    { name = "types-psycopg2", specifier = ">=2.9.21.20260508,<3" },
+    { name = "types-psycopg2", specifier = ">=2.9.21.20260509,<3" },
     { name = "unittest-xml-reporting", specifier = "==4.0.0" },
 ]
 
