@@ -36,7 +36,7 @@ dev = [
     "unittest-xml-reporting (==4.0.0)",
     "django-stubs (==5.2.9)",
     "mypy (==1.20.2)",
-    "types-psycopg2 (>=2.9.21.20260508,<3)",
+    "types-psycopg2 (>=2.9.21.20260509,<3)",
     "djangorestframework-stubs (==3.16.9)",
     "tox-uv>=1.35.2",
     "django-oscar-stubs>=4.1.0b6",
