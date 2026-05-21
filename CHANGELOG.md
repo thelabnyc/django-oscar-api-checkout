@@ -1,36 +1,17 @@
 # Changes
 
-## v3.9.0b5 (2026-03-22)
-
-### Fix
-
-- resolve OrderNumberGenerator lazily in place_order()
-
-## v3.9.0b4 (2026-03-21)
-
-### Fix
-
-- update django-oscar-stubs
-
-## v3.9.0b3 (2026-03-20)
+## v3.9.0 (2026-05-21)
 
 ### Feat
 
 - add django-oscar-stubs for type checking
-
-## v3.9.0b2 (2026-02-13)
-
-## v3.9.0b1 (2026-02-13)
-
-## v3.9.0b0 (2026-02-13)
-
-### Feat
-
 - add ClientSidePaymentRequired payment state
 - support Python 3.14
 
 ### Fix
 
+- resolve OrderNumberGenerator lazily in place_order()
+- update django-oscar-stubs
 - **deps**: update dependency django to >=5.2
 - **deps**: update dependency django to >=4.2.27
 
