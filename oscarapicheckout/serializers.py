@@ -134,7 +134,7 @@ class PaymentMethodsSerializer(serializers.DictField):
     def __init__(
         self,
         *args: Any,
-        context: dict[str, Any] = {},
+        context: Mapping[str, Any] = {},
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
@@ -177,7 +177,7 @@ class PaymentMethodsSerializer(serializers.DictField):
             self.fail("not_a_dict", input_type=type(data).__name__)
         return self.run_child_validation(data)
 
-    def run_child_validation(self, data: dict[str, Any]) -> dict[str, Any]:
+    def run_child_validation(self, data: Mapping[str, Any]) -> dict[str, Any]:
         # For API backwards compatibility with versions 0.3.x and earlier, if ``method_type`` isn't
         # set, default it to the given method key.
         tmp_data = {}
