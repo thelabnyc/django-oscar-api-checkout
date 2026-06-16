@@ -13,6 +13,7 @@ from ..utils import _set_order_payment_declined
 from .base import BaseTest
 
 Order = get_model("order", "Order")
+OrderLineDiscount = get_model("order", "OrderLineDiscount")
 Basket = get_model("basket", "Basket")
 Default = get_class("partner.strategy", "Default")
 OrderCreator = get_class("order.utils", "OrderCreator")
@@ -3397,6 +3398,115 @@ class CheckoutAPITest(BaseTest):
 
         voucher.refresh_from_db()
         self.assertEqual(voucher.num_orders, 1)
+
+    def test_order_line_discount_linked_with_site_offer(self):
+        """
+        Regression test: OrderLineDiscount rows must be linked to OrderDiscount
+        for site offers. Vanilla Oscar's create_line_discount_models looks up
+        OrderDiscount via order.discounts.filter(...).first(), so order lines
+        must be created after the OrderDiscount rows exist.
+        """
+        self.login(is_staff=True)
+        factories.create_offer()
+
+        basket_id = self._prepare_basket()
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {"cash": {"enabled": True, "pay_balance": True}}
+
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        order = Order.objects.get(number=order_resp.data["number"])
+        self.assertLineDiscountLinked(order)
+
+    def test_order_line_discount_linked_with_voucher_offer(self):
+        """
+        Regression test: line-discount linking must also work for voucher-backed
+        offers, not just site offers.
+        """
+        self.login(is_staff=True)
+
+        basket_id = self._prepare_basket()
+        voucher = factories.create_voucher()
+        self._add_voucher(voucher)
+
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {"cash": {"enabled": True, "pay_balance": True}}
+
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        order = Order.objects.get(number=order_resp.data["number"])
+        self.assertLineDiscountLinked(order)
+
+    def test_order_line_discount_relinked_after_payment_decline(self):
+        """
+        Regression test: OrderUpdater.update_order must also create OrderLineDiscount
+        rows when retrying a declined order — historically lines were created
+        before discounts on the retry path too.
+        """
+        self.login(is_staff=False)
+        factories.create_offer()
+
+        basket_id = self._prepare_basket()
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {"credit-card": {"enabled": True, "pay_balance": True}}
+
+        first_resp = self._checkout(data)
+        self.assertEqual(first_resp.status_code, status.HTTP_200_OK)
+        order = Order.objects.get(number=first_resp.data["number"])
+
+        _set_order_payment_declined(order, first_resp.wsgi_request)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "Payment Declined")
+        self.assertEqual(order.discounts.count(), 0)
+
+        retry_resp = self._checkout(data)
+        self.assertEqual(retry_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(retry_resp.data["number"], first_resp.data["number"])
+
+        order.refresh_from_db()
+        self.assertLineDiscountLinked(order)
+
+    def test_order_line_discount_relinked_after_payment_decline_with_voucher(self):
+        """
+        Regression test: OrderUpdater.update_order must also link OrderLineDiscount
+        rows to voucher-backed OrderDiscount records on the retry (payment-declined)
+        path, mirroring the site-offer case.
+        """
+        self.login(is_staff=False)
+
+        basket_id = self._prepare_basket()
+        voucher = factories.create_voucher()
+        self._add_voucher(voucher)
+
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {"credit-card": {"enabled": True, "pay_balance": True}}
+
+        first_resp = self._checkout(data)
+        self.assertEqual(first_resp.status_code, status.HTTP_200_OK)
+        order = Order.objects.get(number=first_resp.data["number"])
+
+        _set_order_payment_declined(order, first_resp.wsgi_request)
+        order.refresh_from_db()
+        self.assertEqual(order.status, "Payment Declined")
+        self.assertEqual(order.discounts.count(), 0)
+
+        retry_resp = self._checkout(data)
+        self.assertEqual(retry_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(retry_resp.data["number"], first_resp.data["number"])
+
+        order.refresh_from_db()
+        self.assertLineDiscountLinked(order)
+
+    def assertLineDiscountLinked(self, order):
+        """Assert the order has exactly one OrderLineDiscount linked to its sole OrderDiscount."""
+        order_discount = order.discounts.get()
+        line_discounts = OrderLineDiscount.objects.filter(line__order=order)
+        self.assertEqual(line_discounts.count(), 1)
+        line_discount = line_discounts.get()
+        self.assertEqual(line_discount.order_discount, order_discount)
+        self.assertEqual(line_discount.amount, D("2.00"))
 
     def assertPaymentSources(self, order_number, sources):
         order = Order.objects.get(number=order_number)

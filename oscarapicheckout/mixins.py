@@ -68,7 +68,7 @@ class OrderCreatorMixin(OrderCreator):
 
         # Open a transaction so that order creation is atomic.
         with transaction.atomic():
-            # Create the actual order.Order and order.Line models
+            # Create the actual order.Order model
             order = cast(
                 Order,
                 self.create_order_model(
@@ -85,9 +85,6 @@ class OrderCreatorMixin(OrderCreator):
                     **kwargs,
                 ),
             )
-            for line in basket.all_lines():
-                self.create_line_models(order, line)
-                self.update_stock_records(line)
 
             # Make sure all the vouchers in the order are active and can actually be used by the order placing user.
             voucher_user = request.user if request and request.user else user
@@ -116,6 +113,12 @@ class OrderCreatorMixin(OrderCreator):
             # Record voucher usage for this order
             for voucher in basket.vouchers.all():
                 self.record_voucher_usage(order, voucher, user)
+
+            # Create order lines last so that create_line_discount_models can
+            # link each OrderLine to the OrderDiscount records created above.
+            for line in basket.all_lines():
+                self.create_line_models(order, line)
+                self.update_stock_records(line)
 
         # Send signal for analytics to pick up
         order_placed.send(sender=self, order=order, user=user)
