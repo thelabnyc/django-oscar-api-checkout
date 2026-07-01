@@ -5,6 +5,7 @@ import pickle
 
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser, User
+from django.db import transaction
 from django.db.models import F
 from django.db.models.functions import Greatest
 from django.http import HttpRequest
@@ -271,70 +272,77 @@ class OrderUpdater:
             msg = _("There is already an order with number %(order_number)s") % dict(order_number=order_number)
             raise ValueError(msg)
 
-        # Remove all the order lines and cancel and stock they allocated. We'll make new lines from the
-        # basket after this.
-        for order_line in order.lines.all():
-            product_class = order_line.product.get_product_class() if order_line.product else None
-            if product_class and product_class.track_stock and order_line.stockrecord:
-                order_line.stockrecord.cancel_allocation(order_line.quantity)
-            order_line.delete()
-
-        # Use the built in OrderCreator, but specify a pk so that Django actually does an update instead
-        # Create the actual order.Order and order.Line models
         if order_number is None:
             raise ValueError("order_number is required")
         order_user: AbstractBaseUser | None = user if isinstance(user, AbstractBaseUser) else None
         creator = OrderCreator()
-        order = creator.create_order_model(
-            order_user,
-            basket,
-            shipping_address,
-            shipping_method,
-            shipping_charge,
-            billing_address,
-            order_total,
-            order_number,
-            status,
-            id=order.id,
-            request=request,
-            **kwargs,
-        )
 
-        # Make new order lines to replace the ones we deleted.
-        for basket_line in basket.all_lines():
-            creator.create_line_models(order, basket_line)
-            creator.update_stock_records(basket_line)
+        # Wrap the update in a transaction so that a failure during line/stock
+        # creation rolls back the freshly written voucher-usage and discount
+        # rows, mirroring the atomic guarantee of OrderCreatorMixin.place_order.
+        with transaction.atomic():
+            # Remove all the order lines and cancel and stock they allocated. We'll make new lines from the
+            # basket after this.
+            for order_line in order.lines.all():
+                product_class = order_line.product.get_product_class() if order_line.product else None
+                if product_class and product_class.track_stock and order_line.stockrecord:
+                    order_line.stockrecord.cancel_allocation(order_line.quantity)
+                order_line.delete()
 
-        # Make sure all the vouchers are still available to the user placing the order (not necessarily the
-        # same as the order owner)
-        voucher_user = request.user if request and request.user else user
-        for voucher in basket.vouchers.select_for_update():
-            available_to_user, msg = voucher.is_available_to_user(user=voucher_user)
-            if not voucher.is_active() or not available_to_user:
-                raise ValueError(msg)
+            # Use the built in OrderCreator, but specify a pk so that Django actually does an update instead
+            # of an insert on the order.Order model.
+            order = creator.create_order_model(
+                order_user,
+                basket,
+                shipping_address,
+                shipping_method,
+                shipping_charge,
+                billing_address,
+                order_total,
+                order_number,
+                status,
+                id=order.id,
+                request=request,
+                **kwargs,
+            )
 
-        # Record any discounts associated with this order
-        for application in basket.offer_applications:
-            # Trigger any deferred benefits from offers and capture the
-            # resulting message
-            application["message"] = application["offer"].apply_deferred_benefit(basket, order, application)
+            # Make sure all the vouchers are still available to the user placing the order (not necessarily the
+            # same as the order owner)
+            voucher_user = request.user if request and request.user else user
+            for voucher in basket.vouchers.select_for_update():
+                available_to_user, msg = voucher.is_available_to_user(user=voucher_user)
+                if not voucher.is_active() or not available_to_user:
+                    raise ValueError(msg)
 
-            # Record offer application results
-            if application["result"].affects_shipping:
-                # Skip zero shipping discounts
-                shipping_discount = shipping_method.discount(basket)
-                if shipping_discount <= Decimal("0.00"):
-                    continue
-                # If a shipping offer, we need to grab the actual discount off
-                # the shipping method instance, which should be wrapped in an
-                # OfferDiscount instance.
-                application["discount"] = shipping_discount
-            creator.create_discount_model(order, application)
-            creator.record_discount(application)
+            # Record any discounts associated with this order
+            for application in basket.offer_applications:
+                # Trigger any deferred benefits from offers and capture the
+                # resulting message
+                application["message"] = application["offer"].apply_deferred_benefit(basket, order, application)
 
-        # Record voucher usage for this order
-        for voucher in basket.vouchers.all():
-            creator.record_voucher_usage(order, voucher, user)
+                # Record offer application results
+                if application["result"].affects_shipping:
+                    # Skip zero shipping discounts
+                    shipping_discount = shipping_method.discount(basket)
+                    if shipping_discount <= Decimal("0.00"):
+                        continue
+                    # If a shipping offer, we need to grab the actual discount off
+                    # the shipping method instance, which should be wrapped in an
+                    # OfferDiscount instance.
+                    application["discount"] = shipping_discount
+                creator.create_discount_model(order, application)
+                creator.record_discount(application)
+
+            # Record voucher usage for this order
+            for voucher in basket.vouchers.all():
+                creator.record_voucher_usage(order, voucher, user)
+
+            # Make new order lines to replace the ones we deleted. Done last so that
+            # create_line_discount_models can link each OrderLine to the OrderDiscount
+            # records created above.
+            for basket_line in basket.all_lines():
+                creator.create_line_models(order, basket_line)
+                creator.update_stock_records(basket_line)
 
         # Done! Return the order.Order model
         return order
