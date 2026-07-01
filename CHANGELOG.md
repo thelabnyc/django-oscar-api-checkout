@@ -1,5 +1,11 @@
 # Changes
 
+## v3.9.1 (2026-07-01)
+
+### Fix
+
+- link OrderLineDiscount rows for OrderCreatorMixin (#33846)
+
 ## v3.9.0 (2026-05-21)
 
 ### Feat
