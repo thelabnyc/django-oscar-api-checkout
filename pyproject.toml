@@ -32,7 +32,7 @@ dev = [
     "PyYAML (==6.0.3)",
     "sorl-thumbnail (==13.0.0)",
     "sphinx (==9.1.0)",
-    "tox (==4.56.4)",
+    "tox (==4.57.0)",
     "unittest-xml-reporting (==4.0.0)",
     "django-stubs (==6.0.4)",
     "mypy (==1.20.2)",
