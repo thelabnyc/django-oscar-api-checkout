@@ -32,13 +32,13 @@ dev = [
     "PyYAML (==6.0.3)",
     "sorl-thumbnail (==13.0.0)",
     "sphinx (==9.1.0)",
-    "tox (==4.57.2)",
+    "tox (==4.58.0)",
     "unittest-xml-reporting (==4.0.0)",
     "django-stubs (==6.0.4)",
     "mypy (==1.20.2)",
     "types-psycopg2 (>=2.9.21.20260724,<3)",
     "djangorestframework-stubs (==3.17.0)",
-    "tox-uv>=1.35.2",
+    "tox-uv>=1.36.0",
     "django-oscar-stubs>=4.1.0b6",
 ]
 
