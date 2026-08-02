@@ -42,7 +42,6 @@ def run_enabled_fraud_checks(
 ) -> None:
     for rule in get_enabled_fraud_checks():
         rule.validate(data, recaptcha_score, request)
-    return None
 
 
 class AddressVelocity:

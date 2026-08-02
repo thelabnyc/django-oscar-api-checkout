@@ -269,7 +269,7 @@ class OrderUpdater:
             pass
         else:
             # Translators: Error message in checkout
-            msg = _("There is already an order with number %(order_number)s") % dict(order_number=order_number)
+            msg = _("There is already an order with number %(order_number)s") % {"order_number": order_number}
             raise ValueError(msg)
 
         if order_number is None:

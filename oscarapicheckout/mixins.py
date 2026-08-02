@@ -59,12 +59,12 @@ class OrderCreatorMixin(OrderCreator):
 
         # Figure out what status the new order should be
         if not status and hasattr(settings, "OSCAR_INITIAL_ORDER_STATUS"):
-            status = getattr(settings, "OSCAR_INITIAL_ORDER_STATUS")
+            status = settings.OSCAR_INITIAL_ORDER_STATUS
 
         # Make sure there isn't already an order with this order number
         if Order._default_manager.filter(number=order_number).exists():
             # Translators: User facing error message in checkout
-            raise ValueError(_("There is already an order with number %(order_number)s") % dict(order_number=order_number))
+            raise ValueError(_("There is already an order with number %(order_number)s") % {"order_number": order_number})
 
         # Open a transaction so that order creation is atomic.
         with transaction.atomic():
