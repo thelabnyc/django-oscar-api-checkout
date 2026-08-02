@@ -88,7 +88,7 @@ class DiscriminatedUnionSerializer(serializers.Serializer[Any]):
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
-        self.fields[discriminant_field_name] = serializers.ChoiceField(choices=[(t, t) for t in types.keys()])
+        self.fields[discriminant_field_name] = serializers.ChoiceField(choices=[(t, t) for t in types])
         self.discriminant_field_name = discriminant_field_name
         self.type_mapping = types
 
@@ -141,9 +141,9 @@ class PaymentMethodsSerializer(serializers.DictField):
 
         request = context.get("request", None)
         assert request is not None, (
-            "`%s` requires the request in the serializer"
+            f"`{self.__class__.__name__}` requires the request in the serializer"
             " context. Add `context={'request': request}` when instantiating "
-            "the serializer." % self.__class__.__name__
+            "the serializer."
         )
 
         self.methods = {}
@@ -156,7 +156,7 @@ class PaymentMethodsSerializer(serializers.DictField):
                 self.methods[method.code] = method
 
         if not any(self.methods):
-            raise RuntimeError("No payment methods were permitted for user %s" % request.user)
+            raise RuntimeError(f"No payment methods were permitted for user {request.user}")
 
         union_types = {}
         for code, method in self.methods.items():
@@ -212,7 +212,7 @@ class PaymentMethodsSerializer(serializers.DictField):
         # Respect payment method limit
         if settings.API_MAX_PAYMENT_METHODS > 0 and len(enabled_methods) > settings.API_MAX_PAYMENT_METHODS:
             # Translators: User facing error message in checkout
-            msg = _("No more than %(num)s payment method can be enabled.") % dict(num=settings.API_MAX_PAYMENT_METHODS)
+            msg = _("No more than %(num)s payment method can be enabled.") % {"num": settings.API_MAX_PAYMENT_METHODS}
             raise serializers.ValidationError(msg)
 
         # Must set pay_balance flag on exactly one payment method
@@ -227,7 +227,7 @@ class PaymentMethodsSerializer(serializers.DictField):
         return result
 
 
-class SignedTokenRelatedField[_MT: models.Model](serializers.SlugRelatedField[_MT]):
+class SignedTokenRelatedField[MT: models.Model](serializers.SlugRelatedField[MT]):
     """
     Similar to a SlugRelatedField, but uses a server-signed version of the slug.
     Thus, this can be used to both identify an object and verify the client has
@@ -243,7 +243,7 @@ class SignedTokenRelatedField[_MT: models.Model](serializers.SlugRelatedField[_M
     def verify_token(cls, token: str) -> str:
         return cls.get_signer().unsign(token)
 
-    def get_token(self, model_inst: _MT | PKOnlyObject) -> str:
+    def get_token(self, model_inst: MT | PKOnlyObject) -> str:
         """Generate the signed token value for the given model instance"""
         raw_value = getattr(model_inst, self.slug_field or "pk")
         logger.info(
@@ -258,7 +258,7 @@ class SignedTokenRelatedField[_MT: models.Model](serializers.SlugRelatedField[_M
         """Don't include choices in the DRF HTML form"""
         return {}
 
-    def to_internal_value(self, data: Any) -> _MT:
+    def to_internal_value(self, data: Any) -> MT:
         # Verify the token
         try:
             raw_value = self.verify_token(data)
@@ -268,7 +268,7 @@ class SignedTokenRelatedField[_MT: models.Model](serializers.SlugRelatedField[_M
             self.fail("invalid")
         return super().to_internal_value(raw_value)
 
-    def to_representation(self, obj: _MT | PKOnlyObject) -> str:
+    def to_representation(self, obj: MT | PKOnlyObject) -> str:
         return self.get_token(obj)
 
 
@@ -325,9 +325,9 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         # the session store when anonymous
         request = self.context.get("request", None)
         assert request is not None, (
-            "`%s` requires the request in the serializer"
+            f"`{self.__class__.__name__}` requires the request in the serializer"
             " context. Add `context={'request': request}` when instantiating "
-            "the serializer." % self.__class__.__name__
+            "the serializer."
         )
 
         # Optionally add a captcha field
@@ -354,7 +354,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
     def get_ownership_calc(
         self,
     ) -> OrderOwnershipCalc:
-        if hasattr(settings.ORDER_OWNERSHIP_CALCULATOR, "__call__"):
+        if callable(settings.ORDER_OWNERSHIP_CALCULATOR):
             return settings.ORDER_OWNERSHIP_CALCULATOR
         return import_string(  # type:ignore[no-any-return]
             settings.ORDER_OWNERSHIP_CALCULATOR
@@ -424,7 +424,7 @@ class CheckoutSerializer(OscarCheckoutSerializer):
         # Payment amounts specified must not be more than the order total
         posted_total = Decimal("0.00")
         methods = {k: v for k, v in data["payment"].items() if v["enabled"] and not v["pay_balance"]}
-        for code, method in methods.items():
+        for method in methods.values():
             posted_total += method["amount"]
 
         if posted_total > data["total"].incl_tax:

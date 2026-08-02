@@ -46,12 +46,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("10.00"),
-                    debited=D("10.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("10.00"),
+                    "debited": D("10.00"),
+                },
             ],
         )
 
@@ -81,12 +81,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Pay Later",
-                    reference="",
-                    allocated=D("0.00"),
-                    debited=D("0.00"),
-                ),
+                {
+                    "source_name": "Pay Later",
+                    "reference": "",
+                    "allocated": D("0.00"),
+                    "debited": D("0.00"),
+                },
             ],
         )
 
@@ -116,18 +116,18 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Pay Later",
-                    reference="",
-                    allocated=D("0.00"),
-                    debited=D("0.00"),
-                ),
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("10.00"),
-                    debited=D("10.00"),
-                ),
+                {
+                    "source_name": "Pay Later",
+                    "reference": "",
+                    "allocated": D("0.00"),
+                    "debited": D("0.00"),
+                },
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("10.00"),
+                    "debited": D("10.00"),
+                },
             ],
         )
 
@@ -229,12 +229,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("10.00"),
-                    debited=D("10.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("10.00"),
+                    "debited": D("10.00"),
+                },
             ],
         )
 
@@ -290,12 +290,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("5.00"),
-                    debited=D("5.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("5.00"),
+                    "debited": D("5.00"),
+                },
             ],
         )
 
@@ -447,7 +447,7 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(source_name="Cash", reference=""),
+                {"source_name": "Cash", "reference": ""},
             ],
         )
 
@@ -512,11 +512,11 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("10.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("10.00"),
+                },
             ],
         )
 
@@ -534,11 +534,11 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("10.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("10.00"),
+                },
             ],
         )
 
@@ -641,12 +641,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("2.00"),
-                    debited=D("2.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("2.00"),
+                    "debited": D("2.00"),
+                },
             ],
         )
 
@@ -657,12 +657,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("2.00"),
-                    debited=D("2.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("2.00"),
+                    "debited": D("2.00"),
+                },
             ],
         )
 
@@ -689,12 +689,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("2.00"),
-                    debited=D("2.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("2.00"),
+                    "debited": D("2.00"),
+                },
             ],
         )
 
@@ -710,17 +710,17 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("2.00"),
-                    debited=D("2.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("8.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("2.00"),
+                    "debited": D("2.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("8.00"),
+                },
             ],
         )
 
@@ -744,17 +744,17 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("2.00"),
-                    debited=D("2.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("8.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("2.00"),
+                    "debited": D("2.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("8.00"),
+                },
             ],
         )
 
@@ -851,11 +851,11 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("3.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("3.00"),
+                },
             ],
         )
 
@@ -888,11 +888,11 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("3.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("3.00"),
+                },
             ],
         )
 
@@ -940,16 +940,16 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("3.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="2f558605-c348-401e-9bdb-976658fb739c",
-                    allocated=D("7.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("3.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "2f558605-c348-401e-9bdb-976658fb739c",
+                    "allocated": D("7.00"),
+                },
             ],
         )
 
@@ -1075,11 +1075,11 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("3.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("3.00"),
+                },
             ],
         )
 
@@ -1112,11 +1112,11 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("3.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("3.00"),
+                },
             ],
         )
 
@@ -1165,16 +1165,16 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("3.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="2f558605-c348-401e-9bdb-976658fb739c",
-                    allocated=D("0.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("3.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "2f558605-c348-401e-9bdb-976658fb739c",
+                    "allocated": D("0.00"),
+                },
             ],
         )
 
@@ -1295,21 +1295,21 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("3.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="2f558605-c348-401e-9bdb-976658fb739c",
-                    allocated=D("0.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="ae7736fb-9f64-48f1-9631-a91764b2d63a",
-                    allocated=D("7.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("3.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "2f558605-c348-401e-9bdb-976658fb739c",
+                    "allocated": D("0.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "ae7736fb-9f64-48f1-9631-a91764b2d63a",
+                    "allocated": D("7.00"),
+                },
             ],
         )
 
@@ -1481,11 +1481,11 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("3.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("3.00"),
+                },
             ],
         )
 
@@ -1518,11 +1518,11 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("3.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("3.00"),
+                },
             ],
         )
 
@@ -1571,16 +1571,16 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("3.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
-                    allocated=D("0.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("3.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
+                    "allocated": D("0.00"),
+                },
             ],
         )
 
@@ -1660,16 +1660,16 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("0.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
-                    allocated=D("0.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("0.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
+                    "allocated": D("0.00"),
+                },
             ],
         )
 
@@ -1707,16 +1707,16 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("0.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
-                    allocated=D("0.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("0.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
+                    "allocated": D("0.00"),
+                },
             ],
         )
 
@@ -1732,21 +1732,21 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("0.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
-                    allocated=D("0.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="a4887268-a9ab-4a18-80c9-4ab6096c20cf",
-                    allocated=D("4.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("0.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
+                    "allocated": D("0.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "a4887268-a9ab-4a18-80c9-4ab6096c20cf",
+                    "allocated": D("4.00"),
+                },
             ],
         )
 
@@ -1779,21 +1779,21 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("0.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
-                    allocated=D("0.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="a4887268-a9ab-4a18-80c9-4ab6096c20cf",
-                    allocated=D("4.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("0.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
+                    "allocated": D("0.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "a4887268-a9ab-4a18-80c9-4ab6096c20cf",
+                    "allocated": D("4.00"),
+                },
             ],
         )
 
@@ -1841,26 +1841,26 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("0.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
-                    allocated=D("0.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="a4887268-a9ab-4a18-80c9-4ab6096c20cf",
-                    allocated=D("4.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="43b54d03-5768-48d7-8126-947b0bce21a1",
-                    allocated=D("6.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("0.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
+                    "allocated": D("0.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "a4887268-a9ab-4a18-80c9-4ab6096c20cf",
+                    "allocated": D("4.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "43b54d03-5768-48d7-8126-947b0bce21a1",
+                    "allocated": D("6.00"),
+                },
             ],
         )
 
@@ -2032,11 +2032,11 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("3.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("3.00"),
+                },
             ],
         )
 
@@ -2069,11 +2069,11 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("3.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("3.00"),
+                },
             ],
         )
 
@@ -2122,16 +2122,16 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("3.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
-                    allocated=D("0.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("3.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
+                    "allocated": D("0.00"),
+                },
             ],
         )
 
@@ -2196,16 +2196,16 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("0.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
-                    allocated=D("0.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("0.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
+                    "allocated": D("0.00"),
+                },
             ],
         )
 
@@ -2234,16 +2234,16 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("0.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
-                    allocated=D("0.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("0.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
+                    "allocated": D("0.00"),
+                },
             ],
         )
 
@@ -2259,21 +2259,21 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("0.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
-                    allocated=D("0.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="a4887268-a9ab-4a18-80c9-4ab6096c20cf",
-                    allocated=D("10.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("0.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
+                    "allocated": D("0.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "a4887268-a9ab-4a18-80c9-4ab6096c20cf",
+                    "allocated": D("10.00"),
+                },
             ],
         )
 
@@ -2297,21 +2297,21 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("0.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
-                    allocated=D("0.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="a4887268-a9ab-4a18-80c9-4ab6096c20cf",
-                    allocated=D("10.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("0.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "2e125bdb-1f6f-48cd-9353-bc2b8411a1f9",
+                    "allocated": D("0.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "a4887268-a9ab-4a18-80c9-4ab6096c20cf",
+                    "allocated": D("10.00"),
+                },
             ],
         )
 
@@ -2392,12 +2392,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp1.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("10.00"),
-                    debited=D("10.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("10.00"),
+                    "debited": D("10.00"),
+                },
             ],
         )
 
@@ -2409,12 +2409,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp1.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("10.00"),
-                    debited=D("10.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("10.00"),
+                    "debited": D("10.00"),
+                },
             ],
         )
 
@@ -2438,12 +2438,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp1.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("10.00"),
-                    debited=D("10.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("10.00"),
+                    "debited": D("10.00"),
+                },
             ],
         )
 
@@ -2497,12 +2497,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp2.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("12.75"),
-                    debited=D("12.75"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("12.75"),
+                    "debited": D("12.75"),
+                },
             ],
         )
 
@@ -2513,12 +2513,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp2.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("12.75"),
-                    debited=D("12.75"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("12.75"),
+                    "debited": D("12.75"),
+                },
             ],
         )
 
@@ -2545,12 +2545,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp2.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("12.75"),
-                    debited=D("12.75"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("12.75"),
+                    "debited": D("12.75"),
+                },
             ],
         )
 
@@ -2566,17 +2566,17 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp2.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("12.75"),
-                    debited=D("12.75"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("17.25"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("12.75"),
+                    "debited": D("12.75"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("17.25"),
+                },
             ],
         )
 
@@ -2600,17 +2600,17 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp2.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("12.75"),
-                    debited=D("12.75"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("17.25"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("12.75"),
+                    "debited": D("12.75"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("17.25"),
+                },
             ],
         )
 
@@ -2702,12 +2702,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp1.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("20.00"),
-                    debited=D("20.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("20.00"),
+                    "debited": D("20.00"),
+                },
             ],
         )
 
@@ -2732,12 +2732,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp1.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("10.00"),
-                    debited=D("10.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("10.00"),
+                    "debited": D("10.00"),
+                },
             ],
         )
 
@@ -2771,12 +2771,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp1.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("10.00"),
-                    debited=D("10.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("10.00"),
+                    "debited": D("10.00"),
+                },
             ],
         )
 
@@ -2875,12 +2875,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp1.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("10.00"),
-                    debited=D("10.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("10.00"),
+                    "debited": D("10.00"),
+                },
             ],
         )
         order = Order.objects.get(number=order_resp1.data["number"])
@@ -2901,12 +2901,12 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp2.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("10.00"),
-                    debited=D("10.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("10.00"),
+                    "debited": D("10.00"),
+                },
             ],
         )
         order = Order.objects.get(number=order_resp2.data["number"])
@@ -3065,11 +3065,11 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("5.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("5.00"),
+                },
             ],
         )
 
@@ -3283,16 +3283,16 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_number2,
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
-                    allocated=D("0.00"),
-                ),
-                dict(
-                    source_name="Credit Card",
-                    reference="edd1e904-0bd5-45b5-940f-36ce27fa6929",
-                    allocated=D("5.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("0.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "edd1e904-0bd5-45b5-940f-36ce27fa6929",
+                    "allocated": D("5.00"),
+                },
             ],
         )
 
@@ -3537,13 +3537,13 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(source.amount_debited, debited)
         self.assertEqual(source.amount_refunded, refunded)
 
-    def _do_payment_step_form_post(self, required_action, extra={}):
+    def _do_payment_step_form_post(self, required_action, extra=None):
         method = required_action["method"].lower()
         url = required_action["url"]
 
         fields = required_action["fields"]
         fields = {field["key"]: field["value"] for field in fields}
-        fields.update(extra)
+        fields.update(extra or {})
 
         resp = getattr(self.client, method)(url, fields)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -3616,9 +3616,9 @@ class CheckoutAPITest(BaseTest):
         url = reverse("api-complete-deferred-payment")
         return self.client.post(url, data, format="json")
 
-    def _do_client_side_payment_complete(self, required_action, extra={}):
+    def _do_client_side_payment_complete(self, required_action, extra=None):
         data = dict(required_action["data"])
-        data.update(extra)
+        data.update(extra or {})
         url = reverse("clientside-complete")
         resp = self.client.post(url, data)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
@@ -3674,11 +3674,11 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Client-Side Card",
-                    reference="tok_success_abc123",
-                    allocated=D("10.00"),
-                ),
+                {
+                    "source_name": "Client-Side Card",
+                    "reference": "tok_success_abc123",
+                    "allocated": D("10.00"),
+                },
             ],
         )
 
@@ -3765,17 +3765,17 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Cash",
-                    reference="",
-                    allocated=D("2.00"),
-                    debited=D("2.00"),
-                ),
-                dict(
-                    source_name="Client-Side Card",
-                    reference="tok_split_abc",
-                    allocated=D("8.00"),
-                ),
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("2.00"),
+                    "debited": D("2.00"),
+                },
+                {
+                    "source_name": "Client-Side Card",
+                    "reference": "tok_split_abc",
+                    "allocated": D("8.00"),
+                },
             ],
         )
 
@@ -3838,16 +3838,16 @@ class CheckoutAPITest(BaseTest):
         self.assertPaymentSources(
             order_resp.data["number"],
             sources=[
-                dict(
-                    source_name="Credit Card",
-                    reference="cc-uuid-12345",
-                    allocated=D("5.00"),
-                ),
-                dict(
-                    source_name="Client-Side Card",
-                    reference="tok_mixed_456",
-                    allocated=D("5.00"),
-                ),
+                {
+                    "source_name": "Credit Card",
+                    "reference": "cc-uuid-12345",
+                    "allocated": D("5.00"),
+                },
+                {
+                    "source_name": "Client-Side Card",
+                    "reference": "tok_mixed_456",
+                    "allocated": D("5.00"),
+                },
             ],
         )
 

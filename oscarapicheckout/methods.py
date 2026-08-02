@@ -33,7 +33,7 @@ class PaymentMethodData(TypedDict):
 
 
 class PaymentMethodSerializer[T: PaymentMethodData](serializers.Serializer[Any]):
-    method_type = serializers.ChoiceField(choices=tuple())
+    method_type = serializers.ChoiceField(choices=())
     enabled = serializers.BooleanField(default=False)
     pay_balance = serializers.BooleanField(default=True)
     amount = serializers.DecimalField(decimal_places=2, max_digits=12, required=False)
@@ -42,11 +42,11 @@ class PaymentMethodSerializer[T: PaymentMethodData](serializers.Serializer[Any])
     def __init__(
         self,
         *args: Any,
-        method_type_choices: list[tuple[str, str]] = list(),
+        method_type_choices: list[tuple[str, str]] | None = None,
         **kwargs: Any,
     ):
         super().__init__(*args, **kwargs)
-        self.fields["method_type"] = serializers.ChoiceField(choices=method_type_choices)
+        self.fields["method_type"] = serializers.ChoiceField(choices=method_type_choices or [])
 
     def validate(self, data: T) -> T:
         if not data["enabled"]:
@@ -72,7 +72,7 @@ class PaymentMethod[T: PaymentMethodData]:
         amount: Decimal,
         reference: str = "",
     ) -> PaymentEvent:
-        etype, created = PaymentEventType.objects.get_or_create(name=type_name)
+        etype, _created = PaymentEventType.objects.get_or_create(name=type_name)
         event = PaymentEvent()
         event.order = order
         event.amount = amount
@@ -133,8 +133,8 @@ class PaymentMethod[T: PaymentMethodData]:
         order: Order,
         reference: str = "",
     ) -> Source:
-        stype, created = SourceType.objects.get_or_create(name=self.name)
-        source, created = Source.objects.get_or_create(order=order, source_type=stype, reference=reference)
+        stype, _created = SourceType.objects.get_or_create(name=self.name)
+        source, _created = Source.objects.get_or_create(order=order, source_type=stype, reference=reference)
         source.currency = order.currency
         source.save()
         return source

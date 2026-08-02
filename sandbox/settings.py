@@ -1,7 +1,7 @@
 import os
 
 from django.utils.translation import gettext_lazy as _
-from oscar.defaults import *  # noqa
+from oscar.defaults import *
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
