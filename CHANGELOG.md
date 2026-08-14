@@ -1,5 +1,16 @@
 # Changes
 
+## v3.10.0 (2026-08-14)
+
+### Feat
+
+- support django-oscar 4.2
+
+### Fix
+
+- **deps**: update dependency django-oscar to >=4.2,<4.3
+- **deps**: update dependency django-oscar to >=4.2,<4.3
+
 ## v3.9.1 (2026-07-01)
 
 ### Fix
