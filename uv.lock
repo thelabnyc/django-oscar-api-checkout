@@ -9,7 +9,7 @@ resolution-markers = [
 [[package]]
 name = "alabaster"
 version = "1.0.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a6/f8/d9c74d0daf3f742840fd818d69cfae176fa332022fd44e3469487d5a9420/alabaster-1.0.0.tar.gz", hash = "sha256:c00dca57bca26fa62a6d7d0a9fcce65f3e026e9bfe33e9c538fd3fbb2144fd9e", size = 24210, upload-time = "2024-07-26T18:15:03.762Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7e/b3/6b4067be973ae96ba0d615946e314c5ae35f9f993eca561b356540bb0c2b/alabaster-1.0.0-py3-none-any.whl", hash = "sha256:fc6786402dc3fcb2de3cabd5fe455a2db534b371124f1f21de8731783dec828b", size = 13929, upload-time = "2024-07-26T18:15:02.05Z" },
@@ -18,7 +18,7 @@ wheels = [
 [[package]]
 name = "asgiref"
 version = "3.12.1"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e6/26/3b59f2bdae5f640389becb1f673cded775287f5fc4f816309d9ca9a3f93d/asgiref-3.12.1.tar.gz", hash = "sha256:59dcb51c272ad209d59bed5708a64a333083e86017d7fcdd67498eeab7784340", size = 42378, upload-time = "2026-07-14T09:56:18.087Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c0/1b/54f4ad77cd8a584fa70746c47df988e002cf1ee1eba43364d46f87803647/asgiref-3.12.1-py3-none-any.whl", hash = "sha256:fe386d1c2bff7259ea95929266d12a8cf9a8b5a1c2598402967d8792e7a7c094", size = 25478, upload-time = "2026-07-14T09:56:16.926Z" },
@@ -27,7 +27,7 @@ wheels = [
 [[package]]
 name = "babel"
 version = "2.18.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/7d/b2/51899539b6ceeeb420d40ed3cd4b7a40519404f9baf3d4ac99dc413a834b/babel-2.18.0.tar.gz", hash = "sha256:b80b99a14bd085fcacfa15c9165f651fbb3406e66cc603abf11c5750937c992d", size = 9959554, upload-time = "2026-02-01T12:30:56.078Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/77/f5/21d2de20e8b8b0408f0681956ca2c69f1320a3848ac50e6e7f39c6159675/babel-2.18.0-py3-none-any.whl", hash = "sha256:e2b422b277c2b9a9630c1d7903c2a00d0830c409c59ac8cae9081c92f1aeba35", size = 10196845, upload-time = "2026-02-01T12:30:53.445Z" },
@@ -36,7 +36,7 @@ wheels = [
 [[package]]
 name = "cachetools"
 version = "7.1.7"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/70/d2/47e8bc06fe2a06d3f5bdf20f1126ab66c4e99dc48d940e7ba873f7ac7131/cachetools-7.1.7.tar.gz", hash = "sha256:a3e2a00b14d8f8a6b70c1dae7b4685e7ad3bc965c5b42124a2d6ce895da6cf50", size = 40680, upload-time = "2026-08-01T21:20:40.434Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e4/d8/767faeda872075724b95dd675466a645f1b92aadcdcf2d1429dcfd76c176/cachetools-7.1.7-py3-none-any.whl", hash = "sha256:ef98ef375ad188819ef2f9b3645e3987f4b8c5b7550e436ad998c2de78296df0", size = 16830, upload-time = "2026-08-01T21:20:38.977Z" },
@@ -45,7 +45,7 @@ wheels = [
 [[package]]
 name = "certifi"
 version = "2026.7.22"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a3/c2/24167ea9858356b47a87a50d39908bfdb72ceeefe0041586e704e5376b3a/certifi-2026.7.22.tar.gz", hash = "sha256:741e2c3b351ddf169a738da9f2c048608ff7f2c5cc02f1ebc6b118bb090d5d55", size = 138112, upload-time = "2026-07-22T03:35:12.644Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0b/a7/71ac2cff56fec219ed242bb11b8efb69fcc4bec75db06fb7bfe35de520e6/certifi-2026.7.22-py3-none-any.whl", hash = "sha256:62f22742b58a1a33014a2b6b706588a8d7e2a88ae7bd1a6ebe8c992928483775", size = 136983, upload-time = "2026-07-22T03:35:11.276Z" },
@@ -54,7 +54,7 @@ wheels = [
 [[package]]
 name = "charset-normalizer"
 version = "3.4.9"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/bd/2a/23f34ec9d04624958e137efdc394888716353190e75f25dd22c7a2c7a8aa/charset_normalizer-3.4.9.tar.gz", hash = "sha256:673611bbd43f0810bec0b0f028ddeaaa501190339cac411f347ac76917c3ae7b", size = 152439, upload-time = "2026-07-07T14:34:58.454Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/70/4a/ecbd131485c07fcdfad54e28946d513e3da22ef3b4bd854dcafae54ec739/charset_normalizer-3.4.9-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:45b0cc4e3556cd875e09102988d1ab8356c998b596c9fced84547c8138b487a0", size = 319300, upload-time = "2026-07-07T14:33:15.666Z" },
@@ -115,7 +115,7 @@ wheels = [
 [[package]]
 name = "colorama"
 version = "0.4.6"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d8/53/6f443c9a4a8358a93a6792e2acffb9d9d5cb0a5cfd8802644b7b1c9a02e4/colorama-0.4.6.tar.gz", hash = "sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44", size = 27697, upload-time = "2022-10-25T02:36:22.414Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d1/d6/3965ed04c63042e047cb6a3e6ed1a63a35087b6a609aa3a15ed8ac56c221/colorama-0.4.6-py2.py3-none-any.whl", hash = "sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6", size = 25335, upload-time = "2022-10-25T02:36:20.889Z" },
@@ -124,7 +124,7 @@ wheels = [
 [[package]]
 name = "coverage"
 version = "7.15.4"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/be/c3/4f2195f512fb172aa425a8803a874b2baa9ba7f80ff7b6080998761fc701/coverage-7.15.4.tar.gz", hash = "sha256:0548198fff07ccf4faf469520bce1c2eceb1ce3e62891921138dec10907f9d00", size = 936952, upload-time = "2026-08-06T13:50:24.442Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1d/48/bc8d4ba7b37551a767bd863f15b3f80182b271c2f55975356f5f7dbe94c2/coverage-7.15.4-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:d4fedd1f7f428f9fe83b1ead5e7cc87a43427be31aadafbac3ac0636dc7abb22", size = 222543, upload-time = "2026-08-06T13:47:37.562Z" },
@@ -223,7 +223,7 @@ wheels = [
 [[package]]
 name = "distlib"
 version = "0.4.3"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/c9/02/bd72be9134d25ed783ecbbc38a539ffaefbf90c78418c7fb7229600dbac7/distlib-0.4.3.tar.gz", hash = "sha256:f152097224a0ae24be5a0f6bae1b9359af82133bce63f98a95f86cae1aede9ed", size = 615141, upload-time = "2026-06-12T08:04:52.847Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/02/08/9c41fb51ab5b43eb21674aff13df270e8ba6c4b29c8624e328dc7a9482af/distlib-0.4.3-py2.py3-none-any.whl", hash = "sha256:4b0ce306c966eb73bc3a7b6abad017c556dadd92c44701562cd528ac7fde4d5b", size = 470628, upload-time = "2026-06-12T08:04:50.506Z" },
@@ -232,7 +232,7 @@ wheels = [
 [[package]]
 name = "django"
 version = "5.2.17"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "asgiref" },
     { name = "sqlparse" },
@@ -246,7 +246,7 @@ wheels = [
 [[package]]
 name = "django-extra-views"
 version = "0.16.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "django" },
 ]
@@ -258,7 +258,7 @@ wheels = [
 [[package]]
 name = "django-haystack"
 version = "3.4.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "django" },
     { name = "packaging" },
@@ -268,7 +268,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/08/00/2fee5c12b650bbc64
 [[package]]
 name = "django-ipware"
 version = "7.0.1"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "python-ipware" },
 ]
@@ -279,8 +279,8 @@ wheels = [
 
 [[package]]
 name = "django-oscar"
-version = "4.1"
-source = { registry = "https://pypi.org/simple" }
+version = "4.2"
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "babel" },
     { name = "django" },
@@ -295,15 +295,15 @@ dependencies = [
     { name = "pillow" },
     { name = "purl" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9b/66/597e7404b1f205c0c53632b10c7e49f4971a690856cda929e85513b42eb9/django_oscar-4.1.tar.gz", hash = "sha256:b240584d147364064852fa254a4c76707a023feb25334af97574dac7f874b2bd", size = 8804339, upload-time = "2025-10-29T11:52:16.389Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/23/66/5bc93cfb2e2e1f6864294b565853bbd53ccfcacb33cec2849cab6cd03052/django_oscar-4.2.tar.gz", hash = "sha256:3726cebad8cfc98bab51a00b3c4e9e01ee9fd22e6db7f00ce2ce76bcbf5ec39c", size = 8439780, upload-time = "2026-08-05T14:33:09.262Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/eb/dd/de1e3e241d6e94d43234158e8470d82154a50a458e52f0c977d67eb91578/django_oscar-4.1-py3-none-any.whl", hash = "sha256:2bcec90f17e8b208d6e9f11dd021884c26bf3db112c7de17adacb7be3265cab6", size = 9346095, upload-time = "2025-10-29T11:52:12.072Z" },
+    { url = "https://files.pythonhosted.org/packages/c9/b4/3b4644425517a6105b85f4544d9a583c87dd9bb542e3ba676812ca4de46c/django_oscar-4.2-py3-none-any.whl", hash = "sha256:048cab7c251b8823d7d5f648e4733ae1dd553a8e62f412d6b00c83da4b87d3b2", size = 8983531, upload-time = "2026-08-05T14:13:36.774Z" },
 ]
 
 [[package]]
 name = "django-oscar-api"
 version = "3.3.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "django" },
     { name = "django-oscar" },
@@ -347,7 +347,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "django", specifier = ">=5.2" },
-    { name = "django-oscar", specifier = ">=4.0,<4.3" },
+    { name = "django-oscar", specifier = ">=4.2,<4.3" },
     { name = "django-oscar-api", specifier = "==3.3.0" },
     { name = "drf-recaptcha", specifier = ">=4.0.3,<5" },
 ]
@@ -355,8 +355,8 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "coverage", specifier = "==7.15.4" },
-    { name = "django-oscar-stubs", specifier = ">=4.1.0b6" },
-    { name = "django-stubs", specifier = "==6.0.7" },
+    { name = "django-oscar-stubs", specifier = ">=4.2.0b0" },
+    { name = "django-stubs", specifier = "==6.1.0" },
     { name = "djangorestframework-stubs", specifier = "==3.17.1" },
     { name = "mypy", specifier = "==1.20.2" },
     { name = "psycopg2-binary", specifier = "==2.9.12" },
@@ -372,22 +372,22 @@ dev = [
 
 [[package]]
 name = "django-oscar-stubs"
-version = "4.1.0b6"
-source = { registry = "https://pypi.org/simple" }
+version = "4.2.0b0"
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "django-oscar" },
     { name = "django-stubs" },
     { name = "django-treebeard-stubs" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d1/17/095ee66604489546e5ee1d29ccdb0253c4481a8fb99be3d1501fd4156904/django_oscar_stubs-4.1.0b6.tar.gz", hash = "sha256:535c960cc5e4dac70000117f50b0c0d225fe41b1648792e6fc8334729a4c90fd", size = 134490, upload-time = "2026-03-22T02:13:24.874Z" }
+sdist = { url = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/files/1a8c7171d016b6b5ba573cafb6248d6a34cc83b293c4bde9b656c4bdf36ffc64/django_oscar_stubs-4.2.0b0.tar.gz", hash = "sha256:1a8c7171d016b6b5ba573cafb6248d6a34cc83b293c4bde9b656c4bdf36ffc64" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0b/e8/2fd5c0e6872b6de9956dec9da32866d73e722efa72dc1d95a19c60056902/django_oscar_stubs-4.1.0b6-py3-none-any.whl", hash = "sha256:0190fdeb4eaae1ebdd344385706b6ff935493e58100e5915f7c4d3a2e8a7a2b1", size = 133802, upload-time = "2026-03-22T02:13:23.678Z" },
+    { url = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/files/9b295363944e915c1305d7d89074ca5aa5baa990b628b019782e2bd127e83789/django_oscar_stubs-4.2.0b0-py3-none-any.whl", hash = "sha256:9b295363944e915c1305d7d89074ca5aa5baa990b628b019782e2bd127e83789" },
 ]
 
 [[package]]
 name = "django-phonenumber-field"
 version = "8.5.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "django" },
 ]
@@ -398,23 +398,23 @@ wheels = [
 
 [[package]]
 name = "django-stubs"
-version = "6.0.7"
-source = { registry = "https://pypi.org/simple" }
+version = "6.1.0"
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "django" },
     { name = "django-stubs-ext" },
     { name = "types-pyyaml" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/8a/90/087c6e424e705e05182e543ef6b366a59eb5c92ab008b0dbbba55f357a40/django_stubs-6.0.7.tar.gz", hash = "sha256:bc55431c0af745a64e39cf33a8d36c87dccbedeae2fe26fab47dd355270e8538", size = 282293, upload-time = "2026-07-14T10:08:27.122Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/65/34/e9f03764b32f56c02168814385ddc6d0e49a7b3e4381e8e3f6f5f34f39ff/django_stubs-6.1.0.tar.gz", hash = "sha256:b6aecc5c738a103135f76ba160a6f75e3b27dcf0200c64d7226018cdbc2340dd", size = 293018, upload-time = "2026-08-12T10:55:28.817Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/02/86/230ae6056221b543d63f7710d73967fe1c6840693540e99ea3c54f45859c/django_stubs-6.0.7-py3-none-any.whl", hash = "sha256:7ed9a14c438e589272ca04e966dee82a4d1ff7ca5c2171bc986c50a0d03ec35b", size = 547460, upload-time = "2026-07-14T10:08:25.626Z" },
+    { url = "https://files.pythonhosted.org/packages/a8/cf/064d7c48642309f3397b17ff14f3159c5225eb9321185a10039c0e846848/django_stubs-6.1.0-py3-none-any.whl", hash = "sha256:63b23ccca2616d464ed7e37d1ce44960315cb3cecab75b23c928467ef125e560", size = 557040, upload-time = "2026-08-12T10:55:26.959Z" },
 ]
 
 [[package]]
 name = "django-stubs-ext"
 version = "6.0.9"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "django" },
     { name = "typing-extensions" },
@@ -427,7 +427,7 @@ wheels = [
 [[package]]
 name = "django-tables2"
 version = "2.7.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "django" },
 ]
@@ -439,7 +439,7 @@ wheels = [
 [[package]]
 name = "django-treebeard"
 version = "5.1.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "django" },
 ]
@@ -451,20 +451,20 @@ wheels = [
 [[package]]
 name = "django-treebeard-stubs"
 version = "5.1.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "django-stubs" },
     { name = "django-treebeard" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c3/70/086a08ef1c47932d35900532d5dc00b1afdd9011fa48b97076512811b29a/django_treebeard_stubs-5.1.0.tar.gz", hash = "sha256:e50e42c50381aa2bb3793659a9b701c2e573f215ffa116252a81302c745cfada", size = 55138, upload-time = "2026-05-20T22:08:45.05Z" }
+sdist = { url = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/files/e50e42c50381aa2bb3793659a9b701c2e573f215ffa116252a81302c745cfada/django_treebeard_stubs-5.1.0.tar.gz", hash = "sha256:e50e42c50381aa2bb3793659a9b701c2e573f215ffa116252a81302c745cfada" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6d/8e/44daeda1235b268b90bafdf1b5f45fcb41c74d828a542a86bb696da9ca83/django_treebeard_stubs-5.1.0-py3-none-any.whl", hash = "sha256:69bfa89a300341f7a1c78cbd395da2d00ec14db84b64aea360ba2993be32551f", size = 11637, upload-time = "2026-05-20T22:08:43.586Z" },
+    { url = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/files/69bfa89a300341f7a1c78cbd395da2d00ec14db84b64aea360ba2993be32551f/django_treebeard_stubs-5.1.0-py3-none-any.whl", hash = "sha256:69bfa89a300341f7a1c78cbd395da2d00ec14db84b64aea360ba2993be32551f" },
 ]
 
 [[package]]
 name = "django-widget-tweaks"
 version = "1.5.1"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "django" },
 ]
@@ -476,7 +476,7 @@ wheels = [
 [[package]]
 name = "djangorestframework"
 version = "3.18.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "django" },
 ]
@@ -488,7 +488,7 @@ wheels = [
 [[package]]
 name = "djangorestframework-stubs"
 version = "3.17.1"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "django-stubs" },
     { name = "types-pyyaml" },
@@ -502,7 +502,7 @@ wheels = [
 [[package]]
 name = "docutils"
 version = "0.22.4"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ae/b6/03bb70946330e88ffec97aefd3ea75ba575cb2e762061e0e62a213befee8/docutils-0.22.4.tar.gz", hash = "sha256:4db53b1fde9abecbb74d91230d32ab626d94f6badfc575d6db9194a49df29968", size = 2291750, upload-time = "2025-12-18T19:00:26.443Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/02/10/5da547df7a391dcde17f59520a231527b8571e6f46fc8efb02ccb370ab12/docutils-0.22.4-py3-none-any.whl", hash = "sha256:d0013f540772d1420576855455d050a2180186c91c15779301ac2ccb3eeb68de", size = 633196, upload-time = "2025-12-18T19:00:18.077Z" },
@@ -511,7 +511,7 @@ wheels = [
 [[package]]
 name = "drf-recaptcha"
 version = "4.0.3"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "django" },
     { name = "django-ipware" },
@@ -525,7 +525,7 @@ wheels = [
 [[package]]
 name = "factory-boy"
 version = "3.3.3"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "faker" },
 ]
@@ -537,7 +537,7 @@ wheels = [
 [[package]]
 name = "faker"
 version = "40.36.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "tzdata", marker = "sys_platform == 'win32'" },
 ]
@@ -549,7 +549,7 @@ wheels = [
 [[package]]
 name = "filelock"
 version = "3.32.2"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f6/57/3ba6e6cb097f85b855b00163d169f35365f44277df044dcf96d55b8f62a3/filelock-3.32.2.tar.gz", hash = "sha256:c33351e1f49cae33414acbc6d56784e6ecee82514ec90795da1161fc4836b5b8", size = 217172, upload-time = "2026-07-29T22:46:04.895Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c1/e8/72f8cef9fdfeffe06213fe8508039396ee48daa0e3259457ed766173bfd6/filelock-3.32.2-py3-none-any.whl", hash = "sha256:87dd94cf281e586d135fa51132b8e3d9a598b316e90377a288663c9321036c82", size = 98830, upload-time = "2026-07-29T22:46:03.52Z" },
@@ -558,7 +558,7 @@ wheels = [
 [[package]]
 name = "idna"
 version = "3.18"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/cd/63/9496c57188a2ee585e0f1db071d75089a11e98aa86eb99d9d7618fc1edce/idna-3.18.tar.gz", hash = "sha256:ffb385a7e039654cef1ab9ef32c6fafe283c0c0467bba1d9029738ce4a14a848", size = 196711, upload-time = "2026-06-02T14:34:07.794Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/1e/5e/d4e9f1a599fb8e573b7b87160658329fbf28d19eac2718f51fc3def3aa5a/idna-3.18-py3-none-any.whl", hash = "sha256:7f952cbe720b688055e3f87de14f5c3e5fdaa8bc3928985c4077ca689de849a2", size = 65455, upload-time = "2026-06-02T14:34:06.319Z" },
@@ -567,7 +567,7 @@ wheels = [
 [[package]]
 name = "imagesize"
 version = "2.0.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/6c/e6/7bf14eeb8f8b7251141944835abd42eb20a658d89084b7e1f3e5fe394090/imagesize-2.0.0.tar.gz", hash = "sha256:8e8358c4a05c304f1fccf7ff96f036e7243a189e9e42e90851993c558cfe9ee3", size = 1773045, upload-time = "2026-03-03T14:18:29.941Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5f/53/fb7122b71361a0d121b669dcf3d31244ef75badbbb724af388948de543e2/imagesize-2.0.0-py2.py3-none-any.whl", hash = "sha256:5667c5bbb57ab3f1fa4bc366f4fbc971db3d5ed011fd2715fd8001f782718d96", size = 9441, upload-time = "2026-03-03T14:18:27.892Z" },
@@ -576,7 +576,7 @@ wheels = [
 [[package]]
 name = "jinja2"
 version = "3.1.6"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "markupsafe" },
 ]
@@ -588,7 +588,7 @@ wheels = [
 [[package]]
 name = "librt"
 version = "0.15.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/36/9b/356320fbae2ac8467e21c5e73e1389c80468e4998c62cc7d3536cc51b614/librt-0.15.0.tar.gz", hash = "sha256:4e66cbe84437497d951b799d3e1551291b6fb3d643820a7014b3655d57a59162", size = 214338, upload-time = "2026-08-07T10:49:42.663Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ba/39/99c25030e782bdfb7a21be8c05254806a2e4bbb05c8d50c2a2130acbfa05/librt-0.15.0-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:e87bc679f86a99aa3b26e3c78eeb821a247c9a28eae48eaafcc32c3bf4c3bb9e", size = 151021, upload-time = "2026-08-07T10:47:00.057Z" },
@@ -689,7 +689,7 @@ wheels = [
 [[package]]
 name = "lxml"
 version = "6.1.1"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/05/3b/aab6728cae887456f409b4d75e8a01856e4f04bd510de38052a47768b680/lxml-6.1.1.tar.gz", hash = "sha256:ba96ae44888e0185281e937633a743ea90d5a196c6000f82565ebb0580012d40", size = 4197430, upload-time = "2026-05-18T19:19:06.424Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/6a/6e/c4add832b6fc1e887125b96f880d7b9b70aae5248718e046b1704bcac4b9/lxml-6.1.1-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:104c09bda8d2a562824c0e319d0768ce26a779b7601e0931d33b09b53c392ef7", size = 8570821, upload-time = "2026-05-18T19:17:42.068Z" },
@@ -769,7 +769,7 @@ wheels = [
 [[package]]
 name = "markupsafe"
 version = "3.0.3"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/7e/99/7690b6d4034fffd95959cbe0c02de8deb3098cc577c67bb6a24fe5d7caa7/markupsafe-3.0.3.tar.gz", hash = "sha256:722695808f4b6457b320fdc131280796bdceb04ab50fe1795cd540799ebe1698", size = 80313, upload-time = "2025-09-27T18:37:40.426Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5a/72/147da192e38635ada20e0a2e1a51cf8823d2119ce8883f7053879c2199b5/markupsafe-3.0.3-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:d53197da72cc091b024dd97249dfc7794d6a56530370992a5e1a08983ad9230e", size = 11615, upload-time = "2025-09-27T18:36:30.854Z" },
@@ -832,7 +832,7 @@ wheels = [
 [[package]]
 name = "mypy"
 version = "1.20.2"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "librt", marker = "platform_python_implementation != 'PyPy'" },
     { name = "mypy-extensions" },
@@ -875,7 +875,7 @@ wheels = [
 [[package]]
 name = "mypy-extensions"
 version = "1.1.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a2/6e/371856a3fb9d31ca8dac321cda606860fa4548858c0cc45d9d1d4ca2628b/mypy_extensions-1.1.0.tar.gz", hash = "sha256:52e68efc3284861e772bbcd66823fde5ae21fd2fdb51c62a211403730b916558", size = 6343, upload-time = "2025-04-22T14:54:24.164Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/79/7b/2c79738432f5c924bef5071f933bcc9efd0473bac3b4aa584a6f7c1c8df8/mypy_extensions-1.1.0-py3-none-any.whl", hash = "sha256:1be4cccdb0f2482337c4743e60421de3a356cd97508abadd57d47403e94f5505", size = 4963, upload-time = "2025-04-22T14:54:22.983Z" },
@@ -884,7 +884,7 @@ wheels = [
 [[package]]
 name = "packaging"
 version = "26.3"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/7d/fa/3944b40b07da9ce895c0e6303a5ab7d53da063554f534556b134a54d6093/packaging-26.3.tar.gz", hash = "sha256:94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79", size = 313412, upload-time = "2026-08-04T18:15:28.737Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl", hash = "sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c", size = 129956, upload-time = "2026-08-04T18:15:27.159Z" },
@@ -893,7 +893,7 @@ wheels = [
 [[package]]
 name = "pathspec"
 version = "1.1.1"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/5a/82/42f767fc1c1143d6fd36efb827202a2d997a375e160a71eb2888a925aac1/pathspec-1.1.1.tar.gz", hash = "sha256:17db5ecd524104a120e173814c90367a96a98d07c45b2e10c2f3919fff91bf5a", size = 135180, upload-time = "2026-04-27T01:46:08.907Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f1/d9/7fb5aa316bc299258e68c73ba3bddbc499654a07f151cba08f6153988714/pathspec-1.1.1-py3-none-any.whl", hash = "sha256:a00ce642f577bf7f473932318056212bc4f8bfdf53128c78bbd5af0b9b20b189", size = 57328, upload-time = "2026-04-27T01:46:07.06Z" },
@@ -902,7 +902,7 @@ wheels = [
 [[package]]
 name = "phonenumbers"
 version = "9.0.36"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/0f/21/3f1561d3527b27121d6872aeecb6df2a8de8e11af9c36f5a0bd3483d2655/phonenumbers-9.0.36.tar.gz", hash = "sha256:60ca2a6870d2532d6e960105790e85e9d69270ede81746d10cf57f5e437b93ec", size = 2307271, upload-time = "2026-08-01T06:13:44.954Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/39/5d/74fbcb16b29927bf378f4ec4d47c7b48488b93e1f1af64b26544daf1d55f/phonenumbers-9.0.36-py2.py3-none-any.whl", hash = "sha256:c16a5b95178345ec2df1954578a4ac09e937443b2ee992dd7b15a8e8c81f4acf", size = 2595528, upload-time = "2026-08-01T06:13:41.591Z" },
@@ -911,7 +911,7 @@ wheels = [
 [[package]]
 name = "pillow"
 version = "12.3.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/1c/3d/bb7fca845737cf9d7dbde16ed1843984665ff2e0a518f5db43e77ec540b9/pillow-12.3.0.tar.gz", hash = "sha256:3b8182a766685eaa002637e28b4ec8d6b18819a0c71f579bf0dbaa5830297cce", size = 47025035, upload-time = "2026-07-01T11:56:38.965Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/37/bf/fb3ebff8ddcb76aac5a01389251bbbb9519922a9b520d8247c1ca864a25d/pillow-12.3.0-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:ba09209fbe443b4acccebe845d8a138b89a8f4fbaeedd44953490b5315d5e965", size = 5345969, upload-time = "2026-07-01T11:54:06.397Z" },
@@ -982,7 +982,7 @@ wheels = [
 [[package]]
 name = "platformdirs"
 version = "4.11.2"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/e5/98/0bf930c4f97d0266b58a89e36c015f56232c52b5d2f207215d48cca9e8f7/platformdirs-4.11.2.tar.gz", hash = "sha256:3a2ae5fca3520a01ab1be8b45613537f52ddf5b5f6f53d88233892dfbf0cd82d", size = 32716, upload-time = "2026-08-10T15:48:06.092Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/49/e2/4e6eee633809c376c024821b91ade709cbfd040ec53939ffbcc292aa7eee/platformdirs-4.11.2-py3-none-any.whl", hash = "sha256:7f89089b6ea71bda7962953edcf784b2e2d9d285b40ad88be2bb75c6e9d82ab4", size = 23361, upload-time = "2026-08-10T15:48:04.855Z" },
@@ -991,7 +991,7 @@ wheels = [
 [[package]]
 name = "pluggy"
 version = "1.6.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f9/e2/3e91f31a7d2b083fe6ef3fa267035b518369d9511ffab804f839851d2779/pluggy-1.6.0.tar.gz", hash = "sha256:7dcc130b76258d33b90f61b658791dede3486c3e6bfb003ee5c9bfb396dd22f3", size = 69412, upload-time = "2025-05-15T12:30:07.975Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/54/20/4d324d65cc6d9205fabedc306948156824eb9f0ee1633355a8f7ec5c66bf/pluggy-1.6.0-py3-none-any.whl", hash = "sha256:e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746", size = 20538, upload-time = "2025-05-15T12:30:06.134Z" },
@@ -1000,7 +1000,7 @@ wheels = [
 [[package]]
 name = "psycopg2-binary"
 version = "2.9.12"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/2a/60/a3624f79acea344c16fbef3a94d28b89a8042ddfb8f3e4ca83f538671409/psycopg2_binary-2.9.12.tar.gz", hash = "sha256:5ac9444edc768c02a6b6a591f070b8aae28ff3a99be57560ac996001580f294c", size = 379686, upload-time = "2026-04-21T09:40:34.304Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e2/9f/ef4ef3c8e15083df90ca35265cfd1a081a2f0cc07bb229c6314c6af817f4/psycopg2_binary-2.9.12-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:5cdc05117180c5fa9c40eea8ea559ce64d73824c39d928b7da9fb5f6a9392433", size = 3712459, upload-time = "2026-04-20T23:34:30.549Z" },
@@ -1041,7 +1041,7 @@ wheels = [
 [[package]]
 name = "purl"
 version = "1.6"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "six" },
 ]
@@ -1053,7 +1053,7 @@ wheels = [
 [[package]]
 name = "pygments"
 version = "2.20.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/c3/b2/bc9c9196916376152d655522fdcebac55e66de6603a76a02bca1b6414f6c/pygments-2.20.0.tar.gz", hash = "sha256:6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f", size = 4955991, upload-time = "2026-03-29T13:29:33.898Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f4/7e/a72dd26f3b0f4f2bf1dd8923c85f7ceb43172af56d63c7383eb62b332364/pygments-2.20.0-py3-none-any.whl", hash = "sha256:81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176", size = 1231151, upload-time = "2026-03-29T13:29:30.038Z" },
@@ -1062,7 +1062,7 @@ wheels = [
 [[package]]
 name = "pyproject-api"
 version = "1.11.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "packaging" },
 ]
@@ -1074,7 +1074,7 @@ wheels = [
 [[package]]
 name = "python-discovery"
 version = "1.5.1"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "filelock" },
 ]
@@ -1086,7 +1086,7 @@ wheels = [
 [[package]]
 name = "python-ipware"
 version = "3.0.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/9e/60/da4426c3e9aee56f08b24091a9e85a0414260f928f97afd0013dfbd0332f/python_ipware-3.0.0.tar.gz", hash = "sha256:9117b1c4dddcb5d5ca49e6a9617de2fc66aec2ef35394563ac4eecabdf58c062", size = 16609, upload-time = "2024-04-19T20:00:58.938Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/08/bd/ccd7416fdb30f104ddf6cfd8ee9f699441c7d9880a26f9b3089438adee05/python_ipware-3.0.0-py3-none-any.whl", hash = "sha256:fc936e6e7ec9fcc107f9315df40658f468ac72f739482a707181742882e36b60", size = 10761, upload-time = "2024-04-19T20:00:57.171Z" },
@@ -1095,7 +1095,7 @@ wheels = [
 [[package]]
 name = "pyyaml"
 version = "6.0.3"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/05/8e/961c0007c59b8dd7729d542c61a4d537767a59645b82a0b521206e1e25c2/pyyaml-6.0.3.tar.gz", hash = "sha256:d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f", size = 130960, upload-time = "2025-09-25T21:33:16.546Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d1/33/422b98d2195232ca1826284a76852ad5a86fe23e31b009c9886b2d0fb8b2/pyyaml-6.0.3-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:7f047e29dcae44602496db43be01ad42fc6f1cc0d8cd6c83d342306c32270196", size = 182063, upload-time = "2025-09-25T21:32:11.445Z" },
@@ -1141,7 +1141,7 @@ wheels = [
 [[package]]
 name = "requests"
 version = "2.34.2"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "certifi" },
     { name = "charset-normalizer" },
@@ -1156,7 +1156,7 @@ wheels = [
 [[package]]
 name = "roman-numerals"
 version = "4.1.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ae/f9/41dc953bbeb056c17d5f7a519f50fdf010bd0553be2d630bc69d1e022703/roman_numerals-4.1.0.tar.gz", hash = "sha256:1af8b147eb1405d5839e78aeb93131690495fe9da5c91856cb33ad55a7f1e5b2", size = 9077, upload-time = "2025-12-17T18:25:34.381Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/04/54/6f679c435d28e0a568d8e8a7c0a93a09010818634c3c3907fc98d8983770/roman_numerals-4.1.0-py3-none-any.whl", hash = "sha256:647ba99caddc2cc1e55a51e4360689115551bf4476d90e8162cf8c345fe233c7", size = 7676, upload-time = "2025-12-17T18:25:33.098Z" },
@@ -1165,7 +1165,7 @@ wheels = [
 [[package]]
 name = "ruff"
 version = "0.16.2"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/73/e1/4508a569211b35599016e84ba65c1a992b7a4004b4b6c4bea02a851cba1b/ruff-0.16.2.tar.gz", hash = "sha256:c3d7828d12e8927a6fc65fe38e2c2541b9e762d360a1786d752cb1b8883b3c9c", size = 4885811, upload-time = "2026-08-07T13:31:01.432Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/14/57/db19951540f98859c956b50bdb4d31089b4d91e9f15e2968e7d5193806d5/ruff-0.16.2-py3-none-linux_armv6l.whl", hash = "sha256:3c8de4cf2181f01d57946d87d777aa52916976fc09942aed89938fab5e013318", size = 10847925, upload-time = "2026-08-07T13:30:14.468Z" },
@@ -1190,7 +1190,7 @@ wheels = [
 [[package]]
 name = "setuptools"
 version = "84.0.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/6d/44/f5da03a8ef95d369145c5bb53050e7877c9f3d312e128605fd9504829143/setuptools-84.0.0.tar.gz", hash = "sha256:f4695c21257f0d9b537ec2692c941d02ee143b7cc1276941349a546573b2ef73", size = 1168449, upload-time = "2026-08-08T18:27:58.365Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/95/9c/c510029fc6ef33a6275cd2c5d3cecd6613dfd6aa401d57c54f1c18852ccf/setuptools-84.0.0-py3-none-any.whl", hash = "sha256:51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670", size = 818216, upload-time = "2026-08-08T18:27:56.719Z" },
@@ -1199,7 +1199,7 @@ wheels = [
 [[package]]
 name = "six"
 version = "1.17.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031, upload-time = "2024-12-04T17:35:28.174Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
@@ -1208,7 +1208,7 @@ wheels = [
 [[package]]
 name = "snowballstemmer"
 version = "3.1.1"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/43/f8/0a71edf031f03c40db17503cb8ca78a69a171254e568e7db241b0ab57ea1/snowballstemmer-3.1.1.tar.gz", hash = "sha256:e07bbc54a0d798fe6010a12398422e62a8bfbba95c394fd0956ef58cb4d3e260", size = 123314, upload-time = "2026-06-03T00:56:40.194Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/4c/07/2ebca9b11fb9be7340a818d8d6f63feaebb146be2c4afbd6061701d6df6e/snowballstemmer-3.1.1-py3-none-any.whl", hash = "sha256:7e207fa178741da09cdee59d3ecec3827ad5f92b1fc5c9ff3755b639f71f5752", size = 104164, upload-time = "2026-06-03T00:56:38.614Z" },
@@ -1217,7 +1217,7 @@ wheels = [
 [[package]]
 name = "sorl-thumbnail"
 version = "13.0.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/c4/d8/038201e8fc4bda7f7905c41155af70fc0d15f94f90baac52f04ea66ad3af/sorl_thumbnail-13.0.0.tar.gz", hash = "sha256:75f1f22fa742846917ca4774cd4c578cd802ff5e4f6f53328735c3a38264ee49", size = 668977, upload-time = "2026-01-22T15:20:51.624Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ea/8b/04d8eaaffbdfc17792b008d7bdf0b379e6bb2648ce262e96c95f76f4ba7c/sorl_thumbnail-13.0.0-py3-none-any.whl", hash = "sha256:8035d218b2b90511326c9a73dbf6e8a829f9ea808e448e98332190a0e2c0ee18", size = 43136, upload-time = "2026-01-22T15:20:37.103Z" },
@@ -1226,7 +1226,7 @@ wheels = [
 [[package]]
 name = "sphinx"
 version = "9.1.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "alabaster" },
     { name = "babel" },
@@ -1254,7 +1254,7 @@ wheels = [
 [[package]]
 name = "sphinxcontrib-applehelp"
 version = "2.0.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ba/6e/b837e84a1a704953c62ef8776d45c3e8d759876b4a84fe14eba2859106fe/sphinxcontrib_applehelp-2.0.0.tar.gz", hash = "sha256:2f29ef331735ce958efa4734873f084941970894c6090408b079c61b2e1c06d1", size = 20053, upload-time = "2024-07-29T01:09:00.465Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/5d/85/9ebeae2f76e9e77b952f4b274c27238156eae7979c5421fba91a28f4970d/sphinxcontrib_applehelp-2.0.0-py3-none-any.whl", hash = "sha256:4cd3f0ec4ac5dd9c17ec65e9ab272c9b867ea77425228e68ecf08d6b28ddbdb5", size = 119300, upload-time = "2024-07-29T01:08:58.99Z" },
@@ -1263,7 +1263,7 @@ wheels = [
 [[package]]
 name = "sphinxcontrib-devhelp"
 version = "2.0.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f6/d2/5beee64d3e4e747f316bae86b55943f51e82bb86ecd325883ef65741e7da/sphinxcontrib_devhelp-2.0.0.tar.gz", hash = "sha256:411f5d96d445d1d73bb5d52133377b4248ec79db5c793ce7dbe59e074b4dd1ad", size = 12967, upload-time = "2024-07-29T01:09:23.417Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/35/7a/987e583882f985fe4d7323774889ec58049171828b58c2217e7f79cdf44e/sphinxcontrib_devhelp-2.0.0-py3-none-any.whl", hash = "sha256:aefb8b83854e4b0998877524d1029fd3e6879210422ee3780459e28a1f03a8a2", size = 82530, upload-time = "2024-07-29T01:09:21.945Z" },
@@ -1272,7 +1272,7 @@ wheels = [
 [[package]]
 name = "sphinxcontrib-htmlhelp"
 version = "2.1.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/43/93/983afd9aa001e5201eab16b5a444ed5b9b0a7a010541e0ddfbbfd0b2470c/sphinxcontrib_htmlhelp-2.1.0.tar.gz", hash = "sha256:c9e2916ace8aad64cc13a0d233ee22317f2b9025b9cf3295249fa985cc7082e9", size = 22617, upload-time = "2024-07-29T01:09:37.889Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0a/7b/18a8c0bcec9182c05a0b3ec2a776bba4ead82750a55ff798e8d406dae604/sphinxcontrib_htmlhelp-2.1.0-py3-none-any.whl", hash = "sha256:166759820b47002d22914d64a075ce08f4c46818e17cfc9470a9786b759b19f8", size = 98705, upload-time = "2024-07-29T01:09:36.407Z" },
@@ -1281,7 +1281,7 @@ wheels = [
 [[package]]
 name = "sphinxcontrib-jsmath"
 version = "1.0.1"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/b2/e8/9ed3830aeed71f17c026a07a5097edcf44b692850ef215b161b8ad875729/sphinxcontrib-jsmath-1.0.1.tar.gz", hash = "sha256:a9925e4a4587247ed2191a22df5f6970656cb8ca2bd6284309578f2153e0c4b8", size = 5787, upload-time = "2019-01-21T16:10:16.347Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c2/42/4c8646762ee83602e3fb3fbe774c2fac12f317deb0b5dbeeedd2d3ba4b77/sphinxcontrib_jsmath-1.0.1-py2.py3-none-any.whl", hash = "sha256:2ec2eaebfb78f3f2078e73666b1415417a116cc848b72e5172e596c871103178", size = 5071, upload-time = "2019-01-21T16:10:14.333Z" },
@@ -1290,7 +1290,7 @@ wheels = [
 [[package]]
 name = "sphinxcontrib-qthelp"
 version = "2.0.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/68/bc/9104308fc285eb3e0b31b67688235db556cd5b0ef31d96f30e45f2e51cae/sphinxcontrib_qthelp-2.0.0.tar.gz", hash = "sha256:4fe7d0ac8fc171045be623aba3e2a8f613f8682731f9153bb2e40ece16b9bbab", size = 17165, upload-time = "2024-07-29T01:09:56.435Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/27/83/859ecdd180cacc13b1f7e857abf8582a64552ea7a061057a6c716e790fce/sphinxcontrib_qthelp-2.0.0-py3-none-any.whl", hash = "sha256:b18a828cdba941ccd6ee8445dbe72ffa3ef8cbe7505d8cd1fa0d42d3f2d5f3eb", size = 88743, upload-time = "2024-07-29T01:09:54.885Z" },
@@ -1299,7 +1299,7 @@ wheels = [
 [[package]]
 name = "sphinxcontrib-serializinghtml"
 version = "2.0.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/3b/44/6716b257b0aa6bfd51a1b31665d1c205fb12cb5ad56de752dfa15657de2f/sphinxcontrib_serializinghtml-2.0.0.tar.gz", hash = "sha256:e9d912827f872c029017a53f0ef2180b327c3f7fd23c87229f7a8e8b70031d4d", size = 16080, upload-time = "2024-07-29T01:10:09.332Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/52/a7/d2782e4e3f77c8450f727ba74a8f12756d5ba823d81b941f1b04da9d033a/sphinxcontrib_serializinghtml-2.0.0-py3-none-any.whl", hash = "sha256:6e2cb0eef194e10c27ec0023bfeb25badbbb5868244cf5bc5bdc04e4464bf331", size = 92072, upload-time = "2024-07-29T01:10:08.203Z" },
@@ -1308,7 +1308,7 @@ wheels = [
 [[package]]
 name = "sqlparse"
 version = "0.5.5"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/90/76/437d71068094df0726366574cf3432a4ed754217b436eb7429415cf2d480/sqlparse-0.5.5.tar.gz", hash = "sha256:e20d4a9b0b8585fdf63b10d30066c7c94c5d7a7ec47c889a2d83a3caa93ff28e", size = 120815, upload-time = "2025-12-19T07:17:45.073Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/49/4b/359f28a903c13438ef59ebeee215fb25da53066db67b305c125f1c6d2a25/sqlparse-0.5.5-py3-none-any.whl", hash = "sha256:12a08b3bf3eec877c519589833aed092e2444e68240a3577e8e26148acc7b1ba", size = 46138, upload-time = "2025-12-19T07:17:46.573Z" },
@@ -1317,7 +1317,7 @@ wheels = [
 [[package]]
 name = "tomli-w"
 version = "1.2.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/19/75/241269d1da26b624c0d5e110e8149093c759b7a286138f4efd61a60e75fe/tomli_w-1.2.0.tar.gz", hash = "sha256:2dd14fac5a47c27be9cd4c976af5a12d87fb1f0b4512f81d69cce3b35ae25021", size = 7184, upload-time = "2025-01-15T12:07:24.262Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c7/18/c86eb8e0202e32dd3df50d43d7ff9854f8e0603945ff398974c1d91ac1ef/tomli_w-1.2.0-py3-none-any.whl", hash = "sha256:188306098d013b691fcadc011abd66727d3c414c571bb01b1a174ba8c983cf90", size = 6675, upload-time = "2025-01-15T12:07:22.074Z" },
@@ -1326,7 +1326,7 @@ wheels = [
 [[package]]
 name = "tox"
 version = "4.59.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "cachetools" },
     { name = "colorama" },
@@ -1348,7 +1348,7 @@ wheels = [
 [[package]]
 name = "tox-uv"
 version = "1.36.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "tox-uv-bare" },
     { name = "uv" },
@@ -1360,7 +1360,7 @@ wheels = [
 [[package]]
 name = "tox-uv-bare"
 version = "1.36.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "packaging" },
     { name = "tox" },
@@ -1373,7 +1373,7 @@ wheels = [
 [[package]]
 name = "types-psycopg2"
 version = "2.9.21.20260724"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/d8/29/09ca8f0ad16105193deabcaf8256059e361e9e37ff24551efd9c739e240b/types_psycopg2-2.9.21.20260724.tar.gz", hash = "sha256:db31031c37de823a2b21c787cb84832174fdda2a99a8b1af648206f19cc32f8c", size = 27644, upload-time = "2026-07-24T04:57:36.61Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cb/90/1e77eb76030bb5feb249ecb41cd7647c6ae831ec7bd2b61a61beecac4029/types_psycopg2-2.9.21.20260724-py3-none-any.whl", hash = "sha256:4f87890dd06cea99e3bb0536330ffc2a7320e69059dc1ee0e2c884ef2718f2b4", size = 24964, upload-time = "2026-07-24T04:57:35.703Z" },
@@ -1382,7 +1382,7 @@ wheels = [
 [[package]]
 name = "types-pyyaml"
 version = "6.0.12.20260724"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/3f/6f/a28f44bcd56bebed42b028a2894c79853e2f5e6b5279e633cb3f287a05e7/types_pyyaml-6.0.12.20260724.tar.gz", hash = "sha256:3c1ce1bb73cd5ec02e90390c2b1f00e810d241d8825fd73ff359696839271b6b", size = 17893, upload-time = "2026-07-24T04:58:43.453Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8b/42/0337fefc615e20ee55d1c8f71b774a9b2b734a04669139c20753b27a2a3a/types_pyyaml-6.0.12.20260724-py3-none-any.whl", hash = "sha256:d57db930a4b2efbc57cf430ec8882765d246929432fa253092f383902329a453", size = 20312, upload-time = "2026-07-24T04:58:42.486Z" },
@@ -1391,7 +1391,7 @@ wheels = [
 [[package]]
 name = "typing-extensions"
 version = "4.16.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f6/cc/6253133b5bb138fc3306cebfbda2c520f545d36b5be2c7255cc528bb45d6/typing_extensions-4.16.0.tar.gz", hash = "sha256:dc983d19a509c94dba722ee6abd33940f7c05a89e243c47e907eb4db6f1a43e5", size = 113555, upload-time = "2026-07-02T08:40:05.92Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl", hash = "sha256:481caa481374e813c1b176ada14e97f1f67a4539ce9cfeb3f350d78d6370c2e8", size = 45571, upload-time = "2026-07-02T08:40:04.659Z" },
@@ -1400,7 +1400,7 @@ wheels = [
 [[package]]
 name = "tzdata"
 version = "2026.3"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/92/ff/5a28bdfd8c3ebec42564ac7d0e54ca3db65044a9314a97f9564fa7a1e926/tzdata-2026.3.tar.gz", hash = "sha256:4a1518b8993086a7982523e071643f3c0e5f213e75b21318e78bcabfff9d1415", size = 198674, upload-time = "2026-07-10T08:50:37.887Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e5/6d/b53b99a9f2766d095985947a5782f1702cabb129a34f7a802d7197af832f/tzdata-2026.3-py2.py3-none-any.whl", hash = "sha256:dc096730c87af6cab1b171c9d532be840741ff5d459015e7f6947bd7d7e54931", size = 348168, upload-time = "2026-07-10T08:50:36.46Z" },
@@ -1409,7 +1409,7 @@ wheels = [
 [[package]]
 name = "unittest-xml-reporting"
 version = "4.0.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "lxml" },
 ]
@@ -1421,7 +1421,7 @@ wheels = [
 [[package]]
 name = "urllib3"
 version = "2.7.0"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/53/0c/06f8b233b8fd13b9e5ee11424ef85419ba0d8ba0b3138bf360be2ff56953/urllib3-2.7.0.tar.gz", hash = "sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c", size = 433602, upload-time = "2026-05-07T16:13:18.596Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7f/3e/5db95bcf282c52709639744ca2a8b149baccf648e39c8cc87553df9eae0c/urllib3-2.7.0-py3-none-any.whl", hash = "sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897", size = 131087, upload-time = "2026-05-07T16:13:17.151Z" },
@@ -1430,7 +1430,7 @@ wheels = [
 [[package]]
 name = "uv"
 version = "0.12.3"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/3c/fa/19a665278931fca142cf1c21927b18b36cffb5fd137bf5228f937a977f84/uv-0.12.3.tar.gz", hash = "sha256:1eb3fea456aea47489d92e10451c9129b7dd9fd8854c4eb17020ba68489d5d9a", size = 5877698, upload-time = "2026-08-07T16:33:32.486Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0e/b1/eabb1f57339a63630a9b195f8bcdbcca101f4f5cbc5556e6f592d6049d80/uv-0.12.3-py3-none-linux_armv6l.whl", hash = "sha256:0c0561cd369002a5968e138ea477e86507a337b3ede44f441c90d85ed2f54714", size = 21777249, upload-time = "2026-08-07T16:32:18.631Z" },
@@ -1456,7 +1456,7 @@ wheels = [
 [[package]]
 name = "virtualenv"
 version = "21.7.4"
-source = { registry = "https://pypi.org/simple" }
+source = { registry = "https://gitlab.com/api/v4/groups/269576/-/packages/pypi/simple" }
 dependencies = [
     { name = "distlib" },
     { name = "filelock" },
