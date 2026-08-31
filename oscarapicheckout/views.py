@@ -1,8 +1,9 @@
-from typing import Any
+from typing import Any, cast
 
 from django.shortcuts import get_object_or_404
 from oscar.core.loading import get_model
 from rest_framework import generics, status
+from rest_framework.metadata import SimpleMetadata
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -30,7 +31,7 @@ class PaymentMethodsView(generics.GenericAPIView[Any]):
         root_serializer: PaymentMethodsSerializer = (
             self.get_serializer()  # type:ignore[assignment]
         )
-        meta = self.metadata_class()  # type:ignore[operator, misc]
+        meta = cast(SimpleMetadata, self.metadata_class())  # type:ignore[operator, misc]
         data = {}
         for (
             method_code,
