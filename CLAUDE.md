@@ -133,10 +133,10 @@ Payment methods configured in Django settings:
 ```python
 API_ENABLED_PAYMENT_METHODS = [
     {
-        'method': 'oscarapicheckout.methods.Cash',
-        'permission': 'oscarapicheckout.permissions.StaffOnly',
-        'method_kwargs': {},
-        'permission_kwargs': {},
+        "method": "oscarapicheckout.methods.Cash",
+        "permission": "oscarapicheckout.permissions.StaffOnly",
+        "method_kwargs": {},
+        "permission_kwargs": {},
     },
 ]
 ```
@@ -144,9 +144,9 @@ API_ENABLED_PAYMENT_METHODS = [
 Required order status pipeline:
 
 ```python
-ORDER_STATUS_PENDING = 'Pending'
-ORDER_STATUS_PAYMENT_DECLINED = 'Payment Declined'
-ORDER_STATUS_AUTHORIZED = 'Authorized'
+ORDER_STATUS_PENDING = "Pending"
+ORDER_STATUS_PAYMENT_DECLINED = "Payment Declined"
+ORDER_STATUS_AUTHORIZED = "Authorized"
 ```
 
 ### Important Patterns
