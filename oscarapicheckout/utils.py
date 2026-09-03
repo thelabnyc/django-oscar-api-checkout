@@ -150,7 +150,37 @@ def _set_order_authorized(order: Order, request: HttpRequest) -> None:
     order_payment_authorized.send(sender=order, order=order, request=request)
 
 
-def _set_order_payment_declined(order: Order, request: HttpRequest) -> None:
+def decline_order_payment(
+    order: Order,
+    request: HttpRequest,
+    internal_error: bool = False,
+) -> None:
+    """
+    Public entry point for declining an order's payment.
+
+    Exposed because the ``internal_error`` flag is part of the
+    ``order_payment_declined`` contract that downstream projects must handle,
+    and because subclasses of the checkout views need a supported way to run
+    the same teardown.
+    """
+    _set_order_payment_declined(order, request, internal_error=internal_error)
+
+
+def _set_order_payment_declined(
+    order: Order,
+    request: HttpRequest,
+    internal_error: bool = False,
+) -> None:
+    """
+    Decline the order's payment and thaw its basket so it can be retried.
+
+    ``internal_error`` marks exactly one thing: the request raised while
+    payment was being recorded, so the decline is a recovery step rather than a
+    verdict. Receivers use it to suppress customer-facing decline messaging,
+    since no processor rejected anything. It is deliberately narrow -- a
+    shortfall found by the authorization guard is a genuine decline the
+    customer must act on, and sends ``False``.
+    """
     # Set the order status
     order.set_status(ORDER_STATUS_PAYMENT_DECLINED)
 
@@ -178,7 +208,12 @@ def _set_order_payment_declined(order: Order, request: HttpRequest) -> None:
         operations.store_basket_in_session(order.basket, request.session)
 
     # Send a signal
-    order_payment_declined.send(sender=order, order=order, request=request)
+    order_payment_declined.send(
+        sender=order,
+        order=order,
+        request=request,
+        internal_error=internal_error,
+    )
 
 
 def get_order_authorized_amount(order: Order) -> Decimal:

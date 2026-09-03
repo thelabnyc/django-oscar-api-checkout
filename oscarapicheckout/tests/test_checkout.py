@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from decimal import Decimal as D
 from unittest import mock
 
@@ -10,9 +11,15 @@ from rest_framework.reverse import reverse
 
 from sandbox.creditcards.methods import CreditCard
 
+from ..methods import Cash
 from ..serializers import OrderTokenField
-from ..signals import order_payment_authorized, order_placed, pre_calculate_total
-from ..states import Complete
+from ..signals import (
+    order_payment_authorized,
+    order_payment_declined,
+    order_placed,
+    pre_calculate_total,
+)
+from ..states import Complete, Deferred
 from ..utils import (
     CHECKOUT_PAYMENT_STEPS,
     _session_pickle,
@@ -27,6 +34,20 @@ Basket = get_model("basket", "Basket")
 PaymentTransaction = get_model("payment", "Transaction")
 Default = get_class("partner.strategy", "Default")
 OrderCreator = get_class("order.utils", "OrderCreator")
+
+
+@contextmanager
+def capture_signal(signal):
+    received = []
+
+    def handler(sender, **kwargs):
+        received.append(kwargs)
+
+    signal.connect(handler)
+    try:
+        yield received
+    finally:
+        signal.disconnect(handler)
 
 
 def _record_review_authorization(self, order, amount, reference):
@@ -4349,6 +4370,33 @@ class CheckoutAPITest(BaseTest):
         self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Complete")
         self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["status"], "Declined")
 
+    def test_basket_and_order_recovered_when_authorized_amount_calculator_raises(self):
+        self.login(is_staff=True)
+        basket_id = self._prepare_basket()
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {
+            "cash": {
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+
+        def explode(order):
+            raise RuntimeError("boom")
+
+        # The guard runs while the states are stored, after payment has been
+        # taken, so a broken calculator must not strand the basket either.
+        with (
+            mock.patch("oscarapicheckout.utils.settings.ORDER_AUTHORIZED_AMOUNT_CALCULATOR", explode),
+            self.assertRaises(RuntimeError),
+        ):
+            self._checkout(data)
+
+        order = Order.objects.get()
+        self.assertEqual(order.status, "Payment Declined")
+        self.assertEqual(Basket.objects.get(id=basket_id).status, "Open")
+        self.assertEqual(self._get_basket().data["id"], basket_id)
+
     def _checkout_with_review_authorization(self):
         """Run a card checkout whose authorization is held for fraud review."""
         basket_id = self._prepare_basket()
@@ -4375,3 +4423,100 @@ class CheckoutAPITest(BaseTest):
                 extra={"uuid": "5b728222-92d1-43c3-95a1-dfb5d623519f"},
             )
         return order_resp
+
+    def test_basket_and_order_recovered_when_recording_payment_raises(self):
+        self.login(is_staff=True)
+        basket_id = self._prepare_basket()
+
+        # An unrelated state, to prove the recovery leaves the session alone.
+        session = self.client.session
+        session[CHECKOUT_PAYMENT_STEPS] = {"pay-later": _session_pickle(Deferred(D("5.00")))}
+        session.save()
+
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {
+            "cash": {
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+
+        with (
+            capture_signal(order_payment_declined) as received,
+            mock.patch.object(Cash, "_record_payment", side_effect=RuntimeError("boom")),
+            self.assertRaises(RuntimeError),
+        ):
+            self._checkout(data)
+
+        order = Order.objects.get()
+        self.assertEqual(order.status, "Payment Declined")
+
+        # Basket is usable again, both in the database and in the session.
+        self.assertEqual(Basket.objects.get(id=basket_id).status, "Open")
+        self.assertEqual(self._get_basket().data["id"], basket_id)
+
+        # Session states are exactly as they were before the failed request.
+        session_states = {k: _session_unpickle(v) for k, v in self.client.session[CHECKOUT_PAYMENT_STEPS].items()}
+        self.assertEqual(session_states.keys(), {"pay-later"})
+        self.assertEqual(session_states["pay-later"].amount, D("5.00"))
+
+        # Receivers can tell this decline apart from a processor decline.
+        self.assertEqual(len(received), 1)
+        self.assertIs(received[0]["internal_error"], True)
+
+    def test_processor_decline_is_not_flagged_as_internal_error(self):
+        basket_id = self._prepare_basket()
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {
+            "credit-card": {
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+        states_resp = self.client.get(order_resp.data["payment_url"])
+
+        with capture_signal(order_payment_declined) as received:
+            self._do_payment_step_form_post(
+                states_resp.data["payment_method_states"]["credit-card"]["required_action"],
+                extra={"deny": True},
+            )
+
+        self.assertEqual(len(received), 1)
+        self.assertIs(received[0]["internal_error"], False)
+
+    def test_deferred_payment_order_recovered_when_recording_payment_raises(self):
+        self.login(is_staff=True)
+        basket_id = self._prepare_basket()
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {
+            "pay-later": {
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+        order = Order.objects.get(number=order_resp.data["number"])
+        self.assertEqual(order.status, "Pending")
+
+        with (
+            mock.patch.object(Cash, "_record_payment", side_effect=RuntimeError("boom")),
+            self.assertRaises(RuntimeError),
+        ):
+            self._complete_deferred_payment(
+                {
+                    "order": OrderTokenField.get_order_token(order),
+                    "payment": {
+                        "cash": {
+                            "enabled": True,
+                            "pay_balance": True,
+                        }
+                    },
+                }
+            )
+
+        order.refresh_from_db()
+        self.assertEqual(order.status, "Payment Declined")
+        self.assertEqual(Basket.objects.get(id=basket_id).status, "Open")
