@@ -1,4 +1,6 @@
+from collections.abc import Callable
 from decimal import Decimal
+from functools import cache
 from typing import Any, TypedDict
 import base64
 import logging
@@ -7,14 +9,16 @@ import pickle
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser, User
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Sum
 from django.db.models.functions import Greatest
 from django.http import HttpRequest
+from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
 from oscar.core.loading import get_class, get_model
 from oscar.core.prices import Price
 from oscarapi.basket import operations
 
+from . import settings
 from .settings import ORDER_STATUS_AUTHORIZED, ORDER_STATUS_PAYMENT_DECLINED
 from .signals import order_payment_authorized, order_payment_declined
 from .states import Complete, Consumed, Declined, PaymentMethodStatus, PaymentStatus
@@ -177,6 +181,47 @@ def _set_order_payment_declined(order: Order, request: HttpRequest) -> None:
     order_payment_declined.send(sender=order, order=order, request=request)
 
 
+def get_order_authorized_amount(order: Order) -> Decimal:
+    """
+    How much money is actually recorded against this order?
+
+    Used as the floor for authorizing an order: the session's payment states
+    describe what checkout believed it collected, which is not evidence that
+    anything was collected against *this* order.
+
+    This is a floor, not a reconciliation. Retries record additional sources, so
+    the sum may legitimately exceed the order total; only the short side matters.
+
+    Counts ``Source.amount_allocated`` only. A payment method that debits without
+    allocating records nothing here and must supply its own calculator via
+    ``ORDER_AUTHORIZED_AMOUNT_CALCULATOR``; amount_debited is not added by
+    default because voiding a payment only decrements amount_allocated.
+
+    A replacement must also count authorizations that are pending manual review,
+    otherwise orders deliberately held for review are declined.
+
+    The sum is currency-blind: every Source on the order is counted at face
+    value against ``order.total_incl_tax``. ``PaymentMethod.get_source()``
+    stamps the order's own currency, so in-tree methods are consistent by
+    construction, but a store recording Sources in more than one currency must
+    supply its own calculator.
+    """
+    total = order.sources.all().aggregate(total=Sum("amount_allocated"))["total"]
+    return Decimal(total or "0.00")
+
+
+@cache
+def _import_authorized_amount_calc(dotted_path: str) -> Callable[[Order], Decimal]:
+    return import_string(dotted_path)  # type:ignore[no-any-return]
+
+
+def _get_authorized_amount_calc() -> Callable[[Order], Decimal]:
+    calculator = settings.ORDER_AUTHORIZED_AMOUNT_CALCULATOR
+    if callable(calculator):
+        return calculator
+    return _import_authorized_amount_calc(calculator)
+
+
 def _update_order_status(order: Order, request: HttpRequest) -> None:
     # Filter here rather than trusting callers. This is the choke point every
     # path reaches -- including out-of-band processor callbacks, which resolve
@@ -191,11 +236,38 @@ def _update_order_status(order: Order, request: HttpRequest) -> None:
             warn_foreign_payment_state(order, key, state)
 
     declined = [s for k, s in states.items() if s.status == PaymentMethodStatus.DECLINED]
+    not_complete = [s for k, s in states.items() if s.status != PaymentMethodStatus.COMPLETE]
     if len(declined) > 0:
         _set_order_payment_declined(order, request)
-
-    not_complete = [s for k, s in states.items() if s.status != PaymentMethodStatus.COMPLETE]
-    if len(not_complete) <= 0:
+    elif len(not_complete) <= 0:
+        authorized_amount = _get_authorized_amount_calc()(order)
+        if authorized_amount < order.total_incl_tax:
+            # Backed means "allocated", not "has a Source row": get_source()
+            # creates the row before any money moves, and the floor above sums
+            # allocations, so existence alone would credit a method that
+            # recorded nothing.
+            backed_source_ids = set(order.sources.filter(amount_allocated__gt=0).values_list("id", flat=True))
+            unbacked = {key: state for key, state in states.items() if state.source_id not in backed_source_ids}
+            logger.error(
+                "Refusing to authorize Order[%s]: payments recorded against it total %s, but the order totals %s. Methods with nothing allocated: %r.",
+                order.number,
+                authorized_amount,
+                order.total_incl_tax,
+                sorted(unbacked.keys()),
+            )
+            # Decline the states with nothing recorded behind them, so the
+            # client shows a decline and a retry re-records only those methods.
+            # Declining a state that did allocate would make the retry take a
+            # second hold for the same money. If every state is backed, the
+            # shortfall can't be attributed, so decline them all rather than
+            # leave the order stuck in a state no retry can clear.
+            states_to_decline = unbacked if len(unbacked) > 0 else states
+            # Written directly to avoid re-entering this function.
+            for key, state in states_to_decline.items():
+                declined_state = Declined(state.amount, source_id=state.source_id)
+                _update_payment_method_state(request, key, declined_state, order_id=order.id)
+            _set_order_payment_declined(order, request)
+            return
         # Authorized the order and consume all the payments
         _set_order_authorized(order, request)
         for key, state in states.items():

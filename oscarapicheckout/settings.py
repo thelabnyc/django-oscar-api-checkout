@@ -1,3 +1,5 @@
+from collections.abc import Callable
+from decimal import Decimal
 from typing import Any, TypedDict
 
 from django.conf import settings
@@ -49,6 +51,11 @@ ORDER_STATUS_CANCELED: str = overridable("ORDER_STATUS_CANCELED", "Canceled")
 ORDER_OWNERSHIP_CALCULATOR: str = overridable(
     "ORDER_OWNERSHIP_CALCULATOR",
     "oscarapicheckout.utils.get_order_ownership",
+)
+
+ORDER_AUTHORIZED_AMOUNT_CALCULATOR: str | Callable[[Any], Decimal] = overridable(
+    "ORDER_AUTHORIZED_AMOUNT_CALCULATOR",
+    "oscarapicheckout.utils.get_order_authorized_amount",
 )
 
 CHECKOUT_CACHE_SERIALIZERS: dict[str, str] = overridable(

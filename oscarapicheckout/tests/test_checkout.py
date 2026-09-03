@@ -2,13 +2,17 @@ from decimal import Decimal as D
 from unittest import mock
 
 from django.contrib.auth.models import User
+from django.db.models import Sum
 from oscar.core.loading import get_class, get_model
 from oscar.test import factories
 from rest_framework import status
 from rest_framework.reverse import reverse
 
+from sandbox.creditcards.methods import CreditCard
+
 from ..serializers import OrderTokenField
 from ..signals import order_payment_authorized, order_placed, pre_calculate_total
+from ..states import Complete
 from ..utils import (
     CHECKOUT_PAYMENT_STEPS,
     _session_pickle,
@@ -20,8 +24,33 @@ from .base import BaseTest
 Order = get_model("order", "Order")
 OrderLineDiscount = get_model("order", "OrderLineDiscount")
 Basket = get_model("basket", "Basket")
+PaymentTransaction = get_model("payment", "Transaction")
 Default = get_class("partner.strategy", "Default")
 OrderCreator = get_class("order.utils", "OrderCreator")
+
+
+def _record_review_authorization(self, order, amount, reference):
+    """
+    Stand-in for a processor that holds an authorization for manual review:
+    the transaction is recorded but nothing is allocated on the Source.
+    """
+    source = self.get_source(order, reference)
+    source._create_transaction(
+        PaymentTransaction.AUTHORISE,
+        amount,
+        reference=reference,
+        status="REVIEW",
+    )
+    return Complete(amount, source_id=source.pk)
+
+
+def _sum_pending_and_approved_authorizations(order):
+    total = PaymentTransaction.objects.filter(
+        source__order=order,
+        txn_type=PaymentTransaction.AUTHORISE,
+        status__in=("ACCEPTED", "REVIEW"),
+    ).aggregate(total=Sum("amount"))["total"]
+    return D(total or "0.00")
 
 
 class CheckoutAPITest(BaseTest):
@@ -4145,3 +4174,204 @@ class CheckoutAPITest(BaseTest):
                 },
             ],
         )
+
+    def test_order_not_authorized_when_recorded_payments_are_short(self):
+        self.login(is_staff=True)
+        basket_id = self._prepare_basket()
+
+        # Seed a Complete state, as a stale session from a previous release
+        # would carry it: no order stamp and no Source behind it.
+        session = self.client.session
+        session[CHECKOUT_PAYMENT_STEPS] = {"cash": _session_pickle(Complete(D("10.00")))}
+        session.save()
+
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {
+            "cash": {
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+        with self.assertLogs("oscarapicheckout.utils", level="ERROR") as logs:
+            order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        log_output = "\n".join(logs.output)
+        self.assertIn(order_resp.data["number"], log_output)
+        self.assertIn("0.00", log_output)
+        self.assertIn("10.00", log_output)
+
+        order = Order.objects.get(number=order_resp.data["number"])
+        self.assertEqual(order.status, "Payment Declined")
+        self.assertEqual(order.sources.count(), 0)
+
+        # The client is told about the decline, and the Declined state stops the
+        # next attempt from recycling the same phantom payment.
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self.assertEqual(states_resp.data["order_status"], "Payment Declined")
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Declined")
+
+        # Basket is thawed, so a retry re-records the payment and succeeds.
+        self.assertEqual(Basket.objects.get(id=basket_id).status, "Open")
+        retry_resp = self._checkout(data)
+        self.assertEqual(retry_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(retry_resp.data["number"], order_resp.data["number"])
+        states_resp = self.client.get(retry_resp.data["payment_url"])
+        self.assertEqual(states_resp.data["order_status"], "Authorized")
+        self.assertPaymentSource(
+            retry_resp.data["number"],
+            source_name="Cash",
+            allocated=D("10.00"),
+            debited=D("10.00"),
+        )
+
+    def test_authorization_without_source_allocation_is_short(self):
+        order_resp = self._checkout_with_review_authorization()
+        order = Order.objects.get(number=order_resp.data["number"])
+        self.assertEqual(order.status, "Payment Declined")
+
+    def test_authorized_amount_calculator_can_count_pending_review(self):
+        with mock.patch(
+            "oscarapicheckout.utils.settings.ORDER_AUTHORIZED_AMOUNT_CALCULATOR",
+            _sum_pending_and_approved_authorizations,
+        ):
+            order_resp = self._checkout_with_review_authorization()
+        order = Order.objects.get(number=order_resp.data["number"])
+        self.assertEqual(order.status, "Authorized")
+
+    def test_only_unbacked_states_declined_when_recorded_payments_are_short(self):
+        self.login(is_staff=True)
+        basket_id = self._prepare_basket()
+
+        # A phantom Complete state with no Source behind it, alongside a card
+        # payment that really is recorded against this order.
+        session = self.client.session
+        session[CHECKOUT_PAYMENT_STEPS] = {"cash": _session_pickle(Complete(D("4.00")))}
+        session.save()
+
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {
+            "cash": {
+                "enabled": True,
+                "pay_balance": False,
+                "amount": "4.00",
+            },
+            "credit-card": {
+                "enabled": True,
+                "pay_balance": True,
+            },
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self._do_payment_step_form_post(states_resp.data["payment_method_states"]["credit-card"]["required_action"])
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self._do_payment_step_form_post(
+            states_resp.data["payment_method_states"]["credit-card"]["required_action"],
+            extra={"uuid": "5b728222-92d1-43c3-95a1-dfb5d623519f"},
+        )
+
+        order = Order.objects.get(number=order_resp.data["number"])
+        self.assertEqual(order.status, "Payment Declined")
+
+        # Only the phantom payment is declined. The card kept its authorization,
+        # so the retry recycles it instead of taking a second hold.
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Declined")
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["status"], "Complete")
+
+        retry_resp = self._checkout(data)
+        self.assertEqual(retry_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(retry_resp.data["number"], order_resp.data["number"])
+
+        states_resp = self.client.get(retry_resp.data["payment_url"])
+        self.assertEqual(states_resp.data["order_status"], "Authorized")
+        order.refresh_from_db()
+        self.assertEqual(order.sources.filter(source_type__name="Credit Card").count(), 1)
+        self.assertPaymentSources(
+            retry_resp.data["number"],
+            sources=[
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("4.00"),
+                    "debited": D("4.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("6.00"),
+                },
+            ],
+        )
+
+    def test_state_with_unallocated_source_is_not_counted_as_backed(self):
+        self.login(is_staff=True)
+        basket_id = self._prepare_basket()
+
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {
+            "cash": {
+                "enabled": True,
+                "pay_balance": False,
+                "amount": "4.00",
+            },
+            "credit-card": {
+                "enabled": True,
+                "pay_balance": True,
+            },
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self._do_payment_step_form_post(states_resp.data["payment_method_states"]["credit-card"]["required_action"])
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        with mock.patch.object(
+            CreditCard,
+            "record_successful_authorization",
+            _record_review_authorization,
+        ):
+            self._do_payment_step_form_post(
+                states_resp.data["payment_method_states"]["credit-card"]["required_action"],
+                extra={"uuid": "5b728222-92d1-43c3-95a1-dfb5d623519f"},
+            )
+
+        order = Order.objects.get(number=order_resp.data["number"])
+        self.assertEqual(order.status, "Payment Declined")
+
+        # get_source() writes the card's Source before any money moves, so the
+        # row exists while nothing is allocated against it. Attribution follows
+        # the allocation, not the row: only the card is declined, and the cash
+        # payment that really did allocate stays recyclable.
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Complete")
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["status"], "Declined")
+
+    def _checkout_with_review_authorization(self):
+        """Run a card checkout whose authorization is held for fraud review."""
+        basket_id = self._prepare_basket()
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {
+            "credit-card": {
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self._do_payment_step_form_post(states_resp.data["payment_method_states"]["credit-card"]["required_action"])
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        with mock.patch.object(
+            CreditCard,
+            "record_successful_authorization",
+            _record_review_authorization,
+        ):
+            self._do_payment_step_form_post(
+                states_resp.data["payment_method_states"]["credit-card"]["required_action"],
+                extra={"uuid": "5b728222-92d1-43c3-95a1-dfb5d623519f"},
+            )
+        return order_resp
