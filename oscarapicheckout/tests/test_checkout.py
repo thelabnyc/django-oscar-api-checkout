@@ -9,7 +9,12 @@ from rest_framework.reverse import reverse
 
 from ..serializers import OrderTokenField
 from ..signals import order_payment_authorized, order_placed, pre_calculate_total
-from ..utils import _set_order_payment_declined
+from ..utils import (
+    CHECKOUT_PAYMENT_STEPS,
+    _session_pickle,
+    _session_unpickle,
+    _set_order_payment_declined,
+)
 from .base import BaseTest
 
 Order = get_model("order", "Order")
@@ -3851,7 +3856,7 @@ class CheckoutAPITest(BaseTest):
             ],
         )
 
-    def test_client_side_payment_state_recycled_on_resubmit(self):
+    def test_client_side_payment_state_not_recycled_across_orders(self):
         # First checkout — creates a Pending client-side-payment state in the session
         basket_id1 = self._prepare_basket()
         data1 = self._get_checkout_data(basket_id1)
@@ -3866,9 +3871,55 @@ class CheckoutAPITest(BaseTest):
         states_resp1 = self.client.get(order_resp1.data["payment_url"])
         action1 = states_resp1.data["payment_method_states"]["client-side-card"]["required_action"]
 
-        # Second checkout with a new basket of the same total — the Pending state
-        # from the first checkout should be recycled because the method_key and
-        # amount match.
+        # Second checkout with a *new* basket. The Pending state from the first
+        # checkout names the first order, so it must not be recycled — the token
+        # it carries would send the payment to the wrong order.
+        basket_id2 = self._prepare_basket()
+        data2 = self._get_checkout_data(basket_id2)
+        data2["payment"] = {
+            "client-side-card": {
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+        with self.assertLogs("oscarapicheckout.utils", level="WARNING") as logs:
+            order_resp2 = self._checkout(data2)
+        self.assertEqual(order_resp2.status_code, status.HTTP_200_OK)
+        self.assertNotEqual(order_resp2.data["number"], order_resp1.data["number"])
+        states_resp2 = self.client.get(order_resp2.data["payment_url"])
+        action2 = states_resp2.data["payment_method_states"]["client-side-card"]["required_action"]
+
+        self.assertNotEqual(action1, action2)
+        self.assertEqual(action2["data"]["reference_number"], order_resp2.data["number"])
+        self.assertIn(order_resp1.data["number"], logs.output[0])
+        self.assertIn(order_resp2.data["number"], logs.output[0])
+
+    def test_legacy_unstamped_pending_state_not_recycled_across_orders(self):
+        # First checkout mints a client-side action naming the first order.
+        basket_id1 = self._prepare_basket()
+        data1 = self._get_checkout_data(basket_id1)
+        data1["payment"] = {
+            "client-side-card": {
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+        order_resp1 = self._checkout(data1)
+        self.assertEqual(order_resp1.status_code, status.HTTP_200_OK)
+
+        # Rewrite it as a pre-upgrade release would have left it: no order
+        # stamp, and no Source, because nothing has been authorized yet.
+        session = self.client.session
+        stored = session[CHECKOUT_PAYMENT_STEPS]
+        state = _session_unpickle(stored["client-side-card"])
+        del state.__dict__["order_id"]
+        self.assertIsNone(state.order_id)
+        stored["client-side-card"] = _session_pickle(state)
+        session[CHECKOUT_PAYMENT_STEPS] = stored
+        session.save()
+
+        # The un-stamped state still carries the first order's reference, so it
+        # must be re-recorded rather than recycled onto the second order.
         basket_id2 = self._prepare_basket()
         data2 = self._get_checkout_data(basket_id2)
         data2["payment"] = {
@@ -3879,8 +3930,218 @@ class CheckoutAPITest(BaseTest):
         }
         order_resp2 = self._checkout(data2)
         self.assertEqual(order_resp2.status_code, status.HTTP_200_OK)
+        self.assertNotEqual(order_resp2.data["number"], order_resp1.data["number"])
+
         states_resp2 = self.client.get(order_resp2.data["payment_url"])
         action2 = states_resp2.data["payment_method_states"]["client-side-card"]["required_action"]
+        self.assertEqual(action2["data"]["reference_number"], order_resp2.data["number"])
 
-        # The recycled state should have the same action data (including token)
-        self.assertEqual(action1, action2)
+    def test_late_processor_callback_ignores_the_other_orders_states(self):
+        # Two checkouts under one session, each with its own method key, so the
+        # second does not overwrite the first order's state.
+        basket_id1 = self._prepare_basket()
+        data1 = self._get_checkout_data(basket_id1)
+        data1["payment"] = {
+            "client-side-card-1": {
+                "method_type": "client-side-card",
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+        order_resp1 = self._checkout(data1)
+        self.assertEqual(order_resp1.status_code, status.HTTP_200_OK)
+        states_resp1 = self.client.get(order_resp1.data["payment_url"])
+        action1 = states_resp1.data["payment_method_states"]["client-side-card-1"]["required_action"]
+
+        basket_id2 = self._prepare_basket()
+        data2 = self._get_checkout_data(basket_id2)
+        data2["payment"] = {
+            "client-side-card-2": {
+                "method_type": "client-side-card",
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+        order_resp2 = self._checkout(data2)
+        self.assertEqual(order_resp2.status_code, status.HTTP_200_OK)
+
+        # The first order's gateway callback finally lands. It resolves its own
+        # order from the payload and never passes through the checkout views,
+        # so the session still holds the second order's pending state.
+        self._do_client_side_payment_complete(
+            action1,
+            extra={"result_token": "tok_success_abc123"},
+        )
+
+        # The second order's pending state must not hold the first one back.
+        order1 = Order.objects.get(number=order_resp1.data["number"])
+        self.assertEqual(order1.status, "Authorized")
+        order2 = Order.objects.get(number=order_resp2.data["number"])
+        self.assertEqual(order2.status, "Pending")
+
+    def test_complete_state_not_recycled_onto_a_different_order(self):
+        self.login(is_staff=True)
+
+        # Place an order, part cash and part card, and decline the card.
+        basket_id1 = self._prepare_basket()
+        data = self._get_checkout_data(basket_id1)
+        data["payment"] = {
+            "cash": {
+                "enabled": True,
+                "pay_balance": False,
+                "amount": "4.00",
+            },
+            "credit-card": {
+                "enabled": True,
+                "pay_balance": True,
+            },
+        }
+        order_resp1 = self._checkout(data)
+        self.assertEqual(order_resp1.status_code, status.HTTP_200_OK)
+        states_resp1 = self.client.get(order_resp1.data["payment_url"])
+        self._do_payment_step_form_post(
+            states_resp1.data["payment_method_states"]["credit-card"]["required_action"],
+            extra={"deny": True},
+        )
+        order1 = Order.objects.get(number=order_resp1.data["number"])
+        self.assertEqual(order1.status, "Payment Declined")
+
+        # The session still carries a Complete cash state bound to order1's Source.
+        session_states = {k: _session_unpickle(v) for k, v in self.client.session[CHECKOUT_PAYMENT_STEPS].items()}
+        self.assertEqual(session_states["cash"].status, "Complete")
+        self.assertEqual(session_states["cash"].amount, D("4.00"))
+
+        # Submitting the first basket forces the customer onto a new basket, so
+        # the next checkout builds a new order while those states persist.
+        Basket.objects.get(id=basket_id1).submit()
+        basket_id2 = self._prepare_basket()
+        self.assertNotEqual(basket_id2, basket_id1)
+
+        data["basket"] = reverse("basket-detail", args=[basket_id2])
+        with self.assertLogs("oscarapicheckout.utils", level="WARNING") as logs:
+            order_resp2 = self._checkout(data)
+        self.assertEqual(order_resp2.status_code, status.HTTP_200_OK)
+        self.assertNotEqual(order_resp2.data["number"], order_resp1.data["number"])
+
+        log_output = "\n".join(logs.output)
+        self.assertIn(order_resp1.data["number"], log_output)
+        self.assertIn(order_resp2.data["number"], log_output)
+
+        # The second order recorded its own cash payment rather than claiming the first order's.
+        self.assertPaymentSource(
+            order_resp2.data["number"],
+            source_name="Cash",
+            allocated=D("4.00"),
+            debited=D("4.00"),
+        )
+        self.assertPaymentSource(
+            order_resp1.data["number"],
+            source_name="Cash",
+            allocated=D("4.00"),
+            debited=D("4.00"),
+        )
+
+        # Finish the card payment; the order covers its full total.
+        states_resp2 = self.client.get(order_resp2.data["payment_url"])
+        self.assertEqual(
+            states_resp2.data["payment_method_states"]["credit-card"]["amount"],
+            "6.00",
+        )
+        self._do_payment_step_form_post(states_resp2.data["payment_method_states"]["credit-card"]["required_action"])
+        states_resp2 = self.client.get(order_resp2.data["payment_url"])
+        self._do_payment_step_form_post(
+            states_resp2.data["payment_method_states"]["credit-card"]["required_action"],
+            extra={"uuid": "5b728222-92d1-43c3-95a1-dfb5d623519f"},
+        )
+        states_resp2 = self.client.get(order_resp2.data["payment_url"])
+        self.assertEqual(states_resp2.data["order_status"], "Authorized")
+        self.assertPaymentSources(
+            order_resp2.data["number"],
+            sources=[
+                {
+                    "source_name": "Cash",
+                    "reference": "",
+                    "allocated": D("4.00"),
+                    "debited": D("4.00"),
+                },
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("6.00"),
+                },
+            ],
+        )
+
+    def test_legacy_unstamped_state_recycled_on_same_order(self):
+        self.login(is_staff=True)
+        basket_id = self._prepare_basket()
+
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {
+            "credit-card-1": {
+                "method_type": "credit-card",
+                "enabled": True,
+                "pay_balance": False,
+                "amount": "3.00",
+            },
+            "credit-card-2": {
+                "method_type": "credit-card",
+                "enabled": True,
+                "pay_balance": True,
+            },
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        # Authorize the first card, decline the second.
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self._do_payment_step_form_post(states_resp.data["payment_method_states"]["credit-card-1"]["required_action"])
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self._do_payment_step_form_post(
+            states_resp.data["payment_method_states"]["credit-card-1"]["required_action"],
+            extra={"uuid": "5b728222-92d1-43c3-95a1-dfb5d623519f"},
+        )
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self._do_payment_step_form_post(
+            states_resp.data["payment_method_states"]["credit-card-2"]["required_action"],
+            extra={"deny": True},
+        )
+        order = Order.objects.get(number=order_resp.data["number"])
+        self.assertEqual(order.status, "Payment Declined")
+
+        # Rewrite the session as a pre-upgrade release would have left it: no
+        # order id stamped on the state, only the Source it allocated.
+        session = self.client.session
+        stored = session[CHECKOUT_PAYMENT_STEPS]
+        state = _session_unpickle(stored["credit-card-1"])
+        del state.__dict__["order_id"]
+        self.assertIsNone(state.order_id)
+        stored["credit-card-1"] = _session_pickle(state)
+        session[CHECKOUT_PAYMENT_STEPS] = stored
+        session.save()
+
+        # Retrying the same basket reuses the same order, so the un-stamped
+        # state is still recycled rather than re-authorized.
+        retry_resp = self._checkout(data)
+        self.assertEqual(retry_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(retry_resp.data["number"], order_resp.data["number"])
+
+        states_resp = self.client.get(retry_resp.data["payment_url"])
+        self.assertEqual(
+            states_resp.data["payment_method_states"]["credit-card-1"]["status"],
+            "Complete",
+        )
+        self.assertEqual(
+            states_resp.data["payment_method_states"]["credit-card-2"]["status"],
+            "Pending",
+        )
+        self.assertPaymentSources(
+            retry_resp.data["number"],
+            sources=[
+                {
+                    "source_name": "Credit Card",
+                    "reference": "5b728222-92d1-43c3-95a1-dfb5d623519f",
+                    "allocated": D("3.00"),
+                },
+            ],
+        )

@@ -108,6 +108,7 @@ class CheckoutView(generics.GenericAPIView[Any]):
         # Save Order
         order = c_ser.save()
         request.session[CHECKOUT_ORDER_ID] = order.id
+        utils.drop_foreign_payment_method_states(order, request)
 
         # Send order_placed signal
         order_placed.send(
@@ -155,7 +156,13 @@ class CheckoutView(generics.GenericAPIView[Any]):
             state: PaymentStatus | None = None
             if method_key in previous_states:
                 prev = previous_states[method_key]
-                if prev.status not in (DECLINED, CONSUMED):
+                if not utils.payment_state_belongs_to_order(prev, order):
+                    # Unreachable from the views above, which drop foreign states
+                    # before this runs. Kept for callers that reach _record_payments
+                    # by another route: another order's money is never recycled,
+                    # and never voided against this order either.
+                    utils.warn_foreign_payment_state(order, method_key, prev)
+                elif prev.status not in (DECLINED, CONSUMED):
                     if prev.amount == method_data["amount"]:
                         state = prev
                     else:
@@ -204,6 +211,7 @@ class CompleteDeferredPaymentView(CheckoutView):
         # Update the session to note that we're working on this order
         order = c_ser.validated_data["order"]
         request.session[CHECKOUT_ORDER_ID] = order.id
+        utils.drop_foreign_payment_method_states(order, request)
 
         # Save payment steps into session for processing
         previous_states = utils.list_payment_method_states(request)
