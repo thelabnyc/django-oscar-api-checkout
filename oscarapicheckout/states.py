@@ -46,6 +46,13 @@ type RequiredAction = FormPostRequiredFormData | ClientSidePaymentData | None
 class PaymentStatus:
     status: PaymentMethodStatus
     amount: Decimal
+    # Declared at class level, not assigned in __init__, because unpickling a
+    # state written before an attribute existed restores only the instance
+    # __dict__. order_id is stamped when the state is stored in the session;
+    # source_id is assigned by SourceBoundPaymentStatus and defaulted here so
+    # that every state can be asked for one.
+    order_id: int | None = None
+    source_id: int | None = None
 
     def __init__(self, amount: Decimal) -> None:
         self.amount = amount

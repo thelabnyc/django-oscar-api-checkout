@@ -1,5 +1,7 @@
 from typing import Any, cast
+import logging
 
+from django.db import transaction
 from django.shortcuts import get_object_or_404
 from oscar.core.loading import get_model
 from rest_framework import generics, status
@@ -16,12 +18,15 @@ from .serializers import (
     PaymentMethodsSerializer,
     PaymentStateSerializer,
 )
+from .settings import ORDER_STATUS_AUTHORIZED
 from .signals import order_placed
 from .states import CONSUMED, DECLINED, PaymentStatus
 
 Order = get_model("order", "Order")
 
 CHECKOUT_ORDER_ID = "checkout_order_id"
+
+logger = logging.getLogger(__name__)
 
 
 class PaymentMethodsView(generics.GenericAPIView[Any]):
@@ -108,6 +113,7 @@ class CheckoutView(generics.GenericAPIView[Any]):
         # Save Order
         order = c_ser.save()
         request.session[CHECKOUT_ORDER_ID] = order.id
+        utils.drop_foreign_payment_method_states(order, request)
 
         # Send order_placed signal
         order_placed.send(
@@ -119,19 +125,77 @@ class CheckoutView(generics.GenericAPIView[Any]):
         )
 
         # Save payment steps into session for processing
-        previous_states = utils.list_payment_method_states(request)
-        new_states = self._record_payments(
-            previous_states=previous_states,
-            request=request,
-            order=order,
-            methods=c_ser.fields["payment"].methods,  # type:ignore[attr-defined]
-            data=c_ser.validated_data["payment"],
+        self._record_payments_and_set_states(
+            request,
+            order,
+            c_ser.fields["payment"].methods,  # type:ignore[attr-defined]
+            c_ser.validated_data["payment"],
         )
-        utils.set_payment_method_states(order, request, new_states)
 
         # Return order data
         o_ser = OrderSerializer(order, context={"request": request})
         return Response(o_ser.data)
+
+    def _record_payments_and_set_states(
+        self,
+        request: Request,
+        order: Order,
+        methods: dict[str, PaymentMethod[PaymentMethodData]],
+        data: dict[str, PaymentMethodData],
+    ) -> None:
+        """
+        Collect payment for a placed order, unwinding the order if that fails.
+
+        Storing the states is inside the backstop as well as recording them:
+        that write runs the authorization guard, the configured authorized-amount
+        calculator and the authorize/decline signals, any of which can raise
+        after payment has already been taken.
+        """
+        previous_states = utils.list_payment_method_states(request)
+        try:
+            new_states = self._record_payments(
+                previous_states=previous_states,
+                request=request,
+                order=order,
+                methods=methods,
+                data=data,
+            )
+            utils.set_payment_method_states(order, request, new_states)
+        except Exception:
+            self._recover_from_payment_error(request, order)
+            raise
+
+    def _recover_from_payment_error(self, request: Request, order: Order) -> None:
+        """
+        Undo the freeze-then-collect-payment setup after payment collection blew up.
+
+        The basket is frozen and the order created before any payment method
+        runs, and only a decline thaws them again. Without this, an unhandled
+        error strands the customer with an unreachable basket and an order stuck
+        in its initial status.
+
+        Recovery is best-effort and must never replace the exception that
+        triggered it. It is skipped once the order is authorized, because the
+        decline teardown deletes discounts and line prices that nothing would
+        rebuild. Session payment states are left alone so a retry behaves as
+        though the failed request had never happened; methods that succeeded
+        before the failure are therefore re-recorded on the retry, which for a
+        method keyed by a per-attempt reference means a second authorization,
+        and for a method that captures synchronously a second charge to refund.
+        """
+        if order.status == ORDER_STATUS_AUTHORIZED:
+            return
+        try:
+            # Atomic because the teardown is six independent writes and this
+            # runs when the request has already failed once: a partial decline
+            # leaves an order no retry can rebuild.
+            with transaction.atomic():
+                utils.decline_order_payment(order, request, internal_error=True)
+        except Exception:
+            logger.exception(
+                "Failed to recover Order[%s] after an error while recording payment.",
+                order.number,
+            )
 
     def _record_payments(
         self,
@@ -155,7 +219,13 @@ class CheckoutView(generics.GenericAPIView[Any]):
             state: PaymentStatus | None = None
             if method_key in previous_states:
                 prev = previous_states[method_key]
-                if prev.status not in (DECLINED, CONSUMED):
+                if not utils.payment_state_belongs_to_order(prev, order):
+                    # Unreachable from the views above, which drop foreign states
+                    # before this runs. Kept for callers that reach _record_payments
+                    # by another route: another order's money is never recycled,
+                    # and never voided against this order either.
+                    utils.warn_foreign_payment_state(order, method_key, prev)
+                elif prev.status not in (DECLINED, CONSUMED):
                     if prev.amount == method_data["amount"]:
                         state = prev
                     else:
@@ -204,17 +274,15 @@ class CompleteDeferredPaymentView(CheckoutView):
         # Update the session to note that we're working on this order
         order = c_ser.validated_data["order"]
         request.session[CHECKOUT_ORDER_ID] = order.id
+        utils.drop_foreign_payment_method_states(order, request)
 
         # Save payment steps into session for processing
-        previous_states = utils.list_payment_method_states(request)
-        new_states = self._record_payments(
-            previous_states=previous_states,
-            request=request,
-            order=order,
-            methods=c_ser.fields["payment"].methods,  # type:ignore[attr-defined]
-            data=c_ser.validated_data["payment"],
+        self._record_payments_and_set_states(
+            request,
+            order,
+            c_ser.fields["payment"].methods,  # type:ignore[attr-defined]
+            c_ser.validated_data["payment"],
         )
-        utils.set_payment_method_states(order, request, new_states)
 
         # Return order data
         o_ser = OrderSerializer(order, context={"request": request})

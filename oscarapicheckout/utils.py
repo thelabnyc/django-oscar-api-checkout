@@ -1,19 +1,24 @@
+from collections.abc import Callable
 from decimal import Decimal
+from functools import cache
 from typing import Any, TypedDict
 import base64
+import logging
 import pickle
 
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser, User
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Sum
 from django.db.models.functions import Greatest
 from django.http import HttpRequest
+from django.utils.module_loading import import_string
 from django.utils.translation import gettext_lazy as _
 from oscar.core.loading import get_class, get_model
 from oscar.core.prices import Price
 from oscarapi.basket import operations
 
+from . import settings
 from .settings import ORDER_STATUS_AUTHORIZED, ORDER_STATUS_PAYMENT_DECLINED
 from .signals import order_payment_authorized, order_payment_declined
 from .states import Complete, Consumed, Declined, PaymentMethodStatus, PaymentStatus
@@ -22,12 +27,14 @@ Basket = get_model("basket", "Basket")
 Order = get_model("order", "Order")
 ShippingAddress = get_model("order", "ShippingAddress")
 BillingAddress = get_model("order", "BillingAddress")
+Source = get_model("payment", "Source")
 
 OrderCreator = get_class("order.utils", "OrderCreator")
 ShippingMethod = get_class("shipping.methods", "Base")
 
-CHECKOUT_ORDER_ID = "api_checkout_pending_order_id"
 CHECKOUT_PAYMENT_STEPS = "api_checkout_payment_steps"
+
+logger = logging.getLogger(__name__)
 
 
 def _session_pickle(obj: Any) -> str:
@@ -48,11 +55,82 @@ def _update_payment_method_state(
     request: HttpRequest,
     method_key: str,
     state: PaymentStatus,
+    order_id: int | None = None,
 ) -> None:
+    # Stamping happens here, at the only place a state enters the session, so
+    # that no caller can leave one unowned. An unowned state is treated as a
+    # legacy pickle, which is the lenient branch -- so a forgotten stamp would
+    # silently re-open cross-order reuse rather than fail.
+    if order_id is not None:
+        state.order_id = order_id
     states = request.session.get(CHECKOUT_PAYMENT_STEPS, {})
     states[method_key] = _session_pickle(state)
     request.session[CHECKOUT_PAYMENT_STEPS] = states
     request.session.modified = True
+
+
+def payment_state_belongs_to_order(state: PaymentStatus, order: Order) -> bool:
+    """
+    Is this payment state safe to reuse while placing the given order?
+
+    States live in the session and outlive the checkout that created them, so a
+    state can describe money taken against an entirely different order. Applying
+    one to this order credits it with a payment it never received.
+
+    States pickled before ``order_id`` existed carry no stamp; for those the
+    Source they allocated is the only available evidence of ownership. An
+    un-stamped state with no Source is only accepted when it has money behind
+    it to protect: a PENDING state has taken none yet, and the payload it
+    carries names the order it was minted for, so replaying it onto this order
+    would route the customer's payment elsewhere. Re-recording it costs a
+    round trip; recycling it costs the payment.
+    """
+    if state.order_id is not None:
+        return bool(state.order_id == order.id)
+    if state.source_id is None:
+        return state.status != PaymentMethodStatus.PENDING
+    return Source.objects.filter(pk=state.source_id, order_id=order.id).exists()
+
+
+def warn_foreign_payment_state(
+    order: Order,
+    method_key: str,
+    state: PaymentStatus,
+) -> None:
+    source = Source.objects.filter(pk=state.source_id).select_related("order").first() if state.source_id is not None else None
+    foreign_order_number: str | None
+    if source is not None:
+        foreign_order_number = source.order.number
+    else:
+        foreign_order = Order._default_manager.filter(pk=state.order_id).first() if state.order_id else None
+        foreign_order_number = foreign_order.number if foreign_order else None
+    # method_key is client-supplied, so %r rather than %s: a key carrying CR/LF
+    # would otherwise forge log lines. Source.reference is deliberately not
+    # logged -- plugins put gateway tokens in it, and this warning is expected
+    # to fire for ordinary stale sessions after an upgrade.
+    logger.warning(
+        "Disregarded payment state for MethodKey[%r], Amount[%s], SourceID[%s] belonging to Order[%s] while working on Order[%s].",
+        method_key,
+        state.amount,
+        state.source_id,
+        foreign_order_number,
+        order.number,
+    )
+
+
+def drop_foreign_payment_method_states(order: Order, request: HttpRequest) -> None:
+    curr_states = list_payment_method_states(request)
+    kept_states = {}
+    for key, state in curr_states.items():
+        if payment_state_belongs_to_order(state, order):
+            kept_states[key] = state
+        else:
+            warn_foreign_payment_state(order, key, state)
+    if len(kept_states) == len(curr_states):
+        return
+    clear_payment_method_states(request)
+    for key, state in kept_states.items():
+        _update_payment_method_state(request, key, state)
 
 
 def _set_order_authorized(order: Order, request: HttpRequest) -> None:
@@ -72,7 +150,37 @@ def _set_order_authorized(order: Order, request: HttpRequest) -> None:
     order_payment_authorized.send(sender=order, order=order, request=request)
 
 
-def _set_order_payment_declined(order: Order, request: HttpRequest) -> None:
+def decline_order_payment(
+    order: Order,
+    request: HttpRequest,
+    internal_error: bool = False,
+) -> None:
+    """
+    Public entry point for declining an order's payment.
+
+    Exposed because the ``internal_error`` flag is part of the
+    ``order_payment_declined`` contract that downstream projects must handle,
+    and because subclasses of the checkout views need a supported way to run
+    the same teardown.
+    """
+    _set_order_payment_declined(order, request, internal_error=internal_error)
+
+
+def _set_order_payment_declined(
+    order: Order,
+    request: HttpRequest,
+    internal_error: bool = False,
+) -> None:
+    """
+    Decline the order's payment and thaw its basket so it can be retried.
+
+    ``internal_error`` marks exactly one thing: the request raised while
+    payment was being recorded, so the decline is a recovery step rather than a
+    verdict. Receivers use it to suppress customer-facing decline messaging,
+    since no processor rejected anything. It is deliberately narrow -- a
+    shortfall found by the authorization guard is a genuine decline the
+    customer must act on, and sends ``False``.
+    """
     # Set the order status
     order.set_status(ORDER_STATUS_PAYMENT_DECLINED)
 
@@ -100,18 +208,101 @@ def _set_order_payment_declined(order: Order, request: HttpRequest) -> None:
         operations.store_basket_in_session(order.basket, request.session)
 
     # Send a signal
-    order_payment_declined.send(sender=order, order=order, request=request)
+    order_payment_declined.send(
+        sender=order,
+        order=order,
+        request=request,
+        internal_error=internal_error,
+    )
+
+
+def get_order_authorized_amount(order: Order) -> Decimal:
+    """
+    How much money is actually recorded against this order?
+
+    Used as the floor for authorizing an order: the session's payment states
+    describe what checkout believed it collected, which is not evidence that
+    anything was collected against *this* order.
+
+    This is a floor, not a reconciliation. Retries record additional sources, so
+    the sum may legitimately exceed the order total; only the short side matters.
+
+    Counts ``Source.amount_allocated`` only. A payment method that debits without
+    allocating records nothing here and must supply its own calculator via
+    ``ORDER_AUTHORIZED_AMOUNT_CALCULATOR``; amount_debited is not added by
+    default because voiding a payment only decrements amount_allocated.
+
+    A replacement must also count authorizations that are pending manual review,
+    otherwise orders deliberately held for review are declined.
+
+    The sum is currency-blind: every Source on the order is counted at face
+    value against ``order.total_incl_tax``. ``PaymentMethod.get_source()``
+    stamps the order's own currency, so in-tree methods are consistent by
+    construction, but a store recording Sources in more than one currency must
+    supply its own calculator.
+    """
+    total = order.sources.all().aggregate(total=Sum("amount_allocated"))["total"]
+    return Decimal(total or "0.00")
+
+
+@cache
+def _import_authorized_amount_calc(dotted_path: str) -> Callable[[Order], Decimal]:
+    return import_string(dotted_path)  # type:ignore[no-any-return]
+
+
+def _get_authorized_amount_calc() -> Callable[[Order], Decimal]:
+    calculator = settings.ORDER_AUTHORIZED_AMOUNT_CALCULATOR
+    if callable(calculator):
+        return calculator
+    return _import_authorized_amount_calc(calculator)
 
 
 def _update_order_status(order: Order, request: HttpRequest) -> None:
-    states = list_payment_method_states(request)
+    # Filter here rather than trusting callers. This is the choke point every
+    # path reaches -- including out-of-band processor callbacks, which resolve
+    # the order from their own payload and never pass through the checkout
+    # views -- so it is the only place the ownership rule holds for everyone.
+    all_states = list_payment_method_states(request)
+    states = {}
+    for key, state in all_states.items():
+        if payment_state_belongs_to_order(state, order):
+            states[key] = state
+        else:
+            warn_foreign_payment_state(order, key, state)
 
     declined = [s for k, s in states.items() if s.status == PaymentMethodStatus.DECLINED]
+    not_complete = [s for k, s in states.items() if s.status != PaymentMethodStatus.COMPLETE]
     if len(declined) > 0:
         _set_order_payment_declined(order, request)
-
-    not_complete = [s for k, s in states.items() if s.status != PaymentMethodStatus.COMPLETE]
-    if len(not_complete) <= 0:
+    elif len(not_complete) <= 0:
+        authorized_amount = _get_authorized_amount_calc()(order)
+        if authorized_amount < order.total_incl_tax:
+            # Backed means "allocated", not "has a Source row": get_source()
+            # creates the row before any money moves, and the floor above sums
+            # allocations, so existence alone would credit a method that
+            # recorded nothing.
+            backed_source_ids = set(order.sources.filter(amount_allocated__gt=0).values_list("id", flat=True))
+            unbacked = {key: state for key, state in states.items() if state.source_id not in backed_source_ids}
+            logger.error(
+                "Refusing to authorize Order[%s]: payments recorded against it total %s, but the order totals %s. Methods with nothing allocated: %r.",
+                order.number,
+                authorized_amount,
+                order.total_incl_tax,
+                sorted(unbacked.keys()),
+            )
+            # Decline the states with nothing recorded behind them, so the
+            # client shows a decline and a retry re-records only those methods.
+            # Declining a state that did allocate would make the retry take a
+            # second hold for the same money. If every state is backed, the
+            # shortfall can't be attributed, so decline them all rather than
+            # leave the order stuck in a state no retry can clear.
+            states_to_decline = unbacked if len(unbacked) > 0 else states
+            # Written directly to avoid re-entering this function.
+            for key, state in states_to_decline.items():
+                declined_state = Declined(state.amount, source_id=state.source_id)
+                _update_payment_method_state(request, key, declined_state, order_id=order.id)
+            _set_order_payment_declined(order, request)
+            return
         # Authorized the order and consume all the payments
         _set_order_authorized(order, request)
         for key, state in states.items():
@@ -120,7 +311,7 @@ def _update_order_status(order: Order, request: HttpRequest) -> None:
                 request,
                 key,
                 state.amount,
-                source_id=getattr(state, "source_id", None),
+                source_id=state.source_id,
             )
 
 
@@ -151,7 +342,7 @@ def update_payment_method_state(
     method_key: str,
     state: PaymentStatus,
 ) -> None:
-    _update_payment_method_state(request, method_key, state)
+    _update_payment_method_state(request, method_key, state, order_id=order.id)
     _update_order_status(order, request)
 
 
@@ -162,7 +353,7 @@ def set_payment_method_states(
 ) -> None:
     clear_payment_method_states(request)
     for method_key, state in states.items():
-        _update_payment_method_state(request, method_key, state)
+        _update_payment_method_state(request, method_key, state, order_id=order.id)
     _update_order_status(order, request)
 
 
