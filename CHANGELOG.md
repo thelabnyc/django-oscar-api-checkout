@@ -1,5 +1,14 @@
 # Changes
 
+## v3.10.1 (2026-09-03)
+
+### Fix
+
+- recover basket and order when payment recording raises (#35986)
+- gate authorization on recorded source allocations (#35986)
+- scope recycled payment states to their order (#35986)
+- narrow metadata_class instance to SimpleMetadata for drf-stubs 3.18.1
+
 ## v3.10.0 (2026-08-14)
 
 ### Feat
