@@ -65,6 +65,16 @@ def _record_review_authorization(self, order, amount, reference):
     return Complete(amount, source_id=source.pk)
 
 
+def _record_short_authorization(self, order, amount, reference):
+    """
+    Stand-in for a processor that reports a successful authorization for the
+    full amount while only a token amount lands on the Source.
+    """
+    source = self.get_source(order, reference)
+    source.allocate(D("0.01"), reference=reference, status="ACCEPTED")
+    return Complete(amount, source_id=source.pk)
+
+
 def _sum_pending_and_approved_authorizations(order):
     total = PaymentTransaction.objects.filter(
         source__order=order,
@@ -4369,6 +4379,52 @@ class CheckoutAPITest(BaseTest):
         states_resp = self.client.get(order_resp.data["payment_url"])
         self.assertEqual(states_resp.data["payment_method_states"]["cash"]["status"], "Complete")
         self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["status"], "Declined")
+
+    def test_backed_states_declined_when_recorded_payments_are_short(self):
+        basket_id = self._prepare_basket()
+
+        data = self._get_checkout_data(basket_id)
+        data["payment"] = {
+            "credit-card": {
+                "enabled": True,
+                "pay_balance": True,
+            }
+        }
+        order_resp = self._checkout(data)
+        self.assertEqual(order_resp.status_code, status.HTTP_200_OK)
+
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self._do_payment_step_form_post(states_resp.data["payment_method_states"]["credit-card"]["required_action"])
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        with (
+            mock.patch.object(
+                CreditCard,
+                "record_successful_authorization",
+                _record_short_authorization,
+            ),
+            self.assertLogs("oscarapicheckout.utils", level="ERROR") as logs,
+        ):
+            self._do_payment_step_form_post(
+                states_resp.data["payment_method_states"]["credit-card"]["required_action"],
+                extra={"uuid": "5b728222-92d1-43c3-95a1-dfb5d623519f"},
+            )
+
+        order = Order.objects.get(number=order_resp.data["number"])
+        self.assertEqual(order.status, "Payment Declined")
+
+        # The card did allocate, so there is no unbacked method to pin the
+        # shortfall on. The backed state is declined anyway rather than leaving
+        # the order authorized for a penny, or stuck with nothing to retry.
+        self.assertIn("Methods with nothing allocated: []", "\n".join(logs.output))
+        self.assertPaymentSource(
+            order_resp.data["number"],
+            source_name="Credit Card",
+            reference="5b728222-92d1-43c3-95a1-dfb5d623519f",
+            allocated=D("0.01"),
+        )
+        states_resp = self.client.get(order_resp.data["payment_url"])
+        self.assertEqual(states_resp.data["payment_method_states"]["credit-card"]["status"], "Declined")
+        self.assertEqual(Basket.objects.get(id=basket_id).status, "Open")
 
     def test_basket_and_order_recovered_when_authorized_amount_calculator_raises(self):
         self.login(is_staff=True)
