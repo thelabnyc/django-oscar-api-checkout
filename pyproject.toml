@@ -30,7 +30,7 @@ dev = [
     "ruff (>=0.17.0)",
     "psycopg2-binary (==2.9.13)",
     "PyYAML (==6.0.3)",
-    "sorl-thumbnail (==13.1.0)",
+    "sorl-thumbnail (==13.2.0)",
     "sphinx (==9.1.0)",
     "tox (==4.65.4)",
     "unittest-xml-reporting (==4.0.0)",
