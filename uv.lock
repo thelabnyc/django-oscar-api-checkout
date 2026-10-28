@@ -511,7 +511,7 @@ dev = [
     { name = "psycopg2-binary", specifier = "==2.9.13" },
     { name = "pyyaml", specifier = "==6.0.3" },
     { name = "ruff", specifier = ">=0.17.2" },
-    { name = "sorl-thumbnail", specifier = "==13.2.0" },
+    { name = "sorl-thumbnail", specifier = "==13.3.0" },
     { name = "sphinx", marker = "python_full_version < '3.13'", specifier = "==9.1.1" },
     { name = "sphinx", marker = "python_full_version >= '3.13'", specifier = "==9.2.0" },
     { name = "tox", specifier = "==4.67.1" },
@@ -1489,11 +1489,11 @@ wheels = [
 
 [[package]]
 name = "sorl-thumbnail"
-version = "13.2.0"
+version = "13.3.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/7a/c9/9dd02779d9c7fd4a873a0a8a89f1840d748491f0cfa89b111569e96d13aa/sorl_thumbnail-13.2.0.tar.gz", hash = "sha256:f3ae9a997485b316d4a44c2d9bf16eb0ab4aa245c6be743e5d34a728eaab59dd", size = 676262, upload-time = "2026-10-13T20:40:25.177Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/df/cb/d8e07e92bbae0d36b337f68239a7614ee2bb20142ab1738ee0dc054db641/sorl_thumbnail-13.3.0.tar.gz", hash = "sha256:0910f1a4a48d046b202b8ae1767397ecea6640c8c16bdf7dc7e9d007d2ea2fa2", size = 689919, upload-time = "2026-10-24T23:46:53.047Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cf/97/453310d684adb6fb7fb8b2f69031543ecd75162a66faa0d61b2f6edd58f4/sorl_thumbnail-13.2.0-py3-none-any.whl", hash = "sha256:3bf689e9c5ab3b7115bf22b02bca3e65e7d06c4eb76797afd60f9417aa76b7b0", size = 43025, upload-time = "2026-10-13T20:40:23.358Z" },
+    { url = "https://files.pythonhosted.org/packages/3e/7a/e3380cdc35493b9021ca67cab10c284f9a7250488bd1caa93f865af7ec95/sorl_thumbnail-13.3.0-py3-none-any.whl", hash = "sha256:36ebd050c8f6a4ee2afb61e76bf4a1a5c2c6d9a54e3f4ebb66972520c4531120", size = 44826, upload-time = "2026-10-24T23:46:51.412Z" },
 ]
 
 [[package]]
