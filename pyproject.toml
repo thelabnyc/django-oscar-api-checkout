@@ -35,7 +35,7 @@ dev = [
     "sphinx (==9.2.0) ; python_version >= '3.13'",
     "tox (==4.67.1)",
     "unittest-xml-reporting (==4.0.0)",
-    "django-stubs (==6.1.0)",
+    "django-stubs (==6.1.2)",
     "mypy (==2.4.0)",
     "types-psycopg2 (>=2.9.21.20261008,<3)",
     "djangorestframework-stubs (==3.18.1)",
