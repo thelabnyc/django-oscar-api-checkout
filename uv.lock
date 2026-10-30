@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.13"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -433,7 +433,7 @@ wheels = [
 
 [[package]]
 name = "django-oscar-api-checkout"
-version = "3.10.1"
+version = "3.11.0"
 source = { editable = "." }
 dependencies = [
     { name = "django" },
@@ -482,7 +482,7 @@ dev = [
     { name = "sphinx", marker = "python_full_version < '3.13'", specifier = "==9.1.1" },
     { name = "sphinx", marker = "python_full_version >= '3.13'", specifier = "==9.2.0" },
     { name = "tox", specifier = "==4.67.2" },
-    { name = "tox-uv", specifier = ">=1.37.1" },
+    { name = "tox-uv", specifier = ">=1.37.2" },
     { name = "types-psycopg2", specifier = ">=2.9.21.20261008,<3" },
     { name = "unittest-xml-reporting", specifier = "==4.0.0" },
 ]
