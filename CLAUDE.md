@@ -20,10 +20,10 @@ docker compose run --rm test uv run python manage.py test oscarapicheckout -v 2 
 docker compose run --rm test uv run tox
 
 # Run tests for specific environment
-docker compose run --rm test uv run tox -e py312-django420-drf316-oscar40
+docker compose run --rm test uv run tox -e py314-django610-drf318-oscar42
 
 # Run tests for multiple specific environments
-docker compose run --rm test uv run tox -e py312-django420-drf316-oscar40,py312-django420-drf316-oscar41
+docker compose run --rm test uv run tox -e py314-django520-drf318-oscar42,py314-django610-drf318-oscar42
 ```
 
 ### Type Checking
