@@ -28,7 +28,7 @@ class FraudRule(Protocol):
     ) -> None: ...
 
 
-def get_enabled_fraud_checks() -> Generator[FraudRule, None, None]:
+def get_enabled_fraud_checks() -> Generator[FraudRule]:
     for config in settings.API_CHECKOUT_FRAUD_CHECKS:
         RuleClass: type[FraudRule] = import_string(config["rule"])
         rule = RuleClass(**config.get("kwargs", {}))
