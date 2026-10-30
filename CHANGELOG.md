@@ -1,5 +1,20 @@
 # Changes
 
+## v3.11.0 (2026-10-30)
+
+### Feat
+
+- support Django 6.0 and 6.1, drop Django 4.2
+- support Python 3.15 and drop Python 3.12
+
+### Fix
+
+- **deps**: update dependency django-oscar to >=4.2.1,<4.3
+
+### Refactor
+
+- adopt Python 3.13 syntax
+
 ## v3.10.1 (2026-09-03)
 
 ### Fix
