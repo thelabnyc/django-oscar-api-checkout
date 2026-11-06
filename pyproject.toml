@@ -38,7 +38,7 @@ dev = [
     "django-stubs (==6.1.2)",
     "mypy (==2.4.1)",
     "types-psycopg2 (>=2.9.21.20261030,<3)",
-    "djangorestframework-stubs (==3.18.1)",
+    "djangorestframework-stubs (==3.18.2)",
     "tox-uv>=1.37.3",
     "django-oscar-stubs>=4.2.0b0",
 ]
