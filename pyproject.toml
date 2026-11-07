@@ -33,13 +33,13 @@ dev = [
     "sorl-thumbnail (==13.4.0)",
     "sphinx (==9.1.1) ; python_version < '3.13'",
     "sphinx (==9.2.0) ; python_version >= '3.13'",
-    "tox (==4.67.8)",
+    "tox (==4.67.9)",
     "unittest-xml-reporting (==4.0.0)",
     "django-stubs (==6.1.2)",
     "mypy (==2.4.1)",
     "types-psycopg2 (>=2.9.21.20261030,<3)",
     "djangorestframework-stubs (==3.18.2)",
-    "tox-uv>=1.37.4",
+    "tox-uv>=1.37.5",
     "django-oscar-stubs>=4.2.0b0",
 ]
 
