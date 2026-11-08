@@ -40,7 +40,7 @@ dev = [
     "types-psycopg2 (>=2.9.21.20261030,<3)",
     "djangorestframework-stubs (==3.18.2)",
     "tox-uv>=1.37.5",
-    "django-oscar-stubs>=4.2.0b0",
+    "django-oscar-stubs>=4.2.0",
 ]
 
 [tool.hatch.build.targets.wheel]
