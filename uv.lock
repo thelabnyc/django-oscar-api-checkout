@@ -482,7 +482,7 @@ dev = [
     { name = "sphinx", marker = "python_full_version < '3.13'", specifier = "==9.1.1" },
     { name = "sphinx", marker = "python_full_version >= '3.13'", specifier = "==9.2.0" },
     { name = "tox", specifier = "==4.67.13" },
-    { name = "tox-uv", specifier = ">=1.37.6" },
+    { name = "tox-uv", specifier = ">=1.37.7" },
     { name = "types-psycopg2", specifier = ">=2.9.21.20261030,<3" },
     { name = "unittest-xml-reporting", specifier = "==4.0.0" },
 ]
