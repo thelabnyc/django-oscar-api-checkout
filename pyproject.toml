@@ -29,7 +29,7 @@ dev = [
     "coverage (==7.17.4)",
     "ruff (>=0.17.6)",
     "psycopg2-binary (==2.9.13)",
-    "PyYAML (==6.0.3)",
+    "PyYAML (==6.0.4)",
     "sorl-thumbnail (==13.5.0)",
     "sphinx (==9.1.1) ; python_version < '3.13'",
     "sphinx (==9.2.0) ; python_version >= '3.13'",
